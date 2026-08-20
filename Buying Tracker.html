@@ -116,6 +116,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 /* LOADING SCREEN */
 .loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999}
 .loading-screen.hidden{display:none}
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000}
+.login-screen.hidden{display:none}
+.login-box{display:flex;flex-direction:column;gap:4px;width:320px;max-width:88vw;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;box-shadow:var(--shadow)}
+.login-title{font-size:1.05rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.login-sub{font-size:.82rem;color:var(--text2);margin-bottom:20px}
+.login-label{font-size:.78rem;color:var(--text2);margin:10px 0 4px}
+.login-input{background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;font-size:.9rem;font-family:inherit;outline:none;width:100%;box-sizing:border-box}
+.login-input:focus{border-color:var(--accent)}
+.login-error{color:var(--red2);font-size:.8rem;margin-top:12px;line-height:1.5}
+.login-submit{margin-top:22px;width:100%;justify-content:center;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:6px;font-size:.9rem;cursor:pointer;font-family:inherit}
+.login-submit:disabled{opacity:.6;cursor:default}
 .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-msg{font-size:.875rem;color:var(--text3)}
@@ -586,8 +597,22 @@ body.light-mode .cp-event{color:#475569}
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <form class="login-box" id="loginForm" autocomplete="on">
+    <div class="login-title"><span class="dot"></span> Buying Tracker</div>
+    <div class="login-sub">Sign in to continue</div>
+    <label class="login-label" for="loginEmail">Email</label>
+    <input class="login-input" type="email" id="loginEmail" name="email" autocomplete="username" required>
+    <label class="login-label" for="loginPassword">Password</label>
+    <input class="login-input" type="password" id="loginPassword" name="password" autocomplete="current-password" required>
+    <div id="loginError" class="login-error" style="display:none"></div>
+    <button class="btn login-submit" type="submit" id="loginSubmitBtn">Sign In</button>
+  </form>
+</div>
+
 <!-- LOADING -->
-<div class="loading-screen" id="loadingScreen">
+<div class="loading-screen hidden" id="loadingScreen">
   <div class="spinner"></div>
   <div class="loading-msg" id="loadingMsg">Connecting to Supabase…</div>
   <div id="loadingError" style="display:none;margin-top:16px;max-width:320px;text-align:center;font-size:.78rem;color:#f87171;line-height:1.6"></div>
@@ -601,6 +626,7 @@ body.light-mode .cp-event{color:#475569}
     <span class="sync-indicator" id="syncIndicator">⬤ Connected</span>
   </div>
   <div class="header-right">
+    <span class="refresh-countdown" id="loggedInAs" style="margin-right:4px" title="Signed in"></span>
     <button class="btn btn-ghost btn-sm" onclick="refreshData()" title="Refresh data from server">↻ Refresh</button>
     <span class="refresh-countdown" id="refreshCountdown" title="Auto-refreshes every 60 seconds">60s</span>
     <!-- THEME TOGGLE -->
@@ -644,6 +670,8 @@ body.light-mode .cp-event{color:#475569}
         <button onclick="clearAllData()">🗑️ Clear all data</button>
         <hr>
         <button onclick="backfillRefCodes()">🔖 Regenerate all ref codes</button>
+        <hr>
+        <button onclick="signOut()">🚪 Sign out</button>
       </div>
     </div>
   </div>
@@ -1154,6 +1182,135 @@ body.light-mode .cp-event{color:#475569}
 const SUPABASE_URL = 'https://lkgfaqiecyvscowjvudb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ2ZhcWllY3l2c2Nvd2p2dWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjM0MjQsImV4cCI6MjA5MzAzOTQyNH0.hlA9xvT75EgyzzFw-lWQ33zARufVRe9JGRyAwRuGcfw';
 
+// ═══════════════════════════════════════
+// AUTH (Supabase Auth — email/password)
+// ═══════════════════════════════════════
+const AUTH_STORAGE_KEY = 'bt_session';
+let _session = null; // { access_token, refresh_token, expires_at, user: {email,...} }
+
+function getStoredSession(){
+  try{
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  try{
+    const raw2 = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    if(raw2) return JSON.parse(raw2);
+  }catch(e){}
+  return null;
+}
+function storeSession(s){
+  _session = s;
+  try{
+    if(s) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(s));
+    else localStorage.removeItem(AUTH_STORAGE_KEY);
+  }catch(e){
+    // Storage quota hit (common with file:// pages sharing one quota across all local files).
+    // Fall back to sessionStorage so the app still works — session just won't survive a full reload.
+    try{
+      if(s) sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(s));
+      else sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    }catch(e2){ /* in-memory only via _session — still lets this tab work */ }
+  }
+}
+
+async function authRequest(path, body){
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error_description || data.msg || data.error || 'Authentication failed');
+  return data;
+}
+
+async function signIn(email, password){
+  const data = await authRequest('token?grant_type=password', { email, password });
+  storeSession({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: Math.floor(Date.now()/1000) + (data.expires_in || 3600),
+    user: { email: data.user?.email }
+  });
+}
+
+async function refreshSession(){
+  const s = getStoredSession();
+  if(!s || !s.refresh_token) return null;
+  try{
+    const data = await authRequest('token?grant_type=refresh_token', { refresh_token: s.refresh_token });
+    const fresh = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Math.floor(Date.now()/1000) + (data.expires_in || 3600),
+      user: { email: data.user?.email }
+    };
+    storeSession(fresh);
+    return fresh;
+  }catch(e){
+    storeSession(null);
+    return null;
+  }
+}
+
+// Returns a valid, non-expired session — refreshing first if needed — or null.
+async function getValidSession(){
+  let s = getStoredSession();
+  if(!s) return null;
+  const now = Math.floor(Date.now()/1000);
+  if(s.expires_at - now < 120){ // refresh if <2 min left
+    s = await refreshSession();
+  } else {
+    _session = s;
+  }
+  return s;
+}
+
+function signOut(){
+  const s = getStoredSession();
+  if(s && s.access_token){
+    fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${s.access_token}` }
+    }).catch(()=>{});
+  }
+  storeSession(null);
+  location.reload();
+}
+
+async function showLoginScreen(errMsg){
+  document.getElementById('loadingScreen').classList.add('hidden');
+  const scr = document.getElementById('loginScreen');
+  scr.classList.remove('hidden');
+  const errEl = document.getElementById('loginError');
+  if(errMsg){ errEl.textContent = errMsg; errEl.style.display = 'block'; }
+  else { errEl.style.display = 'none'; }
+  document.getElementById('loginSubmitBtn').disabled = false;
+  document.getElementById('loginSubmitBtn').textContent = 'Sign In';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginSubmitBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  try{
+    await signIn(email, password);
+    document.getElementById('loginScreen').classList.add('hidden');
+    await bootApp();
+  }catch(err){
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+    errEl.textContent = err.message || 'Sign in failed. Check your email and password.';
+    errEl.style.display = 'block';
+  }
+});
+
 // ── Smart refresh state ───────────────────────────────────────
 let _lastKnownItemsTs   = null; // most recent updated_at seen across all items
 let _lastKnownTlCount   = 0;    // timeline entry count at last full fetch
@@ -1171,18 +1328,26 @@ async function newestUpdatedAt(table, extraFilter){
 }
 
 // ── Supabase REST helper ──────────────────────────────────────
-const SB = {
-  headers: {
+// All requests are authenticated as the logged-in user (session access_token),
+// not the static anon key — RLS policies enforce 'authenticated'-only access.
+async function authHeaders(extra){
+  const s = await getValidSession();
+  if(!s) { showLoginScreen('Your session expired — please sign in again.'); throw new Error('No valid session'); }
+  return {
     'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=representation',
-    'Cache-Control': 'no-cache, no-store',
-    'Pragma': 'no-cache'
-  },
+    'Authorization': `Bearer ${s.access_token}`,
+    ...extra
+  };
+}
 
+const SB = {
   async req(method, path, body) {
-    const headers = {...this.headers};
+    const headers = await authHeaders({
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      'Cache-Control': 'no-cache, no-store',
+      'Pragma': 'no-cache'
+    });
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       method, headers, cache: 'no-store',
       body: body ? JSON.stringify(body) : undefined
@@ -1202,19 +1367,18 @@ const SB = {
 
   // Storage upload — returns public URL
   async upload(bucket, filePath, file) {
+    const headers = await authHeaders();
     const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${filePath}`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: file
+      method: 'POST', headers, body: file
     });
     if (!r.ok) throw new Error('Upload failed: ' + await r.text());
     return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
   },
 
   async deleteStorage(bucket, filePath) {
+    const headers = await authHeaders();
     await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${filePath}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      method: 'DELETE', headers
     });
   }
 };
@@ -5245,13 +5409,29 @@ function startBCBackgroundSync(){
   setInterval(runBCBackgroundSync, 5 * 60 * 1000);
 }
 
-loadConfig();
-loadTheme();
-populateCategoryFilter();
-loadData().then(()=>{ startBCBackgroundSync(); loadQarmaData(); });
-loadAirmail();
-Promise.all([loadTodo(), loadReports()]).then(()=>updateNotifBadge());
-startAutoRefresh();
+async function bootApp(){
+  const s = getStoredSession();
+  const label = document.getElementById('loggedInAs');
+  if(s && s.user && s.user.email && label) label.textContent = s.user.email;
+  loadConfig();
+  loadTheme();
+  populateCategoryFilter();
+  loadData().then(()=>{ startBCBackgroundSync(); loadQarmaData(); });
+  loadAirmail();
+  Promise.all([loadTodo(), loadReports()]).then(()=>updateNotifBadge());
+  startAutoRefresh();
+}
+
+// ── Entry point: only boot the app once a valid session is confirmed ──
+(async function start(){
+  const s = await getValidSession();
+  if(s){
+    document.getElementById('loginScreen').classList.add('hidden');
+    await bootApp();
+  } else {
+    await showLoginScreen();
+  }
+})();
 
 </script>
 </body>
