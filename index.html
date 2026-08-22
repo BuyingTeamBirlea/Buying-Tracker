@@ -1214,6 +1214,23 @@ function storeSession(s){
   }
 }
 
+// ── User attribution (initials + colour per known team member) ──
+const USER_TAGS = {
+  'syrus.cripps@birlea.com':   { initials:'SC', color:'#4f6ef7' }, // blue
+  'michael.prime@birlea.com':  { initials:'MP', color:'#ef4444' }, // red
+  'bethany.herron@birlea.com': { initials:'BH', color:'#22c55e' }  // green
+};
+function userTag(email){
+  if(!email) return null;
+  const t = USER_TAGS[email.toLowerCase()];
+  if(t) return t;
+  // Fallback for anyone not in the known list — derive initials from the email itself
+  const namePart = email.split('@')[0].replace(/[^a-zA-Z.]/g,'');
+  const parts = namePart.split('.').filter(Boolean);
+  const initials = (parts[0]?.[0]||'?') + (parts[1]?.[0]||'');
+  return { initials: initials.toUpperCase(), color:'#8b90a0' };
+}
+
 async function authRequest(path, body){
   const r = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
     method: 'POST',
@@ -1701,6 +1718,7 @@ async function loadData(silent=false){
       timeline: (tlMap[row.id]||[]).map(t=>({
         id:t.id, date:t.date, note:t.note,
         createdAt:t.created_at||'',
+        createdBy:t.created_by||'',
         deadlineDate:t.deadline_date||null,
         deadlineCompleted:t.deadline_completed||false,
         deadlineType:t.deadline_type||'',
@@ -1948,12 +1966,14 @@ function renderTimeline(item){
     :entries.map(e=>{
       const isFuture=e.date>today;
       const deadlineBadge=buildDeadlineBadge(e);
+      const tag=userTag(e.createdBy);
+      const tagBadge=tag?`<span title="${e.createdBy?esc(e.createdBy):''}" style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:20px;padding:0 5px;border-radius:5px;font-size:.68rem;font-weight:700;letter-spacing:.02em;background:${tag.color}22;color:${tag.color};border:1px solid ${tag.color}55;margin-right:6px;vertical-align:middle">${tag.initials}</span>`:'';
       return `<div class="tentry${e.id===topId&&!isFuture?' newest-entry':''}${isFuture?' future-entry':''}" id="te-${e.id}" style="${isFuture?'border-color:var(--accent2);border-style:dashed;opacity:.85':''}">
         <div class="entry-date">
           ${fmtEntryDate(e.date,showYear)}
           ${isFuture?`<span style="display:block;font-size:.65rem;color:var(--accent2);font-weight:600;margin-top:3px;letter-spacing:.03em">📅 Scheduled</span>`:''}
         </div>
-        <div class="entry-note-view" id="env-${e.id}">${esc(e.note)}</div>
+        <div class="entry-note-view" id="env-${e.id}">${tagBadge}${esc(e.note)}</div>
         <div class="entry-btns" style="flex-direction:column;align-items:flex-end;gap:4px">
           <div style="display:flex;gap:3px">
             <button class="ebtn" title="${e.deadlineDate?'Edit deadline':'Add deadline'}" onclick="openDeadlineModal('${e.id}')" style="color:${e.deadlineDate?'var(--accent2)':'var(--text3)'}">⏱</button>
@@ -2028,7 +2048,9 @@ async function addEntry(){
   if(!note){ toast('Note cannot be empty','error'); return; }
   const item=data.find(i=>i.id===currentItemId); if(!item) return;
   const id=newId();
-  const entry={id, item_id:item.id, date:date||todayISO(), note,
+  const s=getStoredSession();
+  const createdBy=s?.user?.email||'';
+  const entry={id, item_id:item.id, date:date||todayISO(), note, created_by:createdBy,
     deadline_date:deadlineDate||null, deadline_completed:false, deadline_completed_date:null};
   try{
     const result = await SB.post('timeline_entries', entry);
@@ -2039,7 +2061,7 @@ async function addEntry(){
       console.error('RLS blocked insert. Run: create policy "Allow all for anon users" on timeline_entries for all to anon using (true) with check (true);');
       return;
     }
-    item.timeline.push({id, date:entry.date, note,
+    item.timeline.push({id, date:entry.date, note, createdBy,
       createdAt:new Date().toISOString(),
       deadlineDate:deadlineDate||null, deadlineCompleted:false, deadlineCompletedDate:null});
     await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
@@ -5295,7 +5317,9 @@ async function calAddTask(){
     if(!itemId){ toast('Select an item card first','error'); return; }
     const item=data.find(i=>i.id===itemId); if(!item){ toast('Item not found','error'); return; }
     const id=newId();
-    const entry={id, item_id:item.id, date:calModalDate, note:text,
+    const s=getStoredSession();
+    const createdBy=s?.user?.email||'';
+    const entry={id, item_id:item.id, date:calModalDate, note:text, created_by:createdBy,
       deadline_date:null, deadline_completed:false, deadline_completed_date:null};
     try{
       const result=await SB.post('timeline_entries', entry);
@@ -5304,7 +5328,7 @@ async function calAddTask(){
         return;
       }
       item.timeline=item.timeline||[];
-      item.timeline.push({id, date:calModalDate, note:text,
+      item.timeline.push({id, date:calModalDate, note:text, createdBy,
         createdAt:new Date().toISOString(),
         deadlineDate:null, deadlineCompleted:false, deadlineCompletedDate:null});
       await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
