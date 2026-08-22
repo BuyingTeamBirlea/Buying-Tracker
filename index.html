@@ -1967,13 +1967,13 @@ function renderTimeline(item){
       const isFuture=e.date>today;
       const deadlineBadge=buildDeadlineBadge(e);
       const tag=userTag(e.createdBy);
-      const tagBadge=tag?`<span title="${e.createdBy?esc(e.createdBy):''}" style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:20px;padding:0 5px;border-radius:5px;font-size:.68rem;font-weight:700;letter-spacing:.02em;background:${tag.color}22;color:${tag.color};border:1px solid ${tag.color}55;margin-right:6px;vertical-align:middle">${tag.initials}</span>`:'';
+      const tagBadge=tag?`<span title="${e.createdBy?esc(e.createdBy):''}" style="font-size:.72rem;font-weight:700;letter-spacing:.02em;color:${tag.color};margin-left:6px">${tag.initials}</span>`:'';
       return `<div class="tentry${e.id===topId&&!isFuture?' newest-entry':''}${isFuture?' future-entry':''}" id="te-${e.id}" style="${isFuture?'border-color:var(--accent2);border-style:dashed;opacity:.85':''}">
         <div class="entry-date">
           ${fmtEntryDate(e.date,showYear)}
           ${isFuture?`<span style="display:block;font-size:.65rem;color:var(--accent2);font-weight:600;margin-top:3px;letter-spacing:.03em">📅 Scheduled</span>`:''}
         </div>
-        <div class="entry-note-view" id="env-${e.id}">${tagBadge}${esc(e.note)}</div>
+        <div class="entry-note-view" id="env-${e.id}">${esc(e.note)}${tagBadge}</div>
         <div class="entry-btns" style="flex-direction:column;align-items:flex-end;gap:4px">
           <div style="display:flex;gap:3px">
             <button class="ebtn" title="${e.deadlineDate?'Edit deadline':'Add deadline'}" onclick="openDeadlineModal('${e.id}')" style="color:${e.deadlineDate?'var(--accent2)':'var(--text3)'}">⏱</button>
