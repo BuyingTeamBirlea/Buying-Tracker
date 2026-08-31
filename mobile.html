@@ -54,7 +54,8 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px c
 .search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none}
 
 /* ── Timeline feed ────────────────────────────────────────── */
-.tl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px}
+.tl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;cursor:pointer}
+.tl-card:active{background:var(--bg3)}
 .tl-card.future{border-color:var(--accent2);border-style:dashed}
 .tl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
 .tl-item{font-size:.82rem;font-weight:600;color:var(--accent2)}
@@ -93,6 +94,29 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px c
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:disabled{opacity:.55}
 .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+
+/* ── Item detail (full timeline) overlay ─────────────────── */
+.detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column}
+.detail-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:calc(10px + var(--safe-top)) 10px 10px;display:flex;align-items:center;gap:8px}
+.detail-title{flex:1;font-size:.98rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
+.detail-entry{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 13px;margin-bottom:9px}
+.detail-entry.future{border-color:var(--accent2);border-style:dashed}
+.detail-entry-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.detail-entry-date{font-size:.7rem;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;padding-top:2px}
+.detail-entry-actions{display:flex;gap:6px;flex-shrink:0}
+.dbtn{background:none;border:none;color:var(--text3);font-size:.95rem;padding:2px 4px;cursor:pointer}
+.dbtn.del{color:#f87171}
+.dbtn.save{color:#4ade80}
+.detail-entry-note{font-size:.9rem;line-height:1.42;color:var(--text)}
+.detail-entry-note-edit input{width:100%;background:var(--bg4);border:1px solid var(--accent);color:var(--text);padding:7px 9px;border-radius:6px;font-size:.9rem;outline:none}
+.detail-entry-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.detail-empty{text-align:center;color:var(--text3);font-size:.85rem;padding:40px 20px}
+.detail-add-bar{background:var(--bg2);border-top:1px solid var(--border);padding:10px 10px calc(10px + var(--safe-bottom));display:flex;gap:8px;align-items:flex-end}
+.detail-add-bar input[type="date"]{width:118px;flex-shrink:0;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:9px 8px;border-radius:6px;font-size:.82rem;outline:none}
+.detail-add-bar input[type="text"]{flex:1;min-width:0;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;font-size:.9rem;outline:none}
+.detail-add-btn{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:1.25rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.detail-add-btn:disabled{opacity:.5}
 
 /* ── Toast ────────────────────────────────────────────────── */
 .toast-wrap{position:fixed;top:calc(10px + var(--safe-top));left:14px;right:14px;z-index:9998;display:flex;flex-direction:column;gap:8px;align-items:center}
@@ -370,7 +394,7 @@ function renderFeed(){
       const overdue = !e.deadline_completed && e.deadline_date < today;
       deadlineHtml = `<span class="tl-deadline ${e.deadline_completed?'done':'pending'}">${e.deadline_completed?'✓ Done':(overdue?'⚠ Overdue':'⏱ '+fmtShort(e.deadline_date))}</span>`;
     }
-    return `<div class="tl-card${isFuture?' future':''}">
+    return `<div class="tl-card${isFuture?' future':''}" onclick="openItemDetail('${e.item_id}')">
       <div class="tl-top">
         <div class="tl-item">${esc(itemName)}</div>
         <div class="tl-date">${fmtShort(e.date)}</div>
@@ -379,6 +403,158 @@ function renderFeed(){
       <div class="tl-meta">${tagHtml}${deadlineHtml}</div>
     </div>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════
+// ITEM DETAIL — full timeline for one item, with edit/delete/add
+// ═══════════════════════════════════════
+let currentDetailItemId = null;
+let itemDetailEntries = [];
+
+async function openItemDetail(itemId){
+  currentDetailItemId = itemId;
+  const itemName = itemsById[itemId] || 'Item';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'detail-overlay';
+  overlay.id = 'itemDetailOverlay';
+  overlay.innerHTML = `
+    <div class="detail-header">
+      <button class="icon-btn" onclick="closeItemDetail()">←</button>
+      <div class="detail-title">${esc(itemName)}</div>
+      <div style="width:34px"></div>
+    </div>
+    <div class="detail-body" id="detailEntriesList"><div class="detail-empty">Loading…</div></div>
+    <div class="detail-add-bar">
+      <input type="date" id="detailAddDate" value="${todayISO()}">
+      <input type="text" id="detailAddNote" placeholder="Add update…" onkeydown="if(event.key==='Enter')addDetailEntry()">
+      <button class="detail-add-btn" id="detailAddBtn" onclick="addDetailEntry()">＋</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // Full timeline for THIS item, not limited by the feed's 200-row global cap
+  try{
+    itemDetailEntries = await SB.get(`timeline_entries?item_id=eq.${itemId}&select=*&order=date.desc,created_at.desc`) || [];
+  }catch(e){
+    toast('Failed to load timeline: '+e.message,'error');
+    itemDetailEntries = [];
+  }
+  renderDetailEntries();
+}
+
+function closeItemDetail(){
+  const o = $('itemDetailOverlay');
+  if(o) o.remove();
+  currentDetailItemId = null;
+  renderFeed(); // reflect any edits/adds/deletes made while in detail view
+}
+
+function renderDetailEntries(){
+  const list = $('detailEntriesList');
+  if(!list) return;
+  const today = todayISO();
+  if(!itemDetailEntries.length){
+    list.innerHTML = '<div class="detail-empty">No timeline entries yet.</div>';
+    return;
+  }
+  list.innerHTML = itemDetailEntries.map(e=>{
+    const isFuture = e.date > today;
+    const tag = userTag(e.created_by);
+    const tagHtml = tag ? `<span class="tl-tag" style="color:${tag.color}" title="${esc(e.created_by||'')}">${tag.initials}</span>` : '<span></span>';
+    let deadlineHtml = '';
+    if(e.deadline_date){
+      const overdue = !e.deadline_completed && e.deadline_date < today;
+      deadlineHtml = `<span class="tl-deadline ${e.deadline_completed?'done':'pending'}">${e.deadline_completed?'✓ Done':(overdue?'⚠ Overdue':'⏱ '+fmtShort(e.deadline_date))}</span>`;
+    }
+    return `<div class="detail-entry${isFuture?' future':''}" id="de-${e.id}">
+      <div class="detail-entry-top">
+        <div class="detail-entry-date">${fmtShort(e.date)}</div>
+        <div class="detail-entry-actions" id="dea-${e.id}">
+          <button class="dbtn" title="Edit" onclick="startEditDetailEntry('${e.id}')">✏</button>
+          <button class="dbtn del" title="Delete" onclick="deleteDetailEntry('${e.id}')">✕</button>
+        </div>
+      </div>
+      <div class="detail-entry-note" id="den-${e.id}">${esc(e.note)}</div>
+      <div class="detail-entry-meta">${tagHtml}${deadlineHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function startEditDetailEntry(eid){
+  const entry = itemDetailEntries.find(e=>e.id===eid); if(!entry) return;
+  const noteEl = $('den-'+eid); if(!noteEl) return;
+  noteEl.outerHTML = `<div class="detail-entry-note-edit" id="den-${eid}"><input type="text" id="dei-${eid}" value="${esc(entry.note)}"></div>`;
+  $('dea-'+eid).innerHTML = `
+    <button class="dbtn save" title="Save" onclick="saveDetailEntryEdit('${eid}')">✓</button>
+    <button class="dbtn" title="Cancel" onclick="renderDetailEntries()">✕</button>`;
+  const inp = $('dei-'+eid);
+  if(inp){
+    inp.focus(); inp.select();
+    inp.addEventListener('keydown', ev=>{ if(ev.key==='Enter') saveDetailEntryEdit(eid); if(ev.key==='Escape') renderDetailEntries(); });
+  }
+}
+
+async function saveDetailEntryEdit(eid){
+  const inp = $('dei-'+eid); if(!inp) return;
+  const newNote = inp.value.trim();
+  if(!newNote){ toast('Note cannot be empty','error'); return; }
+  try{
+    await SB.patch(`timeline_entries?id=eq.${eid}`, { note: newNote });
+    await SB.patch(`items?id=eq.${currentDetailItemId}`, { updated_at: new Date().toISOString() });
+    const entry = itemDetailEntries.find(e=>e.id===eid);
+    if(entry) entry.note = newNote;
+    const globalEntry = timeline.find(e=>e.id===eid);
+    if(globalEntry) globalEntry.note = newNote;
+    renderDetailEntries();
+    toast('Entry updated');
+  }catch(e){ toast('Save failed: '+e.message,'error'); }
+}
+
+function deleteDetailEntry(eid){
+  if(!confirm('Delete this timeline entry? This cannot be undone.')) return;
+  (async()=>{
+    try{
+      await SB.delete(`timeline_entries?id=eq.${eid}`);
+      await SB.patch(`items?id=eq.${currentDetailItemId}`, { updated_at: new Date().toISOString() });
+      itemDetailEntries = itemDetailEntries.filter(e=>e.id!==eid);
+      timeline = timeline.filter(e=>e.id!==eid);
+      renderDetailEntries();
+      toast('Entry deleted');
+    }catch(e){ toast('Delete failed: '+e.message,'error'); }
+  })();
+}
+
+async function addDetailEntry(){
+  const date = $('detailAddDate').value || todayISO();
+  const note = $('detailAddNote').value.trim();
+  if(!note){ toast('Note cannot be empty','error'); return; }
+  const btn = $('detailAddBtn');
+  btn.disabled = true;
+
+  const id = newId();
+  const s = getStoredSession();
+  const createdBy = s?.user?.email || '';
+  const entry = { id, item_id: currentDetailItemId, date, note, created_by: createdBy,
+    deadline_date: null, deadline_completed: false, deadline_completed_date: null };
+
+  try{
+    const result = await SB.post('timeline_entries', entry);
+    if(!result || (Array.isArray(result) && result.length===0)){
+      toast('Entry blocked by database (RLS)','error');
+      btn.disabled = false;
+      return;
+    }
+    await SB.patch(`items?id=eq.${currentDetailItemId}`, { updated_at: new Date().toISOString() });
+    itemDetailEntries.unshift(entry);
+    timeline.unshift(entry);
+    $('detailAddNote').value = '';
+    renderDetailEntries();
+    toast('Entry added');
+  }catch(e){
+    toast('Failed to add entry: '+e.message,'error');
+  }finally{
+    btn.disabled = false;
+  }
 }
 
 // ═══════════════════════════════════════
