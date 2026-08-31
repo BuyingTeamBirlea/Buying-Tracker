@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Buying Tracker · Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#141720;--bg3:#1c2030;--bg4:#242840;
+  --border:#2a2f45;--border2:#353b55;
+  --text:#e8eaf2;--text2:#9aa0bc;--text3:#5c6380;
+  --accent:#4f6ef7;--accent2:#6c8af8;
+  --radius:10px;--radius-sm:6px;--shadow:0 4px 24px rgba(0,0,0,.5);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit}
+.hidden{display:none!important}
+
+/* ── Loading / Login (mirrors desktop) ───────────────────── */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px}
+.login-box{display:flex;flex-direction:column;gap:4px;width:100%;max-width:320px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)}
+.login-title{font-size:1.1rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.login-title .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
+.field-label{font-size:.72rem;color:var(--text3);margin:12px 0 5px;text-transform:none}
+.login-input{background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:11px 12px;border-radius:6px;font-size:1rem;outline:none;width:100%}
+.login-input:focus{border-color:var(--accent)}
+.login-submit{margin-top:20px;width:100%;justify-content:center;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:500}
+.login-submit:disabled{opacity:.6}
+.login-error{color:#f87171;font-size:.82rem;margin-top:10px;display:none}
+
+/* ── App shell ────────────────────────────────────────────── */
+#app{display:none;height:100%;flex-direction:column}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:calc(10px + var(--safe-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-title{font-size:1rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.header-title .dot{width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
+.header-title .dot.offline{background:var(--text3);box-shadow:none}
+.icon-btn{background:none;border:1px solid var(--border);color:var(--text2);width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1rem;padding:0}
+.icon-btn:active{background:var(--bg3)}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(90px + var(--safe-bottom))}
+
+/* ── Search / filter ──────────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:10px 12px 10px 34px;border-radius:var(--radius-sm);font-size:.9rem;outline:none}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none}
+
+/* ── Timeline feed ────────────────────────────────────────── */
+.tl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px}
+.tl-card.future{border-color:var(--accent2);border-style:dashed}
+.tl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.tl-item{font-size:.82rem;font-weight:600;color:var(--accent2)}
+.tl-date{font-size:.72rem;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap}
+.tl-note{font-size:.9rem;line-height:1.42;color:var(--text)}
+.tl-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.tl-tag{font-size:.68rem;font-weight:700;letter-spacing:.02em}
+.tl-deadline{font-size:.68rem;padding:2px 8px;border-radius:20px;font-weight:600}
+.tl-deadline.pending{background:rgba(239,68,68,.15);color:#f87171}
+.tl-deadline.done{background:rgba(34,197,94,.15);color:#4ade80}
+.empty-state{text-align:center;color:var(--text3);font-size:.88rem;padding:60px 20px}
+
+/* ── FAB ──────────────────────────────────────────────────── */
+.fab{position:fixed;right:18px;bottom:calc(84px + var(--safe-bottom));width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:1.6rem;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(79,110,247,.4);z-index:200}
+.fab:active{transform:scale(.94)}
+
+/* ── Bottom nav (scaffold for future sections) ───────────── */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:150}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;background:none;border:none;color:var(--text3);font-size:.63rem}
+.nav-item.active{color:var(--accent2)}
+.nav-item .ic{font-size:1.15rem}
+.nav-item[disabled]{opacity:.35}
+
+/* ── Sheet (add entry) ────────────────────────────────────── */
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;display:flex;align-items:flex-end}
+.sheet{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;padding:18px 18px calc(20px + var(--safe-bottom));max-height:85vh;overflow-y:auto;border-top:1px solid var(--border2)}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.sheet-title{font-size:1rem;font-weight:600;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.72rem;color:var(--text3);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:10px 11px;border-radius:6px;font-size:.92rem;outline:none}
+.field textarea{resize:vertical;min-height:70px}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235c6380' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.sheet-btns{display:flex;gap:10px;margin-top:6px}
+.btn{flex:1;padding:12px;border-radius:8px;border:none;font-size:.92rem;font-weight:500;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:disabled{opacity:.55}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+
+/* ── Toast ────────────────────────────────────────────────── */
+.toast-wrap{position:fixed;top:calc(10px + var(--safe-top));left:14px;right:14px;z-index:9998;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:8px;font-size:.85rem;box-shadow:var(--shadow);animation:toastIn .2s ease}
+.toast.error{border-color:#7f1d1d;color:#fca5a5}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div style="color:var(--text3);font-size:.85rem">Connecting to Supabase…</div>
+</div>
+
+<div class="login-screen hidden" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title"><span class="dot"></span> Buying Tracker</div>
+    <form id="loginForm">
+      <div class="field-label">Email</div>
+      <input class="login-input" type="email" id="loginEmail" autocomplete="username" required>
+      <div class="field-label">Password</div>
+      <input class="login-input" type="password" id="loginPassword" autocomplete="current-password" required>
+      <button class="login-submit" type="submit" id="loginSubmitBtn">Sign In</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div class="header-title"><span class="dot" id="statusDot"></span> Timeline</div>
+    <button class="icon-btn" onclick="signOut()">⎋</button>
+  </div>
+
+  <main>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search item or note…" oninput="renderFeed()">
+    </div>
+    <div id="feed"></div>
+  </main>
+
+  <button class="fab" onclick="openAddSheet()">＋</button>
+
+  <div class="bottom-nav">
+    <button class="nav-item active"><span class="ic">📝</span>Timeline</button>
+    <button class="nav-item" disabled><span class="ic">☑</span>To-Do</button>
+    <button class="nav-item" disabled><span class="ic">📦</span>Items</button>
+    <button class="nav-item" disabled><span class="ic">🚢</span>Logistics</button>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════
+// SUPABASE CONFIG — same project as desktop tracker
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://lkgfaqiecyvscowjvudb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ2ZhcWllY3l2c2Nvd2p2dWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjM0MjQsImV4cCI6MjA5MzAzOTQyNH0.hlA9xvT75EgyzzFw-lWQ33zARufVRe9JGRyAwRuGcfw';
+
+// ═══════════════════════════════════════
+// AUTH — mirrors desktop tracker exactly (Supabase Auth, email/password)
+// ═══════════════════════════════════════
+const AUTH_STORAGE_KEY = 'bt_session'; // shared key — signing in once on either app doesn't cross-share, but keeps convention consistent
+let _session = null;
+
+function getStoredSession(){
+  try{ const raw = localStorage.getItem(AUTH_STORAGE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+function storeSession(s){
+  _session = s;
+  try{ if(s) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(s)); else localStorage.removeItem(AUTH_STORAGE_KEY); }catch(e){}
+}
+
+const USER_TAGS = {
+  'syrus.cripps@birlea.com':   { initials:'SC', color:'#4f6ef7' },
+  'michael.prime@birlea.com':  { initials:'MP', color:'#ef4444' },
+  'bethany.herron@birlea.com': { initials:'BH', color:'#22c55e' }
+};
+function userTag(email){
+  if(!email) return null;
+  const t = USER_TAGS[email.toLowerCase()];
+  if(t) return t;
+  const namePart = email.split('@')[0].replace(/[^a-zA-Z.]/g,'');
+  const parts = namePart.split('.').filter(Boolean);
+  const initials = (parts[0]?.[0]||'?') + (parts[1]?.[0]||'');
+  return { initials: initials.toUpperCase(), color:'#8b90a0' };
+}
+
+async function authRequest(path, body){
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error_description || data.msg || data.error || 'Authentication failed');
+  return data;
+}
+
+async function signIn(email, password){
+  const data = await authRequest('token?grant_type=password', { email, password });
+  storeSession({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: Math.floor(Date.now()/1000) + (data.expires_in || 3600),
+    user: { email: data.user?.email }
+  });
+}
+
+async function refreshSession(){
+  const s = getStoredSession();
+  if(!s || !s.refresh_token) return null;
+  try{
+    const data = await authRequest('token?grant_type=refresh_token', { refresh_token: s.refresh_token });
+    const fresh = {
+      access_token: data.access_token, refresh_token: data.refresh_token,
+      expires_at: Math.floor(Date.now()/1000) + (data.expires_in || 3600),
+      user: { email: data.user?.email }
+    };
+    storeSession(fresh);
+    return fresh;
+  }catch(e){ storeSession(null); return null; }
+}
+
+async function getValidSession(){
+  let s = getStoredSession();
+  if(!s) return null;
+  const now = Math.floor(Date.now()/1000);
+  if(s.expires_at - now < 120){ s = await refreshSession(); } else { _session = s; }
+  return s;
+}
+
+function signOut(){
+  const s = getStoredSession();
+  if(s && s.access_token){
+    fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${s.access_token}` } }).catch(()=>{});
+  }
+  storeSession(null);
+  location.reload();
+}
+
+async function authHeaders(extra){
+  const s = await getValidSession();
+  if(!s){ showLoginScreen('Your session expired — please sign in again.'); throw new Error('No valid session'); }
+  return { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${s.access_token}`, ...extra };
+}
+
+const SB = {
+  async req(method, path, body){
+    const headers = await authHeaders({ 'Content-Type':'application/json', 'Prefer':'return=representation', 'Cache-Control':'no-cache, no-store' });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { method, headers, cache:'no-store', body: body?JSON.stringify(body):undefined });
+    if(!r.ok){ const err = await r.text(); throw new Error(`${r.status}: ${err}`); }
+    const text = await r.text();
+    return text ? JSON.parse(text) : null;
+  },
+  get:    (path)       => SB.req('GET',    path),
+  post:   (path, body) => SB.req('POST',   path, body),
+  patch:  (path, body) => SB.req('PATCH',  path, body),
+  delete: (path)        => SB.req('DELETE', path)
+};
+
+async function showLoginScreen(errMsg){
+  $('loadingScreen').classList.add('hidden');
+  $('app').style.display = 'none';
+  $('loginScreen').classList.remove('hidden');
+  const errEl = $('loginError');
+  if(errMsg){ errEl.textContent = errMsg; errEl.style.display='block'; } else { errEl.style.display='none'; }
+  $('loginSubmitBtn').disabled = false;
+  $('loginSubmitBtn').textContent = 'Sign In';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const email = $('loginEmail').value.trim();
+  const password = $('loginPassword').value;
+  const btn = $('loginSubmitBtn'), errEl = $('loginError');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try{
+    await signIn(email, password);
+    $('loginScreen').classList.add('hidden');
+    await bootApp();
+  }catch(err){
+    btn.disabled = false; btn.textContent = 'Sign In';
+    errEl.textContent = err.message || 'Sign in failed. Check your email and password.';
+    errEl.style.display = 'block';
+  }
+});
+
+// ═══════════════════════════════════════
+// UTILITIES (mirrors desktop tracker)
+// ═══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const newId = () => crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2));
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+function fmtShort(iso){ if(!iso) return '—'; const p=iso.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0].slice(2)}`:iso; }
+
+function toast(msg,type='success'){
+  const t=document.createElement('div');
+  t.className='toast'+(type==='error'?' error':'');
+  t.textContent=msg;
+  $('toastWrap').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+// ═══════════════════════════════════════
+// DATA STATE
+// ═══════════════════════════════════════
+let items = [];          // [{id, name}]
+let timeline = [];        // raw timeline_entries rows, newest first
+let itemsById = {};
+
+async function fetchItemsLite(){
+  // Only id + name needed for the picker and feed labels — keep payload light
+  const rows = await SB.get('items?select=id,name,archived&order=name.asc');
+  items = (rows||[]).filter(i=>!i.archived);
+  itemsById = {};
+  items.forEach(i=>itemsById[i.id]=i.name);
+}
+
+async function fetchTimelinePage(){
+  // Paginated batch fetch — same 1,000-row cap protection as the desktop tracker.
+  // Mobile only needs a recent window, so pull the most recent 200 across up to 2 batches.
+  let all = [];
+  let offset = 0;
+  const batchSize = 200;
+  for(let i=0;i<2;i++){
+    const batch = await SB.get(`timeline_entries?select=*&order=date.desc,created_at.desc&limit=${batchSize}&offset=${offset}`);
+    if(!batch || !batch.length) break;
+    all = all.concat(batch);
+    if(batch.length < batchSize) break;
+    offset += batchSize;
+  }
+  timeline = all;
+}
+
+async function loadAll(){
+  await Promise.all([fetchItemsLite(), fetchTimelinePage()]);
+  renderFeed();
+}
+
+// ═══════════════════════════════════════
+// FEED RENDER
+// ═══════════════════════════════════════
+function renderFeed(){
+  const q = ($('searchInput').value||'').trim().toLowerCase();
+  const today = todayISO();
+
+  let rows = timeline.filter(e=>{
+    if(!q) return true;
+    const itemName = (itemsById[e.item_id]||'').toLowerCase();
+    return itemName.includes(q) || (e.note||'').toLowerCase().includes(q);
+  });
+
+  if(!rows.length){
+    $('feed').innerHTML = `<div class="empty-state">No timeline entries${q?' match your search':' yet'}.</div>`;
+    return;
+  }
+
+  $('feed').innerHTML = rows.map(e=>{
+    const isFuture = e.date > today;
+    const itemName = itemsById[e.item_id] || '(deleted item)';
+    const tag = userTag(e.created_by);
+    const tagHtml = tag ? `<span class="tl-tag" style="color:${tag.color}">${tag.initials}</span>` : '<span></span>';
+    let deadlineHtml = '';
+    if(e.deadline_date){
+      const overdue = !e.deadline_completed && e.deadline_date < today;
+      deadlineHtml = `<span class="tl-deadline ${e.deadline_completed?'done':'pending'}">${e.deadline_completed?'✓ Done':(overdue?'⚠ Overdue':'⏱ '+fmtShort(e.deadline_date))}</span>`;
+    }
+    return `<div class="tl-card${isFuture?' future':''}">
+      <div class="tl-top">
+        <div class="tl-item">${esc(itemName)}</div>
+        <div class="tl-date">${fmtShort(e.date)}</div>
+      </div>
+      <div class="tl-note">${esc(e.note)}</div>
+      <div class="tl-meta">${tagHtml}${deadlineHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// ADD ENTRY SHEET
+// ═══════════════════════════════════════
+function openAddSheet(){
+  const itemOpts = items.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+  const backdrop = document.createElement('div');
+  backdrop.className = 'sheet-backdrop';
+  backdrop.id = 'addSheetBackdrop';
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Add Timeline Entry</div>
+      <div class="field">
+        <label>Item card</label>
+        <select id="addItemSelect">${itemOpts}</select>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="addDate" value="${todayISO()}">
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <textarea id="addNote" placeholder="What happened…"></textarea>
+      </div>
+      <div class="field">
+        <label>Deadline (optional)</label>
+        <input type="date" id="addDeadline">
+      </div>
+      <div class="sheet-btns">
+        <button class="btn btn-ghost" onclick="closeAddSheet()">Cancel</button>
+        <button class="btn btn-primary" id="addSaveBtn" onclick="saveNewEntry()">Add Entry</button>
+      </div>
+    </div>`;
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) closeAddSheet(); });
+  document.body.appendChild(backdrop);
+}
+
+function closeAddSheet(){
+  const b = $('addSheetBackdrop');
+  if(b) b.remove();
+}
+
+async function saveNewEntry(){
+  const itemId = $('addItemSelect').value;
+  const date = $('addDate').value || todayISO();
+  const note = $('addNote').value.trim();
+  const deadlineDate = $('addDeadline').value || null;
+  if(!note){ toast('Note cannot be empty','error'); return; }
+  if(!itemId){ toast('Choose an item card','error'); return; }
+
+  const btn = $('addSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const id = newId();
+  const s = getStoredSession();
+  const createdBy = s?.user?.email || '';
+  const entry = { id, item_id: itemId, date, note, created_by: createdBy,
+    deadline_date: deadlineDate, deadline_completed: false, deadline_completed_date: null };
+
+  try{
+    const result = await SB.post('timeline_entries', entry);
+    if(!result || (Array.isArray(result) && result.length===0)){
+      toast('Entry blocked by database (RLS)','error');
+      btn.disabled=false; btn.textContent='Add Entry';
+      return;
+    }
+    await SB.patch(`items?id=eq.${itemId}`, { updated_at: new Date().toISOString() });
+    timeline.unshift(entry);
+    closeAddSheet();
+    renderFeed();
+    toast('Entry added');
+  }catch(e){
+    toast('Failed to add entry: '+e.message,'error');
+    btn.disabled=false; btn.textContent='Add Entry';
+  }
+}
+
+// ═══════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════
+async function bootApp(){
+  $('loadingScreen').classList.remove('hidden');
+  $('app').style.display = 'none';
+  try{
+    await loadAll();
+    $('loadingScreen').classList.add('hidden');
+    $('app').style.display = 'flex';
+    $('statusDot').classList.remove('offline');
+  }catch(e){
+    console.error('Boot failed:', e);
+    $('loadingScreen').classList.add('hidden');
+    toast('Failed to load data: '+e.message,'error');
+    $('app').style.display = 'flex';
+    $('statusDot').classList.add('offline');
+  }
+}
+
+(async function init(){
+  const s = await getValidSession();
+  if(s){ await bootApp(); }
+  else { showLoginScreen(); }
+})();
+</script>
+</body>
+</html>
