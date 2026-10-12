@@ -3248,27 +3248,10 @@ async function removeGlobalSupplier(name,inputId,ddId,pillsContId){
 function renderFilesTab(item){
   // Exclude images — they live in the Images tab only
   const allFiles=(item.files||[]).filter(f=>!isImageFile(f.name));
-  const margins=allFiles.filter(f=>f.kind==='margin');
-  const files=allFiles.filter(f=>f.kind!=='margin');
+  const spKinds=Object.keys(SP_TARGETS);
+  const files=allFiles.filter(f=>!spKinds.includes(f.kind));
   const links=item.fileLinks||[];
-
-  const route=marginRouteFor(item);
-  const marginsHtml=margins.length?margins.map(f=>`
-    <div class="file-item">
-      <div class="file-icon">${fileIconByName(f.name)}</div>
-      <div class="file-info">
-        <div class="file-name"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a></div>
-        <div class="file-meta">Uploaded ${fmtFull(f.uploadDate)}${f.spPath?` · 📁 Saved to SharePoint: ${esc(f.spPath)}`:''}</div>
-      </div>
-      <div class="file-actions">
-        <a class="btn btn-ghost btn-xs" href="${esc(f.url)}" download="${esc(f.name)}" target="_blank">⬇</a>
-        <button class="ebtn del" title="Removes it from the tracker only. The SharePoint copy is kept." onclick="deleteUploadedFile('${f.id}','${esc(f.name)}')">✕</button>
-      </div>
-    </div>`).join('')
-    :'<div style="color:var(--text3);font-size:.82rem;padding:4px 0">No margin sheets uploaded yet.</div>';
-  const marginDest=route
-    ?`Saves to: <b>Historic Margin files\\2026\\${esc(route.join('\\'))}</b>`
-    :`<span style="color:var(--amber)">No margin sheet folder set for "${esc(item.category||'—')}". Upload is disabled for this category.</span>`;
+  const spHtml=spKinds.map(k=>spSectionHtml(item,k,allFiles.filter(f=>f.kind===k))).join('');
 
   const filesHtml=files.length?files.map((f,i)=>`
     <div class="file-item">
@@ -3306,18 +3289,7 @@ function renderFilesTab(item){
 
   $('detailBody').innerHTML=`
     <div class="files-section">
-      <div>
-        <div class="section-title" style="display:flex;align-items:center;gap:10px">📊 Margin Sheets
-          <span id="marginFolderStatus" style="margin-left:auto;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:0"></span>
-        </div>
-        <div style="font-size:.78rem;color:var(--text3);margin:-4px 0 8px">${marginDest}</div>
-        ${route?`<div class="file-drop-zone" id="marginDropZone" onclick="$('marginInput').click()">
-          <input type="file" id="marginInput" accept=".xlsx,.xlsm,.xls" onchange="handleMarginUpload(event)">
-          <div>📊 Drag & drop or click to upload a margin sheet</div>
-          <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">Renamed to "${esc(item.refCode||'')} - ${esc(item.name)} - Margin Sheet ${ukDateDots()}" · Excel only</div>
-        </div>`:''}
-        <div class="file-list" style="margin-top:10px">${marginsHtml}</div>
-      </div>
+      ${spHtml}
       <div>
         <div class="section-title">Uploaded Files</div>
         <div class="file-drop-zone" id="fileDropZone" onclick="$('fileInput').click()">
@@ -3340,8 +3312,7 @@ function renderFilesTab(item){
 
   $('detailFooter').innerHTML=`<div class="spacer"></div><button class="btn btn-ghost btn-sm" onclick="closeDetail()">Close</button>`;
   setupFileDrop();
-  setupMarginDrop();
-  refreshMarginFolderStatus();
+  setupSpSections();
 }
 
 function setupFileDrop(){
@@ -3381,8 +3352,8 @@ function handleRawFiles(files){
 
 async function deleteUploadedFile(fileId, fileName){
   const it=data.find(i=>i.id===currentItemId);
-  const isMargin=(it?.files||[]).some(f=>f.id===fileId&&f.kind==='margin');
-  const msg=isMargin
+  const isSp=(it?.files||[]).some(f=>f.id===fileId&&SP_TARGETS[f.kind]);
+  const msg=isSp
     ?`"${fileName}" will be removed from the tracker. The copy in SharePoint is kept.`
     :`"${fileName}" will be permanently removed.`;
   confirmAction('Delete file?',msg,async()=>{
@@ -3397,13 +3368,12 @@ async function deleteUploadedFile(fileId, fileName){
 }
 
 // ═══════════════════════════════════════
-// MARGIN SHEETS → SHAREPOINT (OneDrive-synced folder)
-// Each user connects their synced "Historic Margin files\2026" folder once.
-// Files are written there (OneDrive uploads them to SharePoint) and also
-// kept in Supabase so the card link works for everyone.
+// SHAREPOINT SAVING (OneDrive-synced folders)
+// Each user connects each target's synced root folder once. Files are written
+// there (OneDrive uploads them to SharePoint) and also kept in Supabase so the
+// card link works for everyone.
 // ═══════════════════════════════════════
-const MARGIN_ROOT_NAME='2026'; // change (and reconnect) when the year rolls over
-const MARGIN_ROUTES={           // item category → subfolder under the root
+const MARGIN_ROUTES={           // item category → subfolder under the margin root
   'Birlea':                 ['Birlea'],
   'JFS':                    ['JFS','January Furniture Show 2027'],
   'W&G':                    ['WG'],
@@ -3411,7 +3381,39 @@ const MARGIN_ROUTES={           // item category → subfolder under the root
   'Exclusive - Happy Beds': ['Customer Specific','Happy Beds'],
   'Exclusive - BHF':        ['Customer Specific','BHF']
 };
-function marginRouteFor(item){ return MARGIN_ROUTES[item?.category||'']||null; }
+const SP_TARGETS={
+  margin:{
+    title:'📊 Margin Sheets', noun:'margin sheet',
+    rootName:'2026',                       // change (and reconnect) when the year rolls over
+    rootHint:'Margins Sheets › Historic Margin files › 2026',
+    rootLabel:'Historic Margin files\\2026',
+    handleKey:'marginRoot',
+    exts:['xlsx','xlsm','xls'], extLabel:'Excel only',
+    route:item=>MARGIN_ROUTES[item?.category||'']||null,
+    fileName:item=>`${item.refCode||''} - ${item.name} - Margin Sheet ${ukDateDots()}`
+  },
+  spec:{
+    title:'📋 Spec Forms', noun:'spec form',
+    rootName:'Buying Tracker Spec Forms',
+    rootHint:'QC- Far East › SPECIFICATION FORMS › Buying Tracker Spec Forms',
+    rootLabel:'SPECIFICATION FORMS\\Buying Tracker Spec Forms',
+    handleKey:'specRoot',
+    exts:['xlsx','xlsm','xls','pdf'], extLabel:'Excel or PDF',
+    route:()=>[],                           // all categories go straight into the root
+    fileName:item=>`${item.refCode||''} - ${item.name} - Spec Form ${ukDateDots()}`
+  },
+  quote:{
+    title:'💷 Quotations', noun:'quotation',
+    rootName:'Buying Tracker Quotations',
+    rootHint:'Buying › Supplier quotes › Buying Tracker Quotations',
+    rootLabel:'Supplier quotes\\Buying Tracker Quotations',
+    handleKey:'quoteRoot',
+    exts:null, extLabel:'Any file type',      // null = accept everything
+    route:()=>[],
+    fileName:item=>`${item.refCode||''} - ${item.name} - Quotation ${ukDateDots()}`
+  }
+};
+function marginRouteFor(item){ return SP_TARGETS.margin.route(item); }
 
 function ukDateDots(d=new Date()){
   const p=n=>String(n).padStart(2,'0');
@@ -3421,7 +3423,7 @@ function winSafeName(s){
   return String(s).replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,' ').trim().replace(/[. ]+$/,'');
 }
 
-// IndexedDB store for the folder handle (handles can't go in localStorage)
+// IndexedDB store for folder handles (handles can't go in localStorage)
 function _hdb(){
   return new Promise((res,rej)=>{
     const r=indexedDB.open('bt-sharepoint',1);
@@ -3441,40 +3443,87 @@ async function _hset(key,val){
     t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); });
 }
 
-async function refreshMarginFolderStatus(){
-  const el=$('marginFolderStatus'); if(!el) return;
+// Section markup for one target (used by the Files tab)
+function spSectionHtml(item,kind,files){
+  const T=SP_TARGETS[kind], route=T.route(item);
+  const listHtml=files.length?files.map(f=>`
+    <div class="file-item">
+      <div class="file-icon">${fileIconByName(f.name)}</div>
+      <div class="file-info">
+        <div class="file-name"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a></div>
+        <div class="file-meta">Uploaded ${fmtFull(f.uploadDate)}${f.spPath?` · 📁 Saved to SharePoint: ${esc(f.spPath)}`:''}</div>
+      </div>
+      <div class="file-actions">
+        <a class="btn btn-ghost btn-xs" href="${esc(f.url)}" download="${esc(f.name)}" target="_blank">⬇</a>
+        <button class="ebtn del" title="Removes it from the tracker only. The SharePoint copy is kept." onclick="deleteUploadedFile('${f.id}','${esc(f.name)}')">✕</button>
+      </div>
+    </div>`).join('')
+    :`<div style="color:var(--text3);font-size:.82rem;padding:4px 0">No ${T.noun}s uploaded yet.</div>`;
+  const dest=route
+    ?`Saves to: <b>${esc([T.rootLabel,...route].join('\\'))}</b>`
+    :`<span style="color:var(--amber)">No ${T.noun} folder set for "${esc(item.category||'—')}". Upload is disabled for this category.</span>`;
+  return `<div>
+        <div class="section-title" style="display:flex;align-items:center;gap:10px">${T.title}
+          <span id="spStatus-${kind}" style="margin-left:auto;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:0"></span>
+        </div>
+        <div style="font-size:.78rem;color:var(--text3);margin:-4px 0 8px">${dest}</div>
+        ${route?`<div class="file-drop-zone" id="spDrop-${kind}" onclick="$('spInput-${kind}').click()">
+          <input type="file" id="spInput-${kind}"${T.exts?` accept="${T.exts.map(e=>'.'+e).join(',')}"`:''} onchange="handleSpUpload(event,'${kind}')">
+          <div>📎 Drag & drop or click to upload a ${T.noun}</div>
+          <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">Renamed to "${esc(winSafeName(T.fileName(item)))}" · ${T.extLabel}</div>
+        </div>`:''}
+        <div class="file-list" style="margin-top:10px">${listHtml}</div>
+      </div>`;
+}
+
+function setupSpSections(){
+  Object.keys(SP_TARGETS).forEach(kind=>{
+    const z=$('spDrop-'+kind);
+    if(z){
+      z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over');});
+      z.addEventListener('dragleave',()=>z.classList.remove('drag-over'));
+      z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');
+        if(e.dataTransfer.files.length) processSpFile(e.dataTransfer.files[0],kind);});
+    }
+    refreshSpStatus(kind);
+  });
+}
+
+async function refreshSpStatus(kind){
+  const el=$('spStatus-'+kind); if(!el) return;
   if(!('showDirectoryPicker' in window)){
     el.innerHTML='<span style="color:var(--amber)">SharePoint saving needs desktop Chrome or Edge</span>'; return;
   }
-  const h=await _hget('marginRoot');
-  if(!h){ el.innerHTML='<button class="btn btn-sm" onclick="connectMarginFolder()">📁 Connect margin sheet folder</button>'; return; }
+  const h=await _hget(SP_TARGETS[kind].handleKey);
+  if(!h){ el.innerHTML=`<button class="btn btn-sm" onclick="connectSpFolder('${kind}')">📁 Connect ${SP_TARGETS[kind].noun} folder</button>`; return; }
   let perm='prompt'; try{ perm=await h.queryPermission({mode:'readwrite'}); }catch(e){}
   el.innerHTML=perm==='granted'
-    ?`<span style="color:var(--green)">✓ SharePoint folder connected</span> <button class="btn btn-ghost btn-xs" onclick="connectMarginFolder()">Change</button>`
-    :`<button class="btn btn-sm" onclick="reconnectMarginFolder()">🔓 Reconnect folder</button>`;
+    ?`<span style="color:var(--green)">✓ SharePoint folder connected</span> <button class="btn btn-ghost btn-xs" onclick="connectSpFolder('${kind}')">Change</button>`
+    :`<button class="btn btn-sm" onclick="reconnectSpFolder('${kind}')">🔓 Reconnect folder</button>`;
 }
 
-async function connectMarginFolder(){
+async function connectSpFolder(kind){
+  const T=SP_TARGETS[kind];
   try{
-    const h=await window.showDirectoryPicker({id:'marginSheets',mode:'readwrite'});
-    if(h.name!==MARGIN_ROOT_NAME){
-      toast(`Please pick the "${MARGIN_ROOT_NAME}" folder inside Margins Sheets › Historic Margin files (you picked "${h.name}")`,'error');
+    const h=await window.showDirectoryPicker({id:'sp-'+kind,mode:'readwrite'});
+    if(h.name!==T.rootName){
+      toast(`Please pick the "${T.rootName}" folder (${T.rootHint}). You picked "${h.name}"`,'error');
       return;
     }
-    await _hset('marginRoot',h);
-    toast('Margin sheet folder connected ✓');
+    await _hset(T.handleKey,h);
+    toast(`${T.title.replace(/^\S+\s/,'')} folder connected ✓`);
   }catch(e){ if(e.name!=='AbortError') toast('Could not connect folder: '+e.message,'error'); }
-  refreshMarginFolderStatus();
+  refreshSpStatus(kind);
 }
 
-async function reconnectMarginFolder(){
-  const h=await _hget('marginRoot'); if(!h) return connectMarginFolder();
+async function reconnectSpFolder(kind){
+  const h=await _hget(SP_TARGETS[kind].handleKey); if(!h) return connectSpFolder(kind);
   try{ await h.requestPermission({mode:'readwrite'}); }catch(e){}
-  refreshMarginFolderStatus();
+  refreshSpStatus(kind);
 }
 
-async function getMarginRoot(){
-  const h=await _hget('marginRoot'); if(!h) return null;
+async function getSpRoot(kind){
+  const h=await _hget(SP_TARGETS[kind].handleKey); if(!h) return null;
   try{
     if(await h.queryPermission({mode:'readwrite'})==='granted') return h;
     if(await h.requestPermission({mode:'readwrite'})==='granted') return h;
@@ -3482,43 +3531,38 @@ async function getMarginRoot(){
   return null;
 }
 
-function setupMarginDrop(){
-  const z=$('marginDropZone'); if(!z) return;
-  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over');});
-  z.addEventListener('dragleave',()=>z.classList.remove('drag-over'));
-  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');
-    if(e.dataTransfer.files.length) processMarginFile(e.dataTransfer.files[0]);});
-}
-function handleMarginUpload(e){ const f=e.target.files[0]; e.target.value=''; if(f) processMarginFile(f); }
+function handleSpUpload(e,kind){ const f=e.target.files[0]; e.target.value=''; if(f) processSpFile(f,kind); }
 
-async function processMarginFile(f){
+async function processSpFile(f,kind){
+  const T=SP_TARGETS[kind];
   const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const route=marginRouteFor(item);
-  if(!route){ toast(`No margin sheet folder set for "${item.category}"`,'error'); return; }
-  const ext=f.name.split('.').pop().toLowerCase();
-  if(!['xlsx','xlsm','xls'].includes(ext)){ toast('Margin sheets must be Excel files','error'); return; }
+  const route=T.route(item);
+  if(!route){ toast(`No ${T.noun} folder set for "${item.category}"`,'error'); return; }
+  const ext=f.name.includes('.')?f.name.split('.').pop().toLowerCase():'';
+  if(T.exts&&!T.exts.includes(ext)){ toast(`${T.title.replace(/^\S+\s/,'')} must be ${T.extLabel}`,'error'); return; }
   if(f.size>25*1024*1024){ toast(f.name+' exceeds 25MB','error'); return; }
   if(!('showDirectoryPicker' in window)){ toast('SharePoint saving needs desktop Chrome or Edge','error'); return; }
 
-  const root=await getMarginRoot();
-  if(!root){ toast('Connect (or reconnect) the margin sheet folder first — button at the top of this section','error'); refreshMarginFolderStatus(); return; }
+  const root=await getSpRoot(kind);
+  if(!root){ toast(`Connect (or reconnect) the ${T.noun} folder first — button at the top of that section`,'error'); refreshSpStatus(kind); return; }
 
   // 1. Find the destination folder (never create it — a missing folder means the wrong root was picked)
   let dir=root;
   try{ for(const seg of route) dir=await dir.getDirectoryHandle(seg); }
-  catch(e){ toast(`Folder "${route.join('\\')}" not found in your connected ${MARGIN_ROOT_NAME} folder`,'error'); return; }
+  catch(e){ toast(`Folder "${route.join('\\')}" not found in your connected "${T.rootName}" folder`,'error'); return; }
 
-  // 2. Build the name: {ref} - {item name} - Margin Sheet dd.mm.yyyy, adding (2), (3)… if it already exists
-  const base=winSafeName(`${item.refCode||''} - ${item.name} - Margin Sheet ${ukDateDots()}`);
-  let finalName=`${base}.${ext}`, n=2;
+  // 2. Build the name, adding (2), (3)… if it already exists
+  const base=winSafeName(T.fileName(item));
+  const dotExt=ext?'.'+ext:'';
+  let finalName=`${base}${dotExt}`, n=2;
   while(true){
-    try{ await dir.getFileHandle(finalName); finalName=`${base} (${n++}).${ext}`; }
+    try{ await dir.getFileHandle(finalName); finalName=`${base} (${n++})${dotExt}`; }
     catch(e){ break; }
   }
 
   // 3. Write to the synced folder (OneDrive uploads it to SharePoint)
   toast('Saving '+finalName+'…');
-  const spPath=[...route,finalName].join('\\');
+  const spPath=[T.rootLabel,...route,finalName].join('\\');
   try{
     const fh=await dir.getFileHandle(finalName,{create:true});
     const w=await fh.createWritable(); await w.write(f); await w.close();
@@ -3529,10 +3573,10 @@ async function processMarginFile(f){
     const path=`${item.id}/${Date.now()}_${finalName.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
     const url=await SB.upload('item-files',path,f);
     const id=newId();
-    await SB.post('file_links',{id,item_id:item.id,name:finalName,url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:false,kind:'margin',sp_path:spPath});
+    await SB.post('file_links',{id,item_id:item.id,name:finalName,url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:false,kind,sp_path:spPath});
     await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
     item.files=item.files||[];
-    item.files.push({id,name:finalName,url,uploadDate:todayISO(),size:f.size,kind:'margin',spPath});
+    item.files.push({id,name:finalName,url,uploadDate:todayISO(),size:f.size,kind,spPath});
     if(currentItemId===item.id) renderFilesTab(item);
     toast(finalName+' saved to SharePoint ✓');
   }catch(e){ toast('Saved to SharePoint, but adding it to the tracker failed: '+e.message,'error'); }
