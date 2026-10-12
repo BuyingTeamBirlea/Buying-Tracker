@@ -3290,24 +3290,11 @@ function renderFilesTab(item){
   $('detailBody').innerHTML=`
     <div class="files-section">
       ${spHtml}
-      <div>
-        <div class="section-title">Uploaded Files</div>
-        <div class="file-drop-zone" id="fileDropZone" onclick="$('fileInput').click()">
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.pdf,.eml,.msg" multiple onchange="handleFileUpload(event)">
-          <div>📎 Drag & drop or click to upload</div>
-          <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">Excel · PDF · EML · MSG · Max 25MB each</div>
-        </div>
-        <div class="file-list" style="margin-top:10px" id="fileList">${filesHtml}</div>
-      </div>
-      <div>
-        <div class="section-title" style="margin-top:4px">Linked Files (SharePoint / OneDrive)</div>
-        <div class="link-input-row" style="margin-bottom:10px">
-          <div class="field" style="flex:1"><label>Display Name</label><input type="text" id="link-name" placeholder="e.g. Pricing Sheet Q2"></div>
-          <div class="field" style="flex:2"><label>URL</label><input type="text" id="link-url" placeholder="https://company.sharepoint.com/…"></div>
-          <button class="btn btn-sm" style="align-self:flex-end" onclick="addLink()">+ Add</button>
-        </div>
-        <div class="file-list" id="linkList">${linksHtml}</div>
-      </div>
+      ${(files.length||links.length)?`<div>
+        <div class="section-title">Older Files &amp; Links</div>
+        <div style="font-size:.78rem;color:var(--text3);margin:-4px 0 8px">Added before the SharePoint sections. New files go in the sections above.</div>
+        <div class="file-list">${files.length?filesHtml:''}${links.length?linksHtml:''}</div>
+      </div>`:''}
     </div>`;
 
   $('detailFooter').innerHTML=`<div class="spacer"></div><button class="btn btn-ghost btn-sm" onclick="closeDetail()">Close</button>`;
