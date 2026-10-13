@@ -1834,7 +1834,7 @@ async function loadData(silent=false){
       })),
       fileLinks: (flMap[row.id]||[]).map(f=>({id:f.id,name:f.name,url:f.url,addedDate:f.added_date})),
       files: (upMap[row.id]||[]).filter(f=>f.is_upload&&!f.is_image).map(f=>({id:f.id,name:f.name,url:f.url,uploadDate:f.added_date,size:f.file_size||0,kind:f.kind||'',spPath:f.sp_path||''})),
-      images: (upMap[row.id]||[]).filter(f=>f.is_image).map(f=>({id:f.id,name:f.name,url:f.url}))
+      images: (upMap[row.id]||[]).filter(f=>f.is_image).map(f=>({id:f.id,name:f.name,url:f.url,kind:f.kind||'',spPath:f.sp_path||''}))
     }));
 
     setSyncStatus('ok');
@@ -3248,8 +3248,8 @@ async function removeGlobalSupplier(name,inputId,ddId,pillsContId){
 function renderFilesTab(item){
   // Exclude images — they live in the Images tab only
   const allFiles=(item.files||[]).filter(f=>!isImageFile(f.name));
-  const spKinds=Object.keys(SP_TARGETS);
-  const files=allFiles.filter(f=>!spKinds.includes(f.kind));
+  const spKinds=Object.keys(SP_TARGETS).filter(k=>SP_TARGETS[k].filesTab);
+  const files=allFiles.filter(f=>!SP_TARGETS[f.kind]);
   const links=item.fileLinks||[];
   const spHtml=spKinds.map(k=>spSectionHtml(item,k,allFiles.filter(f=>f.kind===k))).join('');
 
@@ -3341,7 +3341,7 @@ async function deleteUploadedFile(fileId, fileName){
   const it=data.find(i=>i.id===currentItemId);
   const isSp=(it?.files||[]).some(f=>f.id===fileId&&SP_TARGETS[f.kind]);
   const msg=isSp
-    ?`"${fileName}" will be removed from the tracker. The copy in SharePoint is kept.`
+    ?`"${fileName}" will be unlinked from the tracker. The file stays in SharePoint.`
     :`"${fileName}" will be permanently removed.`;
   confirmAction('Delete file?',msg,async()=>{
     const item=data.find(i=>i.id===currentItemId); if(!item) return;
@@ -3357,8 +3357,7 @@ async function deleteUploadedFile(fileId, fileName){
 // ═══════════════════════════════════════
 // SHAREPOINT SAVING (OneDrive-synced folders)
 // Each user connects each target's synced root folder once. Files are written
-// there (OneDrive uploads them to SharePoint) and also kept in Supabase so the
-// card link works for everyone.
+// there (OneDrive uploads them to SharePoint); the tracker stores only the link.
 // ═══════════════════════════════════════
 const MARGIN_ROUTES={           // item category → subfolder under the margin root
   'Birlea':                 ['Birlea'],
@@ -3378,7 +3377,8 @@ const SP_TARGETS={
     spBase:'/Buying/Margins Sheets/Historic Margin files/2026',
     exts:['xlsx','xlsm','xls'], extLabel:'Excel only',
     route:item=>MARGIN_ROUTES[item?.category||'']||null,
-    fileName:item=>`${item.refCode||''} - ${item.name} - Margin Sheet ${ukDateDots()}`
+    fileName:item=>`${item.refCode||''} - ${item.name} - Margin Sheet ${ukDateDots()}`,
+    filesTab:true
   },
   spec:{
     title:'📋 Spec Forms', noun:'spec form',
@@ -3389,7 +3389,8 @@ const SP_TARGETS={
     spBase:'/QC Far East/SPECIFICATION FORMS/Buying Tracker Spec Forms',
     exts:['xlsx','xlsm','xls','pdf'], extLabel:'Excel or PDF',
     route:()=>[],                           // all categories go straight into the root
-    fileName:item=>`${item.refCode||''} - ${item.name} - Spec Form ${ukDateDots()}`
+    fileName:item=>`${item.refCode||''} - ${item.name} - Spec Form ${ukDateDots()}`,
+    filesTab:true
   },
   quote:{
     title:'💷 Quotations', noun:'quotation',
@@ -3400,7 +3401,20 @@ const SP_TARGETS={
     spBase:'/Buying/Supplier quotes/Buying Tracker Quotations',
     exts:null, extLabel:'Any file type',      // null = accept everything
     route:()=>[],
-    fileName:item=>`${item.refCode||''} - ${item.name} - Quotation ${ukDateDots()}`
+    fileName:item=>`${item.refCode||''} - ${item.name} - Quotation ${ukDateDots()}`,
+    filesTab:true
+  },
+  media:{
+    title:'📷 Media', noun:'media',
+    rootName:'Images For Buying Tracker',
+    rootHint:'Birlea Furniture - Buying › Images For Buying Tracker',
+    rootLabel:'Images For Buying Tracker',
+    handleKey:'mediaRoot',
+    spBase:'/Buying/Images For Buying Tracker',
+    exts:['jpg','jpeg','png','webp','mp4'], extLabel:'JPG, PNG, WEBP · MP4', maxMB:50,
+    route:()=>[],
+    fileName:(item,f)=>`${item.refCode||''} - ${item.name} - ${/\.mp4$/i.test(f?.name||'')?'Video':'Image'} ${ukDateDots()}`,
+    filesTab:false
   }
 };
 const SP_HOST='https://birleafurniture.sharepoint.com';
@@ -3469,7 +3483,7 @@ function spSectionHtml(item,kind,files){
       </div>
       <div class="file-actions">
         ${openBtns}
-        <button class="ebtn del" title="Removes it from the tracker only. The SharePoint copy is kept." onclick="deleteUploadedFile('${f.id}','${esc(f.name)}')">✕</button>
+        <button class="ebtn del" title="Removes the link from the tracker only. The file stays in SharePoint." onclick="deleteUploadedFile('${f.id}','${esc(f.name)}')">✕</button>
       </div>
     </div>`;}).join('')
     :`<div style="color:var(--text3);font-size:.82rem;padding:4px 0">No ${T.noun}s uploaded yet.</div>`;
@@ -3491,7 +3505,7 @@ function spSectionHtml(item,kind,files){
 }
 
 function setupSpSections(){
-  Object.keys(SP_TARGETS).forEach(kind=>{
+  Object.keys(SP_TARGETS).filter(k=>SP_TARGETS[k].filesTab).forEach(kind=>{
     const z=$('spDrop-'+kind);
     if(z){
       z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over');});
@@ -3547,26 +3561,27 @@ async function getSpRoot(kind){
 
 function handleSpUpload(e,kind){ const f=e.target.files[0]; e.target.value=''; if(f) processSpFile(f,kind); }
 
-async function processSpFile(f,kind){
+// Writes one file into the target's SharePoint folder. Returns {finalName,spPath,url} or null (after a toast).
+async function saveFileToSp(f,kind,item){
   const T=SP_TARGETS[kind];
-  const item=data.find(i=>i.id===currentItemId); if(!item) return;
   const route=T.route(item);
-  if(!route){ toast(`No ${T.noun} folder set for "${item.category}"`,'error'); return; }
+  if(!route){ toast(`No ${T.noun} folder set for "${item.category}"`,'error'); return null; }
   const ext=f.name.includes('.')?f.name.split('.').pop().toLowerCase():'';
-  if(T.exts&&!T.exts.includes(ext)){ toast(`${T.title.replace(/^\S+\s/,'')} must be ${T.extLabel}`,'error'); return; }
-  if(f.size>25*1024*1024){ toast(f.name+' exceeds 25MB','error'); return; }
-  if(!('showDirectoryPicker' in window)){ toast('SharePoint saving needs desktop Chrome or Edge','error'); return; }
+  if(T.exts&&!T.exts.includes(ext)){ toast(`Unsupported: ${f.name} (${T.extLabel})`,'error'); return null; }
+  const maxMB=T.maxMB||25;
+  if(f.size>maxMB*1024*1024){ toast(f.name+' exceeds '+maxMB+'MB','error'); return null; }
+  if(!('showDirectoryPicker' in window)){ toast('SharePoint saving needs desktop Chrome or Edge','error'); return null; }
 
   const root=await getSpRoot(kind);
-  if(!root){ toast(`Connect (or reconnect) the ${T.noun} folder first — button at the top of that section`,'error'); refreshSpStatus(kind); return; }
+  if(!root){ toast(`Connect (or reconnect) the ${T.noun} folder first`,'error'); refreshSpStatus(kind); return null; }
 
   // 1. Find the destination folder (never create it — a missing folder means the wrong root was picked)
   let dir=root;
   try{ for(const seg of route) dir=await dir.getDirectoryHandle(seg); }
-  catch(e){ toast(`Folder "${route.join('\\')}" not found in your connected "${T.rootName}" folder`,'error'); return; }
+  catch(e){ toast(`Folder "${route.join('\\')}" not found in your connected "${T.rootName}" folder`,'error'); return null; }
 
   // 2. Build the name, adding (2), (3)… if it already exists
-  const base=winSafeName(T.fileName(item));
+  const base=winSafeName(T.fileName(item,f));
   const dotExt=ext?'.'+ext:'';
   let finalName=`${base}${dotExt}`, n=2;
   while(true){
@@ -3575,17 +3590,22 @@ async function processSpFile(f,kind){
   }
 
   // 3. Write to the synced folder (OneDrive uploads it to SharePoint)
-  toast('Saving '+finalName+'…');
   const spPath=[T.rootLabel,...route,finalName].join('\\');
   try{
     const fh=await dir.getFileHandle(finalName,{create:true});
     const w=await fh.createWritable(); await w.write(f); await w.close();
-  }catch(e){ toast('SharePoint save failed: '+e.message,'error'); return; }
+  }catch(e){ toast('SharePoint save failed: '+e.message,'error'); return null; }
+  return {finalName,spPath,url:spWebUrl(kind,spPath)};
+}
 
-  // 4. Keep a copy in the tracker so the card link works for everyone
+async function processSpFile(f,kind){
+  const item=data.find(i=>i.id===currentItemId); if(!item) return;
+  toast('Saving to SharePoint…');
+  const saved=await saveFileToSp(f,kind,item); if(!saved) return;
+  const {finalName,spPath,url}=saved;
+
+  // Record the link in the tracker (the file itself lives only in SharePoint)
   try{
-    const path=`${item.id}/${Date.now()}_${finalName.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const url=await SB.upload('item-files',path,f);
     const id=newId();
     await SB.post('file_links',{id,item_id:item.id,name:finalName,url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:false,kind,sp_path:spPath});
     await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
@@ -3593,7 +3613,7 @@ async function processSpFile(f,kind){
     item.files.push({id,name:finalName,url,uploadDate:todayISO(),size:f.size,kind,spPath});
     if(currentItemId===item.id) renderFilesTab(item);
     toast(finalName+' saved to SharePoint ✓');
-  }catch(e){ toast('Saved to SharePoint, but adding it to the tracker failed: '+e.message,'error'); }
+  }catch(e){ toast('Saved to SharePoint, but linking it in the tracker failed: '+e.message,'error'); }
 }
 
 async function addLink(){
@@ -3631,15 +3651,24 @@ function renderImagesTab(item){
   const imgCount=imgs.length-vidCount;
   const countLabel=imgs.length===0?'0':`${imgCount} image${imgCount!==1?'s':''}${vidCount>0?', '+vidCount+' video'+(vidCount!==1?'s':''):''}`;
   $('detailBody').innerHTML=`
-    <div class="section-title">Media (${countLabel})</div>
+    <div class="section-title" style="display:flex;align-items:center;gap:10px">Media (${countLabel})
+      <span id="spStatus-media" style="margin-left:auto;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div style="font-size:.78rem;color:var(--text3);margin:-4px 0 8px">Saves to: <b>Buying\\Images For Buying Tracker</b></div>
     <div class="drop-zone" id="dropZone" onclick="$('imgFileInput').click()">
       <input type="file" id="imgFileInput" accept="image/jpeg,image/png,image/webp,video/mp4" multiple onchange="handleImgUpload(event)">
       <div>📷 Drag & drop or click to browse</div>
-      <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">JPG, PNG, WEBP · MP4 · Max 50MB each</div>
+      <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">JPG, PNG, WEBP · MP4 · Max 50MB each · Renamed to "${esc(winSafeName(SP_TARGETS.media.fileName(item,{name:'x.jpg'})))}"</div>
     </div>
     <div class="image-grid" id="imageGrid">${thumbsHTML(item)}</div>`;
   $('detailFooter').innerHTML=`<div class="spacer"></div><button class="btn btn-ghost btn-sm" onclick="closeDetail()">Close</button>`;
   setupImgDrop();
+  refreshSpStatus('media');
+}
+
+// Small SharePoint-generated preview for grid thumbnails (full image used in the lightbox)
+function spThumbUrl(url){
+  return SP_HOST+'/_layouts/15/getpreview.ashx?path='+encodeURIComponent(url)+'&resolution=1';
 }
 
 function isVideo(name){ return /\.mp4$/i.test(name||''); }
@@ -3654,7 +3683,7 @@ function thumbsHTML(item){
       </div>`;
     }
     return `<div class="img-thumb" onclick="openImgPreview(${i})">
-      <img src="${m.url}" alt="" loading="lazy">
+      <img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" loading="lazy" onerror="if(this.src!=='${esc(m.url)}')this.src='${esc(m.url)}'">
       <button class="img-thumb-del" onclick="event.stopPropagation();delImg('${m.id}',${i})">✕</button>
     </div>`;
   }).join('');
@@ -3671,38 +3700,35 @@ function handleImgUpload(e){ handleImgFiles(e.target.files); }
 
 function handleImgFiles(files){
   const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const MAX=50*1024*1024;
-  const ALLOWED_IMG=['image/jpeg','image/png','image/webp'];
-  const ALLOWED_VID=['video/mp4'];
+  const list=[...files];
   const process=async idx=>{
-    if(idx>=files.length){ renderImagesTab(item); return; }
-    const f=files[idx];
-    const isImg=ALLOWED_IMG.includes(f.type);
-    const isVid=ALLOWED_VID.includes(f.type);
-    if(!isImg&&!isVid){ toast('Unsupported: '+f.name,'error'); return process(idx+1); }
-    if(f.size>MAX){ toast(f.name+' exceeds 50MB','error'); return process(idx+1); }
-    toast(isVid?'Uploading video…':'Uploading image…');
-    try{
-      const path=`${item.id}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const url=await SB.upload('item-images',path,f);
-      const id=newId();
-      await SB.post('file_links',{id,item_id:item.id,name:f.name,url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:true});
-      await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-      item.images=item.images||[];
-      item.images.push({id,name:f.name,url});
-      process(idx+1);
-    }catch(e){ toast('Upload failed: '+e.message,'error'); process(idx+1); }
+    if(idx>=list.length){ if(currentItemId===item.id&&$('imageGrid')) renderImagesTab(item); return; }
+    const f=list[idx];
+    toast(`Saving ${/\.mp4$/i.test(f.name)?'video':'image'} ${list.length>1?(idx+1)+'/'+list.length+' ':''}to SharePoint…`);
+    const saved=await saveFileToSp(f,'media',item);
+    if(saved){
+      try{
+        const id=newId();
+        await SB.post('file_links',{id,item_id:item.id,name:saved.finalName,url:saved.url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:true,kind:'media',sp_path:saved.spPath});
+        await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
+        item.images=item.images||[];
+        item.images.push({id,name:saved.finalName,url:saved.url,kind:'media',spPath:saved.spPath});
+      }catch(e){ toast('Saved to SharePoint, but linking it in the tracker failed: '+e.message,'error'); }
+    }
+    process(idx+1);
   };
   process(0);
 }
 
 async function delImg(imgId, idx){
-  confirmAction('Delete image?','Cannot be undone.',async()=>{
+  const it=data.find(i=>i.id===currentItemId);
+  const onSp=!!(it?.images||[]).find(m=>m.id===imgId)?.spPath;
+  confirmAction('Remove from tracker?',onSp?'The link is removed from this item. The file stays in SharePoint.':'Cannot be undone.',async()=>{
     const item=data.find(i=>i.id===currentItemId); if(!item) return;
     try{
       await SB.delete(`file_links?id=eq.${imgId}`);
       await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-      item.images.splice(idx,1);
+      item.images=item.images.filter(m=>m.id!==imgId);
       renderImagesTab(item); toast('Image removed');
     }catch(e){ toast('Failed: '+e.message,'error'); }
   });
