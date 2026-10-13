@@ -3375,6 +3375,7 @@ const SP_TARGETS={
     rootHint:'Margins Sheets › Historic Margin files › 2026',
     rootLabel:'Historic Margin files\\2026',
     handleKey:'marginRoot',
+    spBase:'/Buying/Margins Sheets/Historic Margin files/2026',
     exts:['xlsx','xlsm','xls'], extLabel:'Excel only',
     route:item=>MARGIN_ROUTES[item?.category||'']||null,
     fileName:item=>`${item.refCode||''} - ${item.name} - Margin Sheet ${ukDateDots()}`
@@ -3385,6 +3386,7 @@ const SP_TARGETS={
     rootHint:'QC- Far East › SPECIFICATION FORMS › Buying Tracker Spec Forms',
     rootLabel:'SPECIFICATION FORMS\\Buying Tracker Spec Forms',
     handleKey:'specRoot',
+    spBase:'/QC Far East/SPECIFICATION FORMS/Buying Tracker Spec Forms',
     exts:['xlsx','xlsm','xls','pdf'], extLabel:'Excel or PDF',
     route:()=>[],                           // all categories go straight into the root
     fileName:item=>`${item.refCode||''} - ${item.name} - Spec Form ${ukDateDots()}`
@@ -3395,11 +3397,28 @@ const SP_TARGETS={
     rootHint:'Buying › Supplier quotes › Buying Tracker Quotations',
     rootLabel:'Supplier quotes\\Buying Tracker Quotations',
     handleKey:'quoteRoot',
+    spBase:'/Buying/Supplier quotes/Buying Tracker Quotations',
     exts:null, extLabel:'Any file type',      // null = accept everything
     route:()=>[],
     fileName:item=>`${item.refCode||''} - ${item.name} - Quotation ${ukDateDots()}`
   }
 };
+const SP_HOST='https://birleafurniture.sharepoint.com';
+// Web URL of the SharePoint copy, built from the saved relative path
+function spWebUrl(kind,spPath){
+  const T=SP_TARGETS[kind]; if(!T||!spPath) return null;
+  const pre=T.rootLabel+'\\';
+  if(!spPath.startsWith(pre)) return null;
+  const segs=[...T.spBase.split('/').filter(Boolean),...spPath.slice(pre.length).split('\\')];
+  return SP_HOST+'/'+segs.map(encodeURIComponent).join('/');
+}
+// Office desktop app link (edits save straight back to SharePoint)
+function officeDesktopUrl(webUrl,name){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  const app={xlsx:'excel',xlsm:'excel',xls:'excel',xlsb:'excel',csv:'excel',
+             docx:'word',docm:'word',doc:'word',pptx:'powerpoint',pptm:'powerpoint',ppt:'powerpoint'}[ext];
+  return app?{href:`ms-${app}:ofe|u|${webUrl}`,label:{excel:'Excel',word:'Word',powerpoint:'PowerPoint'}[app]}:null;
+}
 function marginRouteFor(item){ return SP_TARGETS.margin.route(item); }
 
 function ukDateDots(d=new Date()){
@@ -3433,18 +3452,26 @@ async function _hset(key,val){
 // Section markup for one target (used by the Files tab)
 function spSectionHtml(item,kind,files){
   const T=SP_TARGETS[kind], route=T.route(item);
-  const listHtml=files.length?files.map(f=>`
+  const listHtml=files.length?files.map(f=>{
+    const web=spWebUrl(kind,f.spPath);
+    const desk=web?officeDesktopUrl(web,f.name):null;
+    const viewUrl=web?(desk?web+'?web=1':web):f.url;
+    const openBtns=desk
+      ?`<a class="btn btn-sm" href="${esc(desk.href)}" title="Opens the SharePoint file in ${desk.label}. Changes save to SharePoint.">🖥 Open in ${desk.label}</a>
+        <a class="btn btn-ghost btn-xs" href="${esc(viewUrl)}" target="_blank" rel="noopener" title="Open in ${desk.label} for the web">🌐 Web</a>`
+      :`<a class="btn btn-sm" href="${esc(viewUrl)}" target="_blank" rel="noopener" title="${web?'Open the SharePoint file':'Open the tracker copy'}">↗ Open</a>`;
+    return `
     <div class="file-item">
       <div class="file-icon">${fileIconByName(f.name)}</div>
       <div class="file-info">
-        <div class="file-name"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a></div>
-        <div class="file-meta">Uploaded ${fmtFull(f.uploadDate)}${f.spPath?` · 📁 Saved to SharePoint: ${esc(f.spPath)}`:''}</div>
+        <div class="file-name"><a href="${esc(viewUrl)}" target="_blank" rel="noopener">${esc(f.name)}</a></div>
+        <div class="file-meta">Uploaded ${fmtFull(f.uploadDate)}${f.spPath?` · 📁 SharePoint: ${esc(f.spPath)}`:''}</div>
       </div>
       <div class="file-actions">
-        <a class="btn btn-ghost btn-xs" href="${esc(f.url)}" download="${esc(f.name)}" target="_blank">⬇</a>
+        ${openBtns}
         <button class="ebtn del" title="Removes it from the tracker only. The SharePoint copy is kept." onclick="deleteUploadedFile('${f.id}','${esc(f.name)}')">✕</button>
       </div>
-    </div>`).join('')
+    </div>`;}).join('')
     :`<div style="color:var(--text3);font-size:.82rem;padding:4px 0">No ${T.noun}s uploaded yet.</div>`;
   const dest=route
     ?`Saves to: <b>${esc([T.rootLabel,...route].join('\\'))}</b>`
