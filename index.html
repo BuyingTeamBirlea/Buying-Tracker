@@ -360,6 +360,9 @@ body.light-mode .airmail-card{background:var(--bg4)}
 .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .15s;color:var(--text3);font-size:.875rem}
 .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(79,110,247,.05);color:var(--text2)}
 .drop-zone input{display:none}
+.img-syncing{position:relative}
+.img-syncing .img-thumb-del{z-index:1}
+.img-syncing::after{content:'Syncing to SharePoint…';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.7rem;color:var(--text3);background:var(--bg3)}
 .image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
 .img-thumb{position:relative;aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all .15s}
 .img-thumb:hover{border-color:var(--accent);transform:scale(1.02)}
@@ -3666,6 +3669,17 @@ function renderImagesTab(item){
   refreshSpStatus('media');
 }
 
+// A just-uploaded file can take a minute to reach SharePoint via OneDrive.
+// On error: try the full file, then keep retrying every 5s for ~2 minutes with a "Syncing…" placeholder.
+function spImgRetry(img){
+  const full=img.dataset.full; if(!full) return;
+  const n=+(img.dataset.retry||0);
+  if(n===0){ img.dataset.retry=1; img.src=full; return; }
+  if(n>24){ img.parentElement?.classList.remove('img-syncing'); return; }
+  img.parentElement?.classList.add('img-syncing');
+  img.dataset.retry=n+1;
+  setTimeout(()=>{ if(img.isConnected) img.src=full+(full.includes('?')?'&':'?')+'r='+Date.now(); },5000);
+}
 // Small SharePoint-generated preview for grid thumbnails (full image used in the lightbox)
 function spThumbUrl(url){
   return SP_HOST+'/_layouts/15/getpreview.ashx?path='+encodeURIComponent(url)+'&resolution=1';
@@ -3676,14 +3690,14 @@ function isVideo(name){ return /\.mp4$/i.test(name||''); }
 function thumbsHTML(item){
   return (item.images||[]).map((m,i)=>{
     if(isVideo(m.name)){
-      return `<div class="vid-thumb" onclick="openVidPreview('${m.url}','${esc(m.name)}')">
-        <video src="${m.url}" preload="metadata" muted playsinline></video>
+      return `<div class="vid-thumb" onclick="openVidPreview('${esc(m.localUrl||m.url)}','${esc(m.name)}')">
+        <video src="${esc(m.localUrl||m.url)}" preload="metadata" muted playsinline></video>
         <div class="vid-play-icon"><span>▶</span></div>
         <button class="vid-thumb-del" onclick="event.stopPropagation();delImg('${m.id}',${i})">✕</button>
       </div>`;
     }
     return `<div class="img-thumb" onclick="openImgPreview(${i})">
-      <img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" loading="lazy" onerror="if(this.src!=='${esc(m.url)}')this.src='${esc(m.url)}'">
+      <img src="${esc(m.localUrl||(m.spPath?spThumbUrl(m.url):m.url))}" alt="" loading="lazy" data-full="${esc(m.url)}" onerror="spImgRetry(this)">
       <button class="img-thumb-del" onclick="event.stopPropagation();delImg('${m.id}',${i})">✕</button>
     </div>`;
   }).join('');
@@ -3712,7 +3726,7 @@ function handleImgFiles(files){
         await SB.post('file_links',{id,item_id:item.id,name:saved.finalName,url:saved.url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:true,kind:'media',sp_path:saved.spPath});
         await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
         item.images=item.images||[];
-        item.images.push({id,name:saved.finalName,url:saved.url,kind:'media',spPath:saved.spPath});
+        item.images.push({id,name:saved.finalName,url:saved.url,kind:'media',spPath:saved.spPath,localUrl:URL.createObjectURL(f)});
       }catch(e){ toast('Saved to SharePoint, but linking it in the tracker failed: '+e.message,'error'); }
     }
     process(idx+1);
@@ -3737,7 +3751,7 @@ async function delImg(imgId, idx){
 function openImgPreview(idx){
   const item=data.find(i=>i.id===currentItemId); if(!item||!item.images?.length) return;
   // Build image-only list for the lightbox, mapping back to original index isn't needed — just filter images
-  imgList=item.images.filter(m=>!isVideo(m.name)).map(i=>i.url);
+  imgList=item.images.filter(m=>!isVideo(m.name)).map(i=>i.localUrl||i.url);
   // Find the position in the image-only list
   const imgOnlyIdx=item.images.filter((m,i)=>i<=idx&&!isVideo(m.name)).length-1;
   imgIdx=Math.max(0,imgOnlyIdx); imgZoom=1; updateImg();
