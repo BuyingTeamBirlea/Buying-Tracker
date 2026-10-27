@@ -343,6 +343,10 @@ body.light-mode .airmail-card{background:var(--bg4)}
 .add-entry-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .add-entry-row .date-field{flex:0 0 150px}
 .add-entry-row .note-field{flex:1;min-width:140px}
+.entry-dl-wrap{position:relative;align-self:flex-end}
+.entry-dl-pop{position:fixed;width:250px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;z-index:700;display:flex;flex-direction:column;gap:8px}
+.entry-dl-pop.hidden{display:none}
+#entryDlBtn.has-dl{color:var(--amber);border-color:rgba(245,158,11,.4)}
 /* FILES */
 .files-section{display:flex;flex-direction:column;gap:16px}
 .file-drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .15s;color:var(--text3);font-size:.875rem}
@@ -2247,12 +2251,21 @@ function renderTimeline(item){
     <div class="add-entry-row">
       <div class="field date-field"><label>Date</label><input type="date" id="entryDate" value="${todayISO()}"></div>
       <div class="field note-field"><label>Note</label><input type="text" id="entryNote" placeholder="Update note…" onkeydown="if(event.key==='Enter')addEntry()"></div>
+      <div class="entry-dl-wrap">
+        <button type="button" class="btn btn-ghost btn-sm" id="entryDlBtn" onclick="toggleEntryDeadline(event)" title="Add a deadline with this entry (optional)">⏱ Deadline</button>
+        <div class="entry-dl-pop hidden" id="entryDlPanel" onclick="event.stopPropagation()">
+          <div class="section-title" style="margin-bottom:8px">Deadline (optional)</div>
+          <div class="field"><label>Supplier</label><select id="entryDeadlineSupplier" onchange="updateEntryDlBtn()">${dlSupplierOptions(item,(item.supplierArr||[]).length===1?item.supplierArr[0]:'')}</select></div>
+          <div class="field"><label>Type</label><select id="entryDeadlineType" onchange="updateEntryDlBtn()"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
+          <div class="field"><label>Date</label><input type="date" id="entryDeadline" onchange="updateEntryDlBtn()"></div>
+          <div style="display:flex;gap:6px;margin-top:10px">
+            <button type="button" class="btn btn-ghost btn-xs" onclick="clearEntryDeadline()">Clear</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-xs" onclick="closeEntryDeadline()">Done</button>
+          </div>
+        </div>
+      </div>
       <button class="btn btn-sm" style="align-self:flex-end" onclick="addEntry()">+ Add</button>
-    </div>
-    <div class="add-entry-row" style="margin-top:8px">
-      <div class="field" style="flex:0 0 150px"><label>Deadline (optional)</label><input type="date" id="entryDeadline"></div>
-      <div class="field" style="flex:0 0 160px"><label>Deadline supplier</label><select id="entryDeadlineSupplier">${dlSupplierOptions(item,(item.supplierArr||[]).length===1?item.supplierArr[0]:'')}</select></div>
-      <div class="field" style="flex:0 0 120px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
     </div>`;
 
   // First render for this item → jump to the newest end; re-renders keep position
@@ -2300,6 +2313,33 @@ async function saveEntryEdit(eid){
 
 function cancelEntryEdit(){ const item=data.find(i=>i.id===currentItemId); if(item) renderTimeline(item); }
 
+// ⏱ Deadline menu beside the note (opens upwards, closes on Done / outside click)
+function toggleEntryDeadline(e){
+  e?.stopPropagation();
+  const p=$('entryDlPanel'); if(!p) return;
+  p.classList.toggle('hidden');
+  if(p.classList.contains('hidden')) return;
+  // Float above the item window so it never gets clipped: open upwards, or downwards if there's no room
+  const r=$('entryDlBtn').getBoundingClientRect(), h=p.offsetHeight, w=p.offsetWidth;
+  p.style.left=Math.max(8,Math.min(r.right-w,innerWidth-w-8))+'px';
+  p.style.top=(r.top-h-6>=8?r.top-h-6:Math.min(r.bottom+6,innerHeight-h-8))+'px';
+  setTimeout(()=>$('entryDeadline')?.focus(),0);
+}
+function closeEntryDeadline(){ $('entryDlPanel')?.classList.add('hidden'); updateEntryDlBtn(); }
+function clearEntryDeadline(){ if($('entryDeadline')) $('entryDeadline').value=''; closeEntryDeadline(); }
+function updateEntryDlBtn(){
+  const b=$('entryDlBtn'); if(!b) return;
+  const date=$('entryDeadline')?.value;
+  if(!date){ b.textContent='⏱ Deadline'; b.classList.remove('has-dl'); return; }
+  const parts=[$('entryDeadlineSupplier')?.value,$('entryDeadlineType')?.value].filter(Boolean);
+  b.textContent='⏱ '+[...parts,fmtShort(date)].join(' · ');
+  b.classList.add('has-dl');
+}
+document.addEventListener('click',e=>{
+  const p=$('entryDlPanel');
+  if(p&&!p.classList.contains('hidden')&&!e.target.closest('.entry-dl-wrap')) closeEntryDeadline();
+});
+
 async function addEntry(){
   const date=$('entryDate').value, note=$('entryNote').value.trim();
   const deadlineDate=$('entryDeadline')?.value||null;
@@ -2328,6 +2368,7 @@ async function addEntry(){
     }
     await SB.patch(`items?id=eq.${item.id}`,itemPatch);
     if($('entryDeadline')) $('entryDeadline').value='';
+    $('entryDlPanel')?.classList.add('hidden');
     _tlScrollItemId=null; // scroll to show the new entry
     render(); refreshDetailHeader(); renderTimeline(item); toast('Entry added');
   }catch(e){
