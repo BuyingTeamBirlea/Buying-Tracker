@@ -1219,6 +1219,12 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
     <div class="deadline-modal-body">
       <div class="deadline-set-row">
         <div class="field">
+          <label>Supplier</label>
+          <select id="deadlineSupplierInput"></select>
+        </div>
+      </div>
+      <div class="deadline-set-row">
+        <div class="field">
           <label>Deadline type</label>
           <div style="display:flex;gap:6px;margin-top:2px">
             <button type="button" class="cal-type-btn" id="dlType-Quote"  onclick="setDeadlineType('Quote')" >Quote</button>
@@ -1830,15 +1836,6 @@ function _latestEntry(item){
 function latestNote(item){
   const e=_latestEntry(item); return e?e.note||'—':'—';
 }
-function latestDeadlineBadge(item){
-  if(!item.deadlineDate||item.deadlineCompleted) return '';
-  const today=todayISO();
-  const days=diffDays(today,item.deadlineDate);
-  if(days>3)  return `<span style="font-size:.7rem;font-weight:600;color:#4ade80;font-family:'DM Mono',monospace;white-space:nowrap"> · ${days}d</span>`;
-  if(days>0)  return `<span style="font-size:.7rem;font-weight:600;color:#fbbf24;font-family:'DM Mono',monospace;white-space:nowrap"> · ${days}d</span>`;
-  if(days===0)return `<span style="font-size:.7rem;font-weight:600;color:#fb923c;font-family:'DM Mono',monospace;white-space:nowrap"> · Today</span>`;
-  return      `<span style="font-size:.7rem;font-weight:600;color:#f87171;font-family:'DM Mono',monospace;white-space:nowrap"> · +${Math.abs(days)}d</span>`;
-}
 function lastUpdated(item){
   const e=_latestEntry(item); return e?e.date:'';
 }
@@ -1944,10 +1941,8 @@ async function loadData(silent=false){
       transferOrder: row.transfer_order||'',
       shipDate: row.ship_date||'',
       shipMethod: row.ship_method||'container',
-      deadlineDate: row.deadline_date||null,          // item-level deadline (one per item card)
-      deadlineType: row.deadline_type||'',
-      deadlineCompleted: !!row.deadline_completed,
-      deadlineCompletedDate: row.deadline_completed_date||null,
+      deadlines: (Array.isArray(row.deadlines)&&row.deadlines.length)?row.deadlines
+        :(row.deadline_date?[{id:'legacy-'+row.id,supplier:'',type:row.deadline_type||'',date:row.deadline_date,done:!!row.deadline_completed,doneDate:row.deadline_completed_date||null}]:[]),
       airmailCourier: row.airmail_courier||'',
       airmailTracking: row.airmail_tracking||'',
       airmailTransferOrder: row.airmail_transfer_order||'',
@@ -2244,7 +2239,7 @@ function renderTimeline(item){
     <div class="timeline-toolbar">
       <button class="btn btn-ghost btn-xs" onclick="toggleTlOrder()">${newestFirst?'↑ Oldest first':'↓ Latest first'}</button>
       <span class="timeline-count">${entries.length} entr${entries.length===1?'y':'ies'}</span>
-      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px">${itemDeadlineHTML(item)}</span>
+      <span style="margin-left:auto;display:inline-flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px">${itemDeadlineHTML(item)}</span>
     </div>
     <div class="timeline-entries">${eHtml}</div>
     <hr class="divider">
@@ -2253,6 +2248,7 @@ function renderTimeline(item){
       <div class="field date-field"><label>Date</label><input type="date" id="entryDate" value="${todayISO()}"></div>
       <div class="field note-field"><label>Note</label><input type="text" id="entryNote" placeholder="Update note…" onkeydown="if(event.key==='Enter')addEntry()"></div>
       <div class="field" style="flex:0 0 150px"><label>Deadline (optional)</label><input type="date" id="entryDeadline"></div>
+      <div class="field" style="flex:0 0 140px"><label>Deadline supplier</label><select id="entryDeadlineSupplier">${dlSupplierOptions(item,(item.supplierArr||[]).length===1?item.supplierArr[0]:'')}</select></div>
       <div class="field" style="flex:0 0 110px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
       <button class="btn btn-sm" style="align-self:flex-end" onclick="addEntry()">+ Add</button>
     </div>`;
@@ -2306,6 +2302,7 @@ async function addEntry(){
   const date=$('entryDate').value, note=$('entryNote').value.trim();
   const deadlineDate=$('entryDeadline')?.value||null;
   const deadlineType=deadlineDate?($('entryDeadlineType')?.value||null):null;
+  const deadlineSupplier=deadlineDate?($('entryDeadlineSupplier')?.value||''):'';
   if(!note){ toast('Note cannot be empty','error'); return; }
   const item=data.find(i=>i.id===currentItemId); if(!item) return;
   const id=newId();
@@ -2323,9 +2320,9 @@ async function addEntry(){
     }
     item.timeline.push({id, date:entry.date, note, createdBy, createdAt:new Date().toISOString()});
     const itemPatch={updated_at:new Date().toISOString()};
-    if(deadlineDate){ // set / replace the item card's deadline
-      Object.assign(itemPatch,{deadline_date:deadlineDate,deadline_type:deadlineType||'',deadline_completed:false,deadline_completed_date:null});
-      Object.assign(item,{deadlineDate,deadlineType:deadlineType||'',deadlineCompleted:false,deadlineCompletedDate:null});
+    if(deadlineDate){ // add another deadline to the item card
+      item.deadlines=[...(item.deadlines||[]),{id:newId(),supplier:deadlineSupplier,type:deadlineType||'',date:deadlineDate,done:false,doneDate:null}];
+      Object.assign(itemPatch,{deadlines:item.deadlines,...legacyDeadlineFields(item.deadlines)});
     }
     await SB.patch(`items?id=eq.${item.id}`,itemPatch);
     if($('entryDeadline')) $('entryDeadline').value='';
@@ -4731,6 +4728,7 @@ async function confirmDuplicate(){
   const now=new Date().toISOString();
   // Always generate a brand new ref code — never copy the source's code
   const newRefCode=genRefCode(src.category);
+  const _dupDeadlines=(src.deadlines||[]).map(d=>({...d,id:newId()}));
 
   try{
     await SB.post('items',{
@@ -4742,8 +4740,7 @@ async function confirmDuplicate(){
       notes:src.notes||'', ref_code:newRefCode, archived:false, updated_at:now,
       qc_sample_codes:src.qcSampleCodes||[],
       qc_planned_container:src.qcPlannedContainer||'',
-      deadline_date:src.deadlineDate||null, deadline_type:src.deadlineType||'',
-      deadline_completed:!!src.deadlineCompleted, deadline_completed_date:src.deadlineCompletedDate||null
+      deadlines:_dupDeadlines, ...legacyDeadlineFields(_dupDeadlines)
     });
 
     // Copy timeline entries (including deadline fields)
@@ -4771,8 +4768,7 @@ async function confirmDuplicate(){
       notes:src.notes||'', refCode:newRefCode, archived:false,
       qcSampleCodes:JSON.parse(JSON.stringify(src.qcSampleCodes||[])),
       qcPlannedContainer:src.qcPlannedContainer||'',
-      deadlineDate:src.deadlineDate||null, deadlineType:src.deadlineType||'',
-      deadlineCompleted:!!src.deadlineCompleted, deadlineCompletedDate:src.deadlineCompletedDate||null,
+      deadlines:_dupDeadlines,
       timeline:newTimeline, fileLinks:newFileLinks, files:[], images:[]
     };
     data.unshift(copy);
@@ -4785,6 +4781,7 @@ async function confirmDuplicate(){
 // DEADLINE SYSTEM
 // ═══════════════════════════════════════
 let _deadlineItemId = null;
+let _deadlineId = null;     // which deadline in item.deadlines is being edited (null = new)
 let _deadlineType = '';
 
 const DL_TYPE_COLORS = {Quote:'#f97316', Sample:'#a855f7', QC:'#22c55e'};
@@ -4806,59 +4803,91 @@ function diffDays(fromISO, toISO){
   return Math.round((b-a)/86400000);
 }
 
-// Deadline badge for an item card (clicking it opens the deadline window)
-function buildDeadlineBadge(item){
-  if(!item.deadlineDate) return '';
-  if(item.deadlineCompleted)
-    return `<span class="deadline-badge deadline-done-time" onclick="openDeadlineModal()" title="Completed${item.deadlineCompletedDate?' '+fmtShort(item.deadlineCompletedDate):''}">✓ ${item.deadlineType?esc(item.deadlineType)+' ':''}complete</span>`;
-  const days=diffDays(todayISO(), item.deadlineDate);
-  const dateLabel=fmtShort(item.deadlineDate);
-  const dt=item.deadlineType||'';
-  const label=dt?`${esc(dt)} · ${dateLabel}`:dateLabel;
-  const title=dt?`${esc(dt)} deadline: ${dateLabel}`:`Deadline: ${dateLabel}`;
-  if(days>3)  return `<span class="deadline-badge deadline-ok"    onclick="openDeadlineModal()" title="${title}">⏱ ${label} · ${days}d</span>`;
-  if(days>0)  return `<span class="deadline-badge deadline-soon"  onclick="openDeadlineModal()" title="${title}">⏱ ${label} · ${days}d</span>`;
-  if(days===0)return `<span class="deadline-badge deadline-today" onclick="openDeadlineModal()" title="${title}">⏱ ${dt?esc(dt)+' · ':''}Due today</span>`;
-  return      `<span class="deadline-badge deadline-over"  onclick="openDeadlineModal()" title="${title}">⏱ ${label} · +${Math.abs(days)}d</span>`;
+// ── Multiple deadlines per item card: item.deadlines = [{id,supplier,type,date,done,doneDate}] ──
+function openDeadlines(item){ return (item.deadlines||[]).filter(d=>d.date&&!d.done).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0); }
+function doneDeadlines(item){ return (item.deadlines||[]).filter(d=>d.date&&d.done).sort((a,b)=>(b.doneDate||'')>(a.doneDate||'')?1:-1); }
+function dlLabel(d){ return [d.supplier,d.type].filter(Boolean).map(esc).join(' · '); }
+function dlDaysText(d){
+  const days=diffDays(todayISO(),d.date);
+  return days>0?days+'d':days===0?'Today':'+'+Math.abs(days)+'d';
 }
-// Top-right of the timeline: the card's deadline, or a button to add one
+function dlClass(d){
+  if(d.done) return 'deadline-done-time';
+  const days=diffDays(todayISO(),d.date);
+  return days>3?'deadline-ok':days>0?'deadline-soon':days===0?'deadline-today':'deadline-over';
+}
+// Badge for one deadline: "⏱ Milestone · Quote · 10d" (clicking opens it)
+function buildDeadlineBadge(item,d,clickable=true){
+  const lbl=dlLabel(d);
+  const click=clickable?`onclick="openDeadlineModal('${item.id}','${d.id}')"`:'';
+  const title=`${lbl||'Deadline'}: ${fmtShort(d.date)}${d.done&&d.doneDate?' · completed '+fmtShort(d.doneDate):''}`;
+  if(d.done) return `<span class="deadline-badge ${dlClass(d)}" ${click} title="${title}" style="opacity:.7">✓ ${lbl||'Deadline'}</span>`;
+  return `<span class="deadline-badge ${dlClass(d)}" ${click} title="${title}">⏱ ${lbl||'Deadline'} · ${dlDaysText(d)}</span>`;
+}
+// Top-right of the timeline: every open deadline, recently completed ones, and an add button
 function itemDeadlineHTML(item){
-  return item.deadlineDate
-    ? buildDeadlineBadge(item)
-    : `<button class="btn btn-ghost btn-xs" onclick="openDeadlineModal()" title="Set a deadline for this item card">⏱ Add deadline</button>`;
+  const open=openDeadlines(item).map(d=>buildDeadlineBadge(item,d));
+  const done=doneDeadlines(item).slice(0,3).map(d=>buildDeadlineBadge(item,d));
+  return [...open,...done].join('')+
+    `<button class="btn btn-ghost btn-xs" onclick="openDeadlineModal('${item.id}')" title="Add a deadline (supplier · type · date)">⏱ Add deadline</button>`;
+}
+// Compact version for the main table: soonest open deadline, "+N" if there are more
+function latestDeadlineBadge(item){
+  const open=openDeadlines(item); if(!open.length) return '';
+  const d=open[0], days=diffDays(todayISO(),d.date);
+  const col=days>3?'#4ade80':days>0?'#fbbf24':days===0?'#fb923c':'#f87171';
+  const tip=open.map(x=>`${[x.supplier,x.type].filter(Boolean).join(' – ')||'Deadline'} – ${dlDaysText(x)} (${fmtShort(x.date)})`).join('\n');
+  const short=[d.type||d.supplier].filter(Boolean).map(esc).join('');
+  return `<span title="${esc(tip)}" style="font-size:.7rem;font-weight:600;color:${col};font-family:'DM Mono',monospace;white-space:nowrap"> · ${short?short+' ':''}${dlDaysText(d)}${open.length>1?` <span style="color:var(--text3)">+${open.length-1}</span>`:''}</span>`;
 }
 
-function openDeadlineModal(itemId){
+function dlSupplierOptions(item,selected){
+  const list=[...new Set([...(item.supplierArr||[]),...(selected?[selected]:[])].filter(Boolean))];
+  return `<option value="">— No supplier —</option>`+list.map(s=>`<option${s===selected?' selected':''}>${esc(s)}</option>`).join('');
+}
+
+function openDeadlineModal(itemId,dlId){
   const item=data.find(i=>i.id===(itemId||currentItemId)); if(!item) return;
-  _deadlineItemId=item.id;
-  $('deadlineModalTitle').textContent=item.deadlineDate?'Edit Deadline':'Set Deadline';
+  const d=dlId?(item.deadlines||[]).find(x=>x.id===dlId):null;
+  _deadlineItemId=item.id; _deadlineId=d?d.id:null;
+  $('deadlineModalTitle').textContent=d?'Edit Deadline':'Add Deadline';
   $('deadlineModalSub').textContent=item.name;
-  $('deadlineDateInput').value=item.deadlineDate||'';
-  _deadlineType=''; setDeadlineType(item.deadlineType||'');
-  $('deadlineCurrentStatus').innerHTML=item.deadlineDate?buildDeadlineBadge(item).replace(/onclick="[^"]*"/,''):'';
-  $('deadlineRemoveBtn').style.display=item.deadlineDate?'':'none';
-  $('deadlineCompleteBtn').style.display=(item.deadlineDate&&!item.deadlineCompleted)?'':'none';
+  $('deadlineSupplierInput').innerHTML=dlSupplierOptions(item,d?d.supplier:((item.supplierArr||[]).length===1?item.supplierArr[0]:''));
+  $('deadlineDateInput').value=d?d.date:'';
+  _deadlineType=''; setDeadlineType(d?d.type||'':'');
+  $('deadlineCurrentStatus').innerHTML=d?buildDeadlineBadge(item,d,false):'';
+  $('deadlineRemoveBtn').style.display=d?'':'none';
+  $('deadlineCompleteBtn').style.display=(d&&!d.done)?'':'none';
   $('deadlineOverlay').classList.remove('hidden');
 }
-function closeDeadlineModal(){ $('deadlineOverlay').classList.add('hidden'); _deadlineItemId=null; }
+function closeDeadlineModal(){ $('deadlineOverlay').classList.add('hidden'); _deadlineItemId=null; _deadlineId=null; }
 
-// Writes the item's deadline fields, updates memory and every view that shows it
-async function patchItemDeadline(item, fields, okMsg){
-  const prev={deadlineDate:item.deadlineDate,deadlineType:item.deadlineType,deadlineCompleted:item.deadlineCompleted,deadlineCompletedDate:item.deadlineCompletedDate};
-  const local={};
-  if('deadline_date' in fields) local.deadlineDate=fields.deadline_date;
-  if('deadline_type' in fields) local.deadlineType=fields.deadline_type||'';
-  if('deadline_completed' in fields) local.deadlineCompleted=fields.deadline_completed;
-  if('deadline_completed_date' in fields) local.deadlineCompletedDate=fields.deadline_completed_date;
-  Object.assign(item,local);
+// Old single-deadline columns mirror the soonest open deadline, so older pages still show something sensible
+function legacyDeadlineFields(list){
+  const open=list.filter(d=>d.date&&!d.done).sort((a,b)=>a.date<b.date?-1:1);
+  if(open.length) return {deadline_date:open[0].date,deadline_type:open[0].type||'',deadline_completed:false,deadline_completed_date:null};
+  const done=list.filter(d=>d.date&&d.done).sort((a,b)=>(b.doneDate||'')>(a.doneDate||'')?1:-1);
+  if(done.length) return {deadline_date:done[0].date,deadline_type:done[0].type||'',deadline_completed:true,deadline_completed_date:done[0].doneDate||null};
+  return {deadline_date:null,deadline_type:'',deadline_completed:false,deadline_completed_date:null};
+}
+// Saves the item's whole deadline list, updates memory and every view that shows it
+async function saveItemDeadlines(item,list,okMsg){
+  const prev=item.deadlines||[];
+  item.deadlines=list;
   refreshDeadlineViews(item);
   try{
-    await SB.patch(`items?id=eq.${item.id}`,{...fields,updated_at:new Date().toISOString()});
+    await SB.patch(`items?id=eq.${item.id}`,{deadlines:list,...legacyDeadlineFields(list),updated_at:new Date().toISOString()});
     if(okMsg) toast(okMsg);
   }catch(e){
-    Object.assign(item,prev); refreshDeadlineViews(item);
+    item.deadlines=prev; refreshDeadlineViews(item);
     toast('Save failed: '+e.message,'error');
   }
+}
+function updateDeadline(item,dlId,changes,okMsg){
+  return saveItemDeadlines(item,(item.deadlines||[]).map(d=>d.id===dlId?{...d,...changes}:d),okMsg);
+}
+function addDeadline(item,{supplier='',type='',date},okMsg){
+  return saveItemDeadlines(item,[...(item.deadlines||[]),{id:newId(),supplier,type,date,done:false,doneDate:null}],okMsg);
 }
 function refreshDeadlineViews(item){
   render();
@@ -4869,25 +4898,27 @@ function refreshDeadlineViews(item){
 
 async function saveDeadline(){
   const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
-  const newDate=$('deadlineDateInput').value||null;
+  const dlId=_deadlineId;
+  const date=$('deadlineDateInput').value||null;
+  const supplier=$('deadlineSupplierInput').value||'';
+  const type=_deadlineType||'';
+  if(!date){ toast('Pick a date for the deadline','error'); return; }
   closeDeadlineModal();
-  if(!newDate) return removeDeadlineFor(item);
-  await patchItemDeadline(item,{deadline_date:newDate,deadline_type:_deadlineType||'',
-    deadline_completed:false,deadline_completed_date:null},'Deadline saved ✓');
+  if(dlId) await updateDeadline(item,dlId,{supplier,type,date,done:false,doneDate:null},'Deadline saved ✓');
+  else await addDeadline(item,{supplier,type,date},'Deadline added ✓');
 }
 async function removeDeadline(){
   const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
-  closeDeadlineModal(); removeDeadlineFor(item);
-}
-function removeDeadlineFor(item){
-  return patchItemDeadline(item,{deadline_date:null,deadline_type:'',deadline_completed:false,deadline_completed_date:null},'Deadline removed');
+  const dlId=_deadlineId; closeDeadlineModal();
+  if(dlId) saveItemDeadlines(item,(item.deadlines||[]).filter(d=>d.id!==dlId),'Deadline removed');
 }
 async function completeDeadline(){
   const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
-  closeDeadlineModal(); completeDeadlineFor(item);
+  const dlId=_deadlineId; closeDeadlineModal();
+  if(dlId) completeDeadlineFor(item,dlId);
 }
-function completeDeadlineFor(item){
-  return patchItemDeadline(item,{deadline_completed:true,deadline_completed_date:todayISO()},'Deadline marked complete ✓');
+function completeDeadlineFor(item,dlId){
+  return updateDeadline(item,dlId,{done:true,doneDate:todayISO()},'Deadline marked complete ✓');
 }
 
 // ═══════════════════════════════════════
@@ -5758,10 +5789,11 @@ function buildCalEvents(){
   const map={};
   const push=(date,ev)=>{ if(!date) return; const d=String(date).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return; (map[d]=map[d]||[]).push(ev); };
   (data||[]).forEach(it=>{
-    if(it.deadlineDate && !it.archived){                // one deadline per item card
-      const dlCat=calDeadlineCategory(it.deadlineType);
-      if(calFilter[dlCat]) push(it.deadlineDate,{kind:dlCat,label:it.name,sub:it.deadlineType?it.deadlineType+' deadline':'Deadline',itemId:it.id,isDeadline:true,done:!!it.deadlineCompleted});
-    }
+    if(!it.archived) (it.deadlines||[]).forEach(d=>{   // every deadline on the item card
+      if(!d.date) return;
+      const dlCat=calDeadlineCategory(d.type);
+      if(calFilter[dlCat]) push(d.date,{kind:dlCat,label:it.name,sub:[d.supplier,d.type?d.type+' deadline':'Deadline'].filter(Boolean).join(' · '),itemId:it.id,dlId:d.id,isDeadline:true,done:!!d.done});
+    });
     if(calFilter.container && (it.shipMethod||'container')==='container' && it.transferReceiptDate)
       push(it.transferReceiptDate,{kind:'container',label:it.name,sub:it.containerNum?('Container '+it.containerNum):'',itemId:it.id,done:!!it.arrived});
     if(calFilter.airmail && it.shipMethod==='airmail' && it.transferReceiptDate)
@@ -5807,7 +5839,7 @@ function calPill(ev){
   const txt=esc(ev.label||'');
   const isDeadline=!!ev.isDeadline;
   const drag=isDeadline
-    ? `draggable="true" ondragstart="calDragStart(event,'${ev.itemId}')" ondragend="calDragEnd()"`
+    ? `draggable="true" ondragstart="calDragStart(event,'${ev.itemId}','${ev.dlId}')" ondragend="calDragEnd()"`
     : '';
   const draggableCls=isDeadline?' draggable':'';
   if(ev.kind==='task')
@@ -5904,7 +5936,7 @@ function renderCalDay(){
       ? `<div class="cal-checkbox${ev.done?' done':''}" onclick="calToggleTask('${ev.todoId}')" title="${ev.done?'Mark incomplete':'Mark complete'}"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
       : `<div class="cal-ev-ic">${CAL_ICON[ev.kind]||'•'}</div>`;
     const del = editable?`<button class="cal-ev-btn del" onclick="calDeleteTask('${ev.todoId}')" title="Delete">✕</button>`:'';
-    const dismiss = ev.isDeadline&&!ev.done?`<button class="cal-ev-btn" onclick="calCompleteDeadline('${ev.itemId}')" title="Mark deadline complete">✓</button>`:'';
+    const dismiss = ev.isDeadline&&!ev.done?`<button class="cal-ev-btn" onclick="calCompleteDeadline('${ev.itemId}','${ev.dlId}')" title="Mark deadline complete">✓</button>`:'';
     const openLink = ev.itemId
       ? `<button class="cal-ev-btn" onclick="closeCalDay();showPage('main');openDetail('${ev.itemId}')" title="Open item card" style="font-size:.75rem;padding:3px 7px;margin-top:4px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2)">↗ Open</button>`
       : '';
@@ -5943,17 +5975,17 @@ function calDeleteTask(id){
   });
 }
 
-function calCompleteDeadline(itemId){
-  const item=data.find(i=>i.id===itemId); if(item) completeDeadlineFor(item);
+function calCompleteDeadline(itemId,dlId){
+  const item=data.find(i=>i.id===itemId); if(item) completeDeadlineFor(item,dlId);
 }
 
 // ── CALENDAR DRAG & DROP ──
 let _calDragData=null;
 
-function calDragStart(e, itemId){
-  _calDragData={itemId};
+function calDragStart(e, itemId, dlId){
+  _calDragData={itemId,dlId};
   e.dataTransfer.effectAllowed='move';
-  e.dataTransfer.setData('text/plain', JSON.stringify({itemId}));
+  e.dataTransfer.setData('text/plain', JSON.stringify({itemId,dlId}));
   e.stopPropagation();
 }
 function calDragEnd(){ _calDragData=null; document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over')); }
@@ -5965,11 +5997,11 @@ async function calDrop(e, targetISO){
   document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
   const raw=e.dataTransfer.getData('text/plain')||'';
   if(!raw) return;
-  let itemId;
-  try{ ({itemId}=JSON.parse(raw)); }catch(err){ return; }
-  const item=data.find(i=>i.id===itemId); if(!item||!item.deadlineDate) return;
-  if(item.deadlineDate===targetISO) return;
-  await patchItemDeadline(item,{deadline_date:targetISO},
+  let itemId,dlId;
+  try{ ({itemId,dlId}=JSON.parse(raw)); }catch(err){ return; }
+  const item=data.find(i=>i.id===itemId); if(!item) return;
+  const d=(item.deadlines||[]).find(x=>x.id===dlId); if(!d||d.date===targetISO) return;
+  await updateDeadline(item,dlId,{date:targetISO},
     'Deadline moved to '+new Date(targetISO+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
 }
 
