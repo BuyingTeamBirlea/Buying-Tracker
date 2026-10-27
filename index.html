@@ -200,6 +200,8 @@ td{padding:10px 13px;font-size:.875rem;vertical-align:middle}
 .badge-spec-forms    {background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid rgba(56,189,248,.35)}
 .badge-awaiting-resp {background:rgba(236,72,153,.14);color:#f472b6;border:1px solid rgba(236,72,153,.35)}
 .badge-loaded        {background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+.badge-todo          {background:rgba(148,163,184,.14);color:#a3acbd;border:1px solid rgba(148,163,184,.32)}
+body.light-mode .badge-todo{color:#4b5563}
 .badge-on-hold       {background:rgba(100,116,139,.12);color:#7f8ea3;border:1px solid rgba(100,116,139,.25)}
 .badge-cancelled     {background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
 .badge-archived      {background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25);font-size:.7rem}
@@ -360,7 +362,9 @@ body.light-mode .airmail-card{background:var(--bg4)}
 .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .15s;color:var(--text3);font-size:.875rem}
 .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(79,110,247,.05);color:var(--text2)}
 .drop-zone input{display:none}
-.img-syncing{position:relative}
+.img-syncing,.img-signin{position:relative}
+.img-signin .img-thumb-del{z-index:1}
+.img-signin::after{content:'🔑 Sign in to SharePoint';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.7rem;color:var(--text3);background:var(--bg3)}
 .img-syncing .img-thumb-del{z-index:1}
 .img-syncing::after{content:'Syncing to SharePoint…';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.7rem;color:var(--text3);background:var(--bg3)}
 .image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
@@ -600,6 +604,75 @@ body.light-mode .cp-event{color:#475569}
 .cal-pill.draggable{cursor:grab}
 .cal-pill.draggable:active{cursor:grabbing}
 @media(max-width:700px){.cal-cell{min-height:74px}.cal-legend{width:100%;margin-left:0}}
+
+/* ═══ SALES REQUESTS ═══ */
+.req-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(79,110,247,.1);border:1px solid rgba(79,110,247,.4);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:.88rem}
+.req-banner.urgent{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.45)}
+.req-banner b{font-weight:600}
+.rq-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:.74rem;font-weight:500;white-space:nowrap}
+.rq-New{background:rgba(79,110,247,.15);color:#8aa0fb}
+.rq-Acknowledged{background:rgba(245,158,11,.15);color:#fbbf24}
+.rq-In-Progress{background:rgba(168,85,247,.15);color:#c084fc}
+.rq-Complete{background:rgba(34,197,94,.15);color:#4ade80}
+.rq-Declined{background:rgba(239,68,68,.15);color:#f87171}
+.rq-urgent{background:rgba(239,68,68,.15);color:#f87171}
+body.light-mode .rq-New{color:#3651d6}body.light-mode .rq-Acknowledged{color:#b45309}body.light-mode .rq-In-Progress{color:#7e22ce}
+body.light-mode .rq-Complete{color:#15803d}body.light-mode .rq-Declined{color:#b91c1c}body.light-mode .rq-urgent{color:#b91c1c}
+.rq-row{cursor:pointer}
+.rq-row.unread td{font-weight:600}
+.rq-row.unread td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.rq-ref{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--text3)}
+.rq-kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.rq-kv div{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px}
+.rq-kv b{display:block;font-size:.66rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.rq-kv span{font-size:.86rem}
+.rq-desc{white-space:pre-wrap;font-size:.88rem;line-height:1.5;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px}
+.rq-sec{margin-bottom:18px}
+.rq-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.rq-thumb{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;text-align:center;padding:6px;font-size:.7rem;color:var(--text2);word-break:break-word}
+.rq-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rq-thumb .rq-ic{display:block;font-size:1.5rem;margin-bottom:3px}
+.rq-thumb .rq-sp{position:absolute;bottom:4px;right:4px;background:rgba(34,197,94,.9);color:#fff;font-size:.6rem;padding:1px 5px;border-radius:4px;z-index:1}
+.rq-links{display:flex;flex-direction:column;gap:6px}
+.rq-link{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;font-size:.86rem}
+.rq-link:hover{border-color:var(--accent)}
+.rq-msgs{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto}
+.rq-msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:.86rem;line-height:1.45;white-space:pre-wrap;background:var(--bg3);border:1px solid var(--border);align-self:flex-start}
+.rq-msg.mine{align-self:flex-end;background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.35)}
+.rq-msg small{display:block;font-size:.68rem;color:var(--text3);margin-top:3px}
+.rq-reply{display:flex;gap:8px;margin-top:8px}
+.rq-reply textarea{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--radius-sm);font-family:inherit;font-size:.86rem;outline:none;resize:none;height:54px}
+.rq-reply textarea:focus{border-color:var(--accent)}
+.view-banner{display:none;background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.35);color:var(--text);padding:7px 24px;font-size:.82rem;text-align:center}
+body.view-only .view-banner{display:block}
+body.view-only .toolbar .btn[onclick="openAddModal()"],
+body.view-only #tabEdit,
+body.view-only .add-entry-row,
+body.view-only #detailFooter,
+body.view-only .tentry .ebtn,
+body.view-only .file-drop-zone,
+body.view-only .drop-zone,
+body.view-only .img-thumb-del,
+body.view-only .vid-thumb-del,
+body.view-only .file-actions .ebtn.del,
+body.view-only [id^="spStatus-"],
+body.view-only .todo-add-area,
+body.view-only .logi-section-title .btn,
+body.view-only #rqFooter,
+body.view-only .rq-reply,
+body.view-only #rqAssign,
+body.view-only #rqAssign ~ .btn,
+body.view-only [onclick^="createItemFromRequest"],
+body.view-only [onclick^="copyRequestFilesToSp"],
+body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="export"]){display:none!important}
+.rq-done{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px}
+.rq-done .rq-desc{background:var(--bg2);margin:8px 0 10px}
+.rq-drop{border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;text-align:center;color:var(--text2);cursor:pointer;font-size:.86rem;transition:all .15s}
+.rq-drop.over{border-color:var(--accent);background:rgba(79,110,247,.06)}
+.rq-file-row{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:.84rem;margin-top:6px}
+.rq-file-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq-decline{display:flex;gap:8px;margin-top:8px}
+.rq-decline input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius-sm);font-family:inherit;font-size:.86rem;outline:none}
 </style>
 </head>
 <body>
@@ -647,6 +720,7 @@ body.light-mode .cp-event{color:#475569}
   </div>
   <div class="header-right">
     <span class="refresh-countdown" id="loggedInAs" style="margin-right:4px" title="Signed in"></span>
+    <button class="btn btn-ghost btn-sm hidden" onclick="showPage('requests')" id="reqPageBtn" style="position:relative" title="Requests from sales">📥 Requests<span class="todo-notif-badge" id="reqNotifBadge"></span></button>
     <button class="btn btn-ghost btn-sm" onclick="refreshData()" title="Refresh data from server">↻ Refresh</button>
     <span class="refresh-countdown" id="refreshCountdown" title="Auto-refreshes every 60 seconds">60s</span>
     <!-- THEME TOGGLE -->
@@ -697,6 +771,7 @@ body.light-mode .cp-event{color:#475569}
   </div>
 </header>
 
+<div class="view-banner">👁 View-only access — you can see everything but changes are made by the buying team.</div>
 <div id="pageMain" class="page active">
 <div class="main">
   <div class="cards" id="summaryCards"></div>
@@ -705,6 +780,7 @@ body.light-mode .cp-event{color:#475569}
     <div class="spacer"></div>
     <button class="btn btn-ghost btn-sm" onclick="toggleArchiveView()">← Back to active</button>
   </div>
+  <div id="reqBanner" class="req-banner hidden"></div>
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
@@ -715,7 +791,7 @@ body.light-mode .cp-event{color:#475569}
       <option value="">All Statuses</option>
       <option>Quoting</option><option>Sampling</option><option>Awaiting Jake Approval</option>
       <option>Awaiting Spec Forms</option><option>Awaiting Response</option>
-      <option>On Hold</option><option>Cancelled / Dropped</option>
+      <option>To-Do</option><option>On Hold</option><option>Cancelled / Dropped</option>
     </select>
     <select id="sortSelect">
       <option value="days_inactive">Days inactive</option>
@@ -746,6 +822,42 @@ body.light-mode .cp-event{color:#475569}
     </div>
   </div>
 </div>
+</div>
+
+<!-- ═══ SALES REQUESTS PAGE ═══ -->
+<div id="pageRequests" class="page">
+  <div class="page-header">
+    <button class="page-back" onclick="showPage('main')">← Back to Buying Tracker</button>
+    <div class="page-title">📥 Requests</div>
+    <div class="page-sub" id="reqPageSub"></div>
+  </div>
+  <div class="main">
+    <div class="logi-toolbar">
+      <div class="search-wrap" style="max-width:280px">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="reqSearch" placeholder="Search ref, customer, title, rep…" oninput="renderRequestsPage()">
+      </div>
+      <select id="reqFilterSel" onchange="renderRequestsPage()" style="font-size:.82rem">
+        <option value="open">Open</option>
+        <option value="closed">Closed</option>
+        <option value="mine">Assigned to me</option>
+        <option value="unassigned">Unassigned</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+    <div class="logi-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ref</th><th>Customer</th><th>Request</th><th>From</th>
+            <th>Assigned To</th><th>Status</th><th>Item Cards</th><th>Received</th>
+          </tr>
+        </thead>
+        <tbody id="reqBody"></tbody>
+      </table>
+      <div id="reqEmpty" class="empty-state hidden"><h3>No requests</h3><p>Requests from the Request page appear here</p></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ LOGISTICS PAGE ═══ -->
@@ -882,29 +994,9 @@ body.light-mode .cp-event{color:#475569}
       <button class="modal-close" onclick="closeCalDay()">✕</button>
     </div>
     <div class="modal-body" id="calDayBody"></div>
-    <div style="border-top:1px solid var(--border);padding:14px 22px;display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button type="button" class="cal-type-btn active" id="calTypeTimeline" onclick="calSetAddType('timeline')">📝 Timeline Entry</button>
-        <button type="button" class="cal-type-btn" id="calTypeTask" onclick="calSetAddType('task')">☑ To-Do</button>
-        <button type="button" class="cal-type-btn" id="calTypeEvent" onclick="calSetAddType('event')">📌 Calendar entry</button>
-      </div>
-      <div class="field" id="calAddItemFieldTop" style="display:none">
-        <label>Item Card <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">— required for a timeline entry</span></label>
-        <select id="calAddItemTop"><option value="">— Select item —</option></select>
-      </div>
-      <div class="field"><label id="calAddTextLabel">New to-do</label>
-        <input type="text" id="calAddText" placeholder="What needs doing on this day?" onkeydown="if(event.key==='Enter')calAddTask()"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <div class="field" id="calAssigneeField" style="flex:1;min-width:120px"><label>Assignee</label>
-          <select id="calAddAssignee"><option value="">—</option><option>Syrus</option><option>Michael</option><option>Beth</option></select></div>
-        <div class="field" id="calAddItemFieldBottom" style="flex:2;min-width:160px"><label>Link to item card (optional)</label>
-          <select id="calAddItem"><option value="">— None —</option></select></div>
-      </div>
-    </div>
     <div class="modal-footer">
       <div class="spacer"></div>
       <button class="btn btn-ghost btn-sm" onclick="closeCalDay()">Close</button>
-      <button class="btn btn-sm" onclick="calAddTask()">＋ Add to this day</button>
     </div>
   </div>
 </div>
@@ -1024,7 +1116,7 @@ body.light-mode .cp-event{color:#475569}
         <div class="field"><label>Status</label><select id="add-stage">
           <option>Quoting</option><option>Sampling</option><option>Awaiting Jake Approval</option>
           <option>QC</option><option>Awaiting Spec Forms</option><option>Awaiting Response</option><option>Loaded / Shipped</option>
-          <option>On Hold</option><option>Cancelled / Dropped</option>
+          <option>To-Do</option><option>On Hold</option><option>Cancelled / Dropped</option>
         </select></div>
         <div class="field"><label>Date</label><input type="date" id="add-date"></div>
       </div>
@@ -1154,6 +1246,49 @@ body.light-mode .cp-event{color:#475569}
 </div>
 
 <!-- CONFIRM MODAL -->
+<!-- SALES REQUEST MODAL -->
+<div class="overlay hidden" id="reqOverlay">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-header">
+      <div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="rq-ref" id="rqRef"></span><span id="rqPills"></span></div>
+        <div class="modal-title" id="rqTitle" style="margin-top:4px"></div>
+      </div>
+      <button class="modal-close" onclick="closeReqModal()">✕</button>
+    </div>
+    <div class="modal-body" id="rqBody"></div>
+    <div class="modal-footer" id="rqFooter"></div>
+  </div>
+</div>
+
+<!-- COMPLETE REQUEST MODAL -->
+<div class="overlay hidden" id="reqDoneOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div><div class="modal-title" id="rdTitle">Complete request</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="rdSub"></div></div>
+      <button class="modal-close" onclick="closeReqDone()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:14px">
+        <label>Details for the requester</label>
+        <textarea id="rdNotes" style="min-height:120px" placeholder="What was done, answers, prices, next steps…"></textarea>
+      </div>
+      <div class="field">
+        <label>Files</label>
+        <div class="rq-drop" id="rdDrop" onclick="$('rdFiles').click()">📎 Drop files here or click to choose<div style="font-size:.74rem;color:var(--text3);margin-top:3px">Any file type · up to 50 MB each · the requester can download these</div></div>
+        <input type="file" id="rdFiles" multiple class="hidden" onchange="rdAddFiles(this.files);this.value=''">
+        <div id="rdFileRows"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReqDone()">Cancel</button>
+      <div class="spacer"></div>
+      <button class="btn" id="rdSaveBtn" onclick="saveReqDone()">✔ Complete request</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="confirmOverlay">
   <div class="modal confirm-modal">
     <div class="modal-header"><div><div class="modal-title" id="confirmTitle">Confirm</div></div>
@@ -1377,7 +1512,7 @@ async function sendPasswordReset(){
 function handleRecoveryRedirect(){
   const h=location.hash.replace(/^#/,''); if(!h) return false;
   const p=new URLSearchParams(h);
-  const isRecovery=p.get('type')==='recovery';
+  const isRecovery=p.get('type')==='recovery'||p.get('type')==='invite'; // invite = first-time password
   const errDesc=p.get('error_description');
   if(!isRecovery&&!errDesc) return false;
   history.replaceState(null,'',location.pathname+location.search); // strip tokens from URL
@@ -1530,14 +1665,16 @@ async function fetchPaginated(basePath, batchSize=500){
 // ═══════════════════════════════════════
 const CATEGORIES = [
   'Birlea','W&G','SleepSoul','JFS',
-  'Exclusive - BHF','Exclusive - Happy Beds','Exclusive - Wayfair','Exclusive - Other',
+  'Exclusive - BHF','Exclusive - Happy Beds','Exclusive - Wayfair',
+  'Exclusive - NEXT','Exclusive - Marketplaces','Exclusive - MattressOnline','Exclusive - MattressNextDay',
+  'Exclusive - Other',
   'Miscellaneous','Customer Service Enquiries'
 ];
 const STAGES = [
   'Quoting','Sampling','Awaiting Jake Approval','QC','Awaiting Spec Forms',
-  'Awaiting Response','Loaded / Shipped','On Hold','Cancelled / Dropped'
+  'Awaiting Response','Loaded / Shipped','To-Do','On Hold','Cancelled / Dropped'
 ];
-const NO_INACTIVE = new Set(['Loaded / Shipped','On Hold']);
+const NO_INACTIVE = new Set(['Loaded / Shipped','On Hold','To-Do']); // no days-inactive / chase tracking
 
 // ═══════════════════════════════════════
 // BC DATA OVERRIDES — known-bad records
@@ -1565,7 +1702,7 @@ const STAGE_CLS = {
   'Awaiting Jake Approval':'badge-awaiting-jake-red','QC':'badge-qc-green',
   'Awaiting Spec Forms':'badge-spec-forms',
   'Awaiting Response':'badge-awaiting-resp','Loaded / Shipped':'badge-loaded',
-  'On Hold':'badge-on-hold','Cancelled / Dropped':'badge-cancelled'
+  'To-Do':'badge-todo','On Hold':'badge-on-hold','Cancelled / Dropped':'badge-cancelled'
 };
 
 // ═══════════════════════════════════════
@@ -1694,10 +1831,9 @@ function latestNote(item){
   const e=_latestEntry(item); return e?e.note||'—':'—';
 }
 function latestDeadlineBadge(item){
-  const latest=_latestEntry(item); if(!latest) return '';
-  if(!latest.deadlineDate||latest.deadlineCompleted) return '';
+  if(!item.deadlineDate||item.deadlineCompleted) return '';
   const today=todayISO();
-  const days=diffDays(today,latest.deadlineDate);
+  const days=diffDays(today,item.deadlineDate);
   if(days>3)  return `<span style="font-size:.7rem;font-weight:600;color:#4ade80;font-family:'DM Mono',monospace;white-space:nowrap"> · ${days}d</span>`;
   if(days>0)  return `<span style="font-size:.7rem;font-weight:600;color:#fbbf24;font-family:'DM Mono',monospace;white-space:nowrap"> · ${days}d</span>`;
   if(days===0)return `<span style="font-size:.7rem;font-weight:600;color:#fb923c;font-family:'DM Mono',monospace;white-space:nowrap"> · Today</span>`;
@@ -1808,6 +1944,10 @@ async function loadData(silent=false){
       transferOrder: row.transfer_order||'',
       shipDate: row.ship_date||'',
       shipMethod: row.ship_method||'container',
+      deadlineDate: row.deadline_date||null,          // item-level deadline (one per item card)
+      deadlineType: row.deadline_type||'',
+      deadlineCompleted: !!row.deadline_completed,
+      deadlineCompletedDate: row.deadline_completed_date||null,
       airmailCourier: row.airmail_courier||'',
       airmailTracking: row.airmail_tracking||'',
       airmailTransferOrder: row.airmail_transfer_order||'',
@@ -1837,7 +1977,7 @@ async function loadData(silent=false){
       })),
       fileLinks: (flMap[row.id]||[]).map(f=>({id:f.id,name:f.name,url:f.url,addedDate:f.added_date})),
       files: (upMap[row.id]||[]).filter(f=>f.is_upload&&!f.is_image).map(f=>({id:f.id,name:f.name,url:f.url,uploadDate:f.added_date,size:f.file_size||0,kind:f.kind||'',spPath:f.sp_path||''})),
-      images: (upMap[row.id]||[]).filter(f=>f.is_image).map(f=>({id:f.id,name:f.name,url:f.url,kind:f.kind||'',spPath:f.sp_path||''}))
+      images: (upMap[row.id]||[]).filter(f=>f.is_image).map(f=>({id:f.id,name:f.name,url:f.url,kind:f.kind||'',spPath:f.sp_path||'',uploadDate:f.added_date||''}))
     }));
 
     setSyncStatus('ok');
@@ -2079,7 +2219,6 @@ function renderTimeline(item){
     ?'<div style="color:var(--text3);font-size:.875rem;padding:8px 0">No entries yet.</div>'
     :entries.map(e=>{
       const isFuture=e.date>today;
-      const deadlineBadge=buildDeadlineBadge(e);
       const tag=userTag(e.createdBy);
       const tagBadge=tag?`<span title="${e.createdBy?esc(e.createdBy):''}" style="font-size:.72rem;font-weight:700;letter-spacing:.02em;color:${tag.color};margin-left:6px">${tag.initials}</span>`:'';
       return `<div class="tentry${e.id===topId&&!isFuture?' newest-entry':''}${isFuture?' future-entry':''}" id="te-${e.id}" style="${isFuture?'border-color:var(--accent2);border-style:dashed;opacity:.85':''}">
@@ -2090,11 +2229,9 @@ function renderTimeline(item){
         <div class="entry-note-view" id="env-${e.id}">${esc(e.note)}${tagBadge}</div>
         <div class="entry-btns" style="flex-direction:column;align-items:flex-end;gap:4px">
           <div style="display:flex;gap:3px">
-            <button class="ebtn" title="${e.deadlineDate?'Edit deadline':'Add deadline'}" onclick="openDeadlineModal('${e.id}')" style="color:${e.deadlineDate?'var(--accent2)':'var(--text3)'}">⏱</button>
             <button class="ebtn" title="Edit" onclick="startEditEntry('${e.id}')">✏</button>
             <button class="ebtn del" title="Delete" onclick="deleteEntry('${e.id}')">✕</button>
           </div>
-          ${deadlineBadge?`<div>${deadlineBadge}</div>`:''}
         </div>
       </div>`;
     }).join('');
@@ -2107,6 +2244,7 @@ function renderTimeline(item){
     <div class="timeline-toolbar">
       <button class="btn btn-ghost btn-xs" onclick="toggleTlOrder()">${newestFirst?'↑ Oldest first':'↓ Latest first'}</button>
       <span class="timeline-count">${entries.length} entr${entries.length===1?'y':'ies'}</span>
+      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px">${itemDeadlineHTML(item)}</span>
     </div>
     <div class="timeline-entries">${eHtml}</div>
     <hr class="divider">
@@ -2115,7 +2253,7 @@ function renderTimeline(item){
       <div class="field date-field"><label>Date</label><input type="date" id="entryDate" value="${todayISO()}"></div>
       <div class="field note-field"><label>Note</label><input type="text" id="entryNote" placeholder="Update note…" onkeydown="if(event.key==='Enter')addEntry()"></div>
       <div class="field" style="flex:0 0 150px"><label>Deadline (optional)</label><input type="date" id="entryDeadline"></div>
-      <div class="field" style="flex:0 0 110px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="">Other</option></select></div>
+      <div class="field" style="flex:0 0 110px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
       <button class="btn btn-sm" style="align-self:flex-end" onclick="addEntry()">+ Add</button>
     </div>`;
 
@@ -2173,8 +2311,7 @@ async function addEntry(){
   const id=newId();
   const s=getStoredSession();
   const createdBy=s?.user?.email||'';
-  const entry={id, item_id:item.id, date:date||todayISO(), note, created_by:createdBy,
-    deadline_date:deadlineDate||null, deadline_type:deadlineType, deadline_completed:false, deadline_completed_date:null};
+  const entry={id, item_id:item.id, date:date||todayISO(), note, created_by:createdBy};
   try{
     const result = await SB.post('timeline_entries', entry);
     // return=representation means Supabase returns the inserted row
@@ -2184,10 +2321,13 @@ async function addEntry(){
       console.error('RLS blocked insert. Run: create policy "Allow all for anon users" on timeline_entries for all to anon using (true) with check (true);');
       return;
     }
-    item.timeline.push({id, date:entry.date, note, createdBy,
-      createdAt:new Date().toISOString(),
-      deadlineDate:deadlineDate||null, deadlineType:deadlineType||'', deadlineCompleted:false, deadlineCompletedDate:null});
-    await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
+    item.timeline.push({id, date:entry.date, note, createdBy, createdAt:new Date().toISOString()});
+    const itemPatch={updated_at:new Date().toISOString()};
+    if(deadlineDate){ // set / replace the item card's deadline
+      Object.assign(itemPatch,{deadline_date:deadlineDate,deadline_type:deadlineType||'',deadline_completed:false,deadline_completed_date:null});
+      Object.assign(item,{deadlineDate,deadlineType:deadlineType||'',deadlineCompleted:false,deadlineCompletedDate:null});
+    }
+    await SB.patch(`items?id=eq.${item.id}`,itemPatch);
     if($('entryDeadline')) $('entryDeadline').value='';
     _tlScrollItemId=null; // scroll to show the new entry
     render(); refreshDetailHeader(); renderTimeline(item); toast('Entry added');
@@ -3407,6 +3547,18 @@ const SP_TARGETS={
     fileName:item=>`${item.refCode||''} - ${item.name} - Quotation ${ukDateDots()}`,
     filesTab:true
   },
+  request:{
+    title:'📨 Sales Request Files', noun:'sales request file',
+    rootName:'Buying Tracker Quotations',     // same folder + saved handle as Quotations — no extra setup
+    rootHint:'Buying › Supplier quotes › Buying Tracker Quotations',
+    rootLabel:'Supplier quotes\\Buying Tracker Quotations',
+    handleKey:'quoteRoot',
+    spBase:'/Buying/Supplier quotes/Buying Tracker Quotations',
+    exts:null, extLabel:'Any file type', maxMB:50,
+    route:()=>[],
+    fileName:(item,f)=>`${item.refCode||''} - ${item.name} - Sales Request - ${(f?.name||'file').replace(/\.[^.]+$/,'')}`,
+    filesTab:true
+  },
   media:{
     title:'📷 Media', noun:'media',
     rootName:'Images For Buying Tracker',
@@ -3658,9 +3810,13 @@ function renderImagesTab(item){
       <span id="spStatus-media" style="margin-left:auto;font-size:.72rem;font-weight:500;text-transform:none;letter-spacing:0"></span>
     </div>
     <div style="font-size:.78rem;color:var(--text3);margin:-4px 0 8px">Saves to: <b>Buying\\Images For Buying Tracker</b></div>
+    <div id="spSigninBar" style="display:none;align-items:center;gap:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:10px;font-size:.8rem;color:var(--amber)">
+      <span style="flex:1">Your SharePoint sign-in has timed out, so images can't load.</span>
+      <button class="btn btn-sm" onclick="spReauth()">🔑 Sign in to SharePoint</button>
+    </div>
     <div class="drop-zone" id="dropZone" onclick="$('imgFileInput').click()">
       <input type="file" id="imgFileInput" accept="image/jpeg,image/png,image/webp,video/mp4" multiple onchange="handleImgUpload(event)">
-      <div>📷 Drag & drop or click to browse</div>
+      <div>📷 Drag & drop, paste (Ctrl+V) or click to browse</div>
       <div style="font-size:.75rem;margin-top:4px;color:var(--text3)">JPG, PNG, WEBP · MP4 · Max 50MB each · Renamed to "${esc(winSafeName(SP_TARGETS.media.fileName(item,{name:'x.jpg'})))}"</div>
     </div>
     <div class="image-grid" id="imageGrid">${thumbsHTML(item)}</div>`;
@@ -3669,17 +3825,57 @@ function renderImagesTab(item){
   refreshSpStatus('media');
 }
 
-// A just-uploaded file can take a minute to reach SharePoint via OneDrive.
-// On error: try the full file, then keep retrying every 5s for ~2 minutes with a "Syncing…" placeholder.
+// Thumbnail failed to load. First try the full file. Then:
+//  • uploaded today → probably still syncing via OneDrive: show "Syncing…" and retry for ~2 min
+//  • older → the browser's SharePoint sign-in has lapsed: show the sign-in bar
 function spImgRetry(img){
   const full=img.dataset.full; if(!full) return;
   const n=+(img.dataset.retry||0);
   if(n===0){ img.dataset.retry=1; img.src=full; return; }
-  if(n>24){ img.parentElement?.classList.remove('img-syncing'); return; }
-  img.parentElement?.classList.add('img-syncing');
+  const tile=img.parentElement;
+  if(!img.dataset.new){
+    tile?.classList.add('img-signin');
+    spSigninNeeded(full);
+    return;
+  }
+  if(n>24){ tile?.classList.remove('img-syncing'); return; }
+  tile?.classList.add('img-syncing');
   img.dataset.retry=n+1;
   setTimeout(()=>{ if(img.isConnected) img.src=full+(full.includes('?')?'&':'?')+'r='+Date.now(); },5000);
 }
+
+let _spProbe=null;
+function spSigninNeeded(url){
+  if(!_spProbe) _spProbe=url;
+  const bar=$('spSigninBar'); if(bar) bar.style.display='flex';
+}
+function _spCanLoad(u){
+  return new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(false),8000);
+    i.onload=()=>{clearTimeout(t);res(true)}; i.onerror=()=>{clearTimeout(t);res(false)};
+    i.src=u+(u.includes('?')?'&':'?')+'r='+Date.now(); });
+}
+// Opens SharePoint in a small window (Microsoft signs you in automatically, or asks once),
+// then closes it and reloads the images as soon as they can be read.
+async function spReauth(){
+  const w=window.open(SP_HOST+'/_layouts/15/sharepoint.aspx','spSignin','width=520,height=640');
+  if(!w){ toast('Pop-up blocked — allow pop-ups for the tracker, or open SharePoint in another tab','error'); return; }
+  toast('Signing in to SharePoint…');
+  const probe=_spProbe;
+  for(let i=0;i<60;i++){
+    await new Promise(r=>setTimeout(r,2000));
+    if(probe&&await _spCanLoad(probe)){
+      try{ w.close(); }catch(e){}
+      _spProbe=null;
+      const item=data.find(x=>x.id===currentItemId);
+      if(item&&$('imageGrid')) renderImagesTab(item);
+      toast('SharePoint connected ✓');
+      return;
+    }
+    if(w.closed&&i>2) break;
+  }
+  toast('Still can\'t reach SharePoint images — check you are signed in to Microsoft 365','error');
+}
+
 // Small SharePoint-generated preview for grid thumbnails (full image used in the lightbox)
 function spThumbUrl(url){
   return SP_HOST+'/_layouts/15/getpreview.ashx?path='+encodeURIComponent(url)+'&resolution=1';
@@ -3697,7 +3893,7 @@ function thumbsHTML(item){
       </div>`;
     }
     return `<div class="img-thumb" onclick="openImgPreview(${i})">
-      <img src="${esc(m.localUrl||(m.spPath?spThumbUrl(m.url):m.url))}" alt="" loading="lazy" data-full="${esc(m.url)}" onerror="spImgRetry(this)">
+      <img src="${esc(m.localUrl||(m.spPath?spThumbUrl(m.url):m.url))}" alt="" loading="lazy" data-full="${esc(m.url)}" data-new="${m.uploadDate===todayISO()?1:''}" onerror="spImgRetry(this)">
       <button class="img-thumb-del" onclick="event.stopPropagation();delImg('${m.id}',${i})">✕</button>
     </div>`;
   }).join('');
@@ -3705,10 +3901,60 @@ function thumbsHTML(item){
 
 function setupImgDrop(){
   const z=$('dropZone'); if(!z) return;
-  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over');});
+  z.addEventListener('dragover',e=>{e.preventDefault();try{e.dataTransfer.dropEffect='copy';}catch(_){}z.classList.add('drag-over');});
   z.addEventListener('dragleave',()=>z.classList.remove('drag-over'));
-  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');handleImgFiles(e.dataTransfer.files);});
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');handleMediaDrop(e.dataTransfer);});
 }
+
+// Give a file a proper extension when the source (Outlook, clipboard) didn't include one
+const MEDIA_MIME_EXT={'image/jpeg':'jpg','image/jpg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4'};
+function withExt(f){
+  if(/\.[a-z0-9]{2,5}$/i.test(f.name||'')) return f;
+  const ext=MEDIA_MIME_EXT[f.type]; if(!ext) return f;
+  return new File([f],(f.name||'image')+'.'+ext,{type:f.type});
+}
+function filesFromTransfer(dt){
+  let out=[...(dt?.files||[])];
+  if(!out.length&&dt?.items) out=[...dt.items].filter(i=>i.kind==='file').map(i=>i.getAsFile()).filter(Boolean);
+  return out.map(withExt);
+}
+
+// Drop from desktop, classic Outlook, or anything that hands over real files.
+// If the source only hands over a link (new Outlook / Outlook on the web), try to fetch it,
+// otherwise explain and suggest copy + paste.
+async function handleMediaDrop(dt){
+  const files=filesFromTransfer(dt);
+  if(files.length) return handleImgFiles(files);
+  const types=[...(dt?.types||[])];
+  let url='';
+  try{
+    const dl=dt.getData('DownloadURL'); // "mime:filename:url"
+    if(dl){ const m=dl.match(/^[^:]+:([^:]+):(.+)$/); if(m) url=m[2]; }
+    if(!url) url=(dt.getData('text/uri-list')||'').split(/\r?\n/).find(l=>l&&!l.startsWith('#'))||'';
+  }catch(_){}
+  if(url&&/^https?:/i.test(url)){
+    try{
+      const r=await fetch(url,{credentials:'include'});
+      if(!r.ok) throw new Error(r.status);
+      const b=await r.blob();
+      if(!/^image\/|^video\/mp4/.test(b.type)) throw new Error('not an image');
+      const name=decodeURIComponent((url.split('?')[0].split('/').pop()||'image'));
+      return handleImgFiles([withExt(new File([b],name,{type:b.type}))]);
+    }catch(_){}
+  }
+  console.log('[media-drop] nothing usable — types:',types,'url:',url);
+  toast(`That app didn't hand the image over to the browser${types.length?' (it sent: '+types.join(', ')+')':''}. In Outlook, right-click the image › Copy, then press Ctrl+V here.`,'error');
+}
+
+// Ctrl+V on the Media tab: paste copied images (from Outlook, screenshots, websites…)
+document.addEventListener('paste',e=>{
+  if(!$('imageGrid')||!currentItemId) return;
+  const t=e.target; if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  const files=filesFromTransfer(e.clipboardData).filter(f=>MEDIA_MIME_EXT[f.type]);
+  if(!files.length) return;
+  e.preventDefault();
+  handleImgFiles(files);
+});
 
 function handleImgUpload(e){ handleImgFiles(e.target.files); }
 
@@ -3726,7 +3972,7 @@ function handleImgFiles(files){
         await SB.post('file_links',{id,item_id:item.id,name:saved.finalName,url:saved.url,added_date:todayISO(),is_upload:true,file_size:f.size,is_image:true,kind:'media',sp_path:saved.spPath});
         await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
         item.images=item.images||[];
-        item.images.push({id,name:saved.finalName,url:saved.url,kind:'media',spPath:saved.spPath,localUrl:URL.createObjectURL(f)});
+        item.images.push({id,name:saved.finalName,url:saved.url,kind:'media',spPath:saved.spPath,uploadDate:todayISO(),localUrl:URL.createObjectURL(f)});
       }catch(e){ toast('Saved to SharePoint, but linking it in the tracker failed: '+e.message,'error'); }
     }
     process(idx+1);
@@ -3814,15 +4060,18 @@ async function confirmDeleteItem(id){
 // ADD ITEM
 // ═══════════════════════════════════════
 function openAddModal(){
+  _reqConvert=null; if($('addSaveBtn')) $('addSaveBtn').textContent='Add Item';
+  if($('add-stage')){ $('add-stage').disabled=false; $('add-stage').value='Quoting'; }
   $('add-name').value=''; $('add-note').value=''; $('add-date').value=todayISO();
   populateCategorySelect('add-category','Birlea');
   addPillSelected=[];
   initPillSelect('add-pill-input','add-pill-dd','add-pills',addPillSelected,false);
   $('addOverlay').classList.remove('hidden');
 }
-function closeAdd(){ $('addOverlay').classList.add('hidden'); }
+function closeAdd(){ $('addOverlay').classList.add('hidden'); if($('add-stage')) $('add-stage').disabled=false; }
 
 async function saveNewItem(){
+  const _rc=_reqConvert; // set when this item is being created from a sales request
   const name=$('add-name').value.trim();
   if(!name){ toast('Name is required','error'); return; }
   const note=$('add-note').value.trim();
@@ -3854,6 +4103,7 @@ async function saveNewItem(){
     }
     data.unshift(newItem);
     render(); closeAdd(); toast('Item added ✓');
+    if(_rc){ _reqConvert=null; afterRequestItemCreated(_rc,newItem); }
   }catch(e){ toast('Failed: '+e.message,'error'); }
   btn.disabled=false; btn.textContent='Add Item';
 }
@@ -4491,25 +4741,17 @@ async function confirmDuplicate(){
       transfer_order:src.transferOrder||'', sample_skus:src.sampleSkus||[],
       notes:src.notes||'', ref_code:newRefCode, archived:false, updated_at:now,
       qc_sample_codes:src.qcSampleCodes||[],
-      qc_planned_container:src.qcPlannedContainer||''
+      qc_planned_container:src.qcPlannedContainer||'',
+      deadline_date:src.deadlineDate||null, deadline_type:src.deadlineType||'',
+      deadline_completed:!!src.deadlineCompleted, deadline_completed_date:src.deadlineCompletedDate||null
     });
 
     // Copy timeline entries (including deadline fields)
     const newTimeline=[];
     for(const e of (src.timeline||[])){
       const eid=newId();
-      await SB.post('timeline_entries',{
-        id:eid, item_id:newId_, date:e.date, note:e.note,
-        deadline_date:e.deadlineDate||null,
-        deadline_completed:e.deadlineCompleted||false,
-        deadline_completed_date:e.deadlineCompletedDate||null
-      });
-      newTimeline.push({
-        id:eid, date:e.date, note:e.note,
-        deadlineDate:e.deadlineDate||null,
-        deadlineCompleted:e.deadlineCompleted||false,
-        deadlineCompletedDate:e.deadlineCompletedDate||null
-      });
+      await SB.post('timeline_entries',{id:eid, item_id:newId_, date:e.date, note:e.note});
+      newTimeline.push({id:eid, date:e.date, note:e.note});
     }
 
     // Copy file links only
@@ -4529,6 +4771,8 @@ async function confirmDuplicate(){
       notes:src.notes||'', refCode:newRefCode, archived:false,
       qcSampleCodes:JSON.parse(JSON.stringify(src.qcSampleCodes||[])),
       qcPlannedContainer:src.qcPlannedContainer||'',
+      deadlineDate:src.deadlineDate||null, deadlineType:src.deadlineType||'',
+      deadlineCompleted:!!src.deadlineCompleted, deadlineCompletedDate:src.deadlineCompletedDate||null,
       timeline:newTimeline, fileLinks:newFileLinks, files:[], images:[]
     };
     data.unshift(copy);
@@ -4540,7 +4784,7 @@ async function confirmDuplicate(){
 // ═══════════════════════════════════════
 // DEADLINE SYSTEM
 // ═══════════════════════════════════════
-let _deadlineEntryId = null;
+let _deadlineItemId = null;
 let _deadlineType = '';
 
 const DL_TYPE_COLORS = {Quote:'#f97316', Sample:'#a855f7', QC:'#22c55e'};
@@ -4562,104 +4806,88 @@ function diffDays(fromISO, toISO){
   return Math.round((b-a)/86400000);
 }
 
-function buildDeadlineBadge(entry){
-  if(!entry.deadlineDate) return '';
-  const today=todayISO();
-
-  if(entry.deadlineCompleted){
-    return `<span class="deadline-badge deadline-done-time">✓ Complete</span>`;
-  }
-
-  // Active deadline
-  const days=diffDays(today, entry.deadlineDate);
-  const dateLabel=fmtShort(entry.deadlineDate);
-  const dt=entry.deadlineType||'';
-  const label=dt ? `${dt} · ${dateLabel}` : dateLabel;
-  const titleAttr=dt ? `${dt}: ${dateLabel}` : `Expected: ${dateLabel}`;
-  if(days>3)  return `<span class="deadline-badge deadline-ok"   onclick="openDeadlineModal('${entry.id}')" title="${titleAttr}">⏱ ${label} · ${days}d</span>`;
-  if(days>0)  return `<span class="deadline-badge deadline-soon"  onclick="openDeadlineModal('${entry.id}')" title="${titleAttr}">⏱ ${label} · ${days}d</span>`;
-  if(days===0)return `<span class="deadline-badge deadline-today" onclick="openDeadlineModal('${entry.id}')" title="${titleAttr}">⏱ ${dt||'Due today'}</span>`;
-  return      `<span class="deadline-badge deadline-over"  onclick="openDeadlineModal('${entry.id}')" title="${titleAttr}">⏱ ${label} · +${Math.abs(days)}d</span>`;
+// Deadline badge for an item card (clicking it opens the deadline window)
+function buildDeadlineBadge(item){
+  if(!item.deadlineDate) return '';
+  if(item.deadlineCompleted)
+    return `<span class="deadline-badge deadline-done-time" onclick="openDeadlineModal()" title="Completed${item.deadlineCompletedDate?' '+fmtShort(item.deadlineCompletedDate):''}">✓ ${item.deadlineType?esc(item.deadlineType)+' ':''}complete</span>`;
+  const days=diffDays(todayISO(), item.deadlineDate);
+  const dateLabel=fmtShort(item.deadlineDate);
+  const dt=item.deadlineType||'';
+  const label=dt?`${esc(dt)} · ${dateLabel}`:dateLabel;
+  const title=dt?`${esc(dt)} deadline: ${dateLabel}`:`Deadline: ${dateLabel}`;
+  if(days>3)  return `<span class="deadline-badge deadline-ok"    onclick="openDeadlineModal()" title="${title}">⏱ ${label} · ${days}d</span>`;
+  if(days>0)  return `<span class="deadline-badge deadline-soon"  onclick="openDeadlineModal()" title="${title}">⏱ ${label} · ${days}d</span>`;
+  if(days===0)return `<span class="deadline-badge deadline-today" onclick="openDeadlineModal()" title="${title}">⏱ ${dt?esc(dt)+' · ':''}Due today</span>`;
+  return      `<span class="deadline-badge deadline-over"  onclick="openDeadlineModal()" title="${title}">⏱ ${label} · +${Math.abs(days)}d</span>`;
+}
+// Top-right of the timeline: the card's deadline, or a button to add one
+function itemDeadlineHTML(item){
+  return item.deadlineDate
+    ? buildDeadlineBadge(item)
+    : `<button class="btn btn-ghost btn-xs" onclick="openDeadlineModal()" title="Set a deadline for this item card">⏱ Add deadline</button>`;
 }
 
-function openDeadlineModal(eid){
-  const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const entry=item.timeline.find(e=>e.id===eid); if(!entry) return;
-  _deadlineEntryId=eid;
-
-  $('deadlineModalTitle').textContent=entry.deadlineDate?'Edit Deadline':'Set Deadline';
-  $('deadlineModalSub').textContent=entry.note.slice(0,60)+(entry.note.length>60?'…':'');
-  $('deadlineDateInput').value=entry.deadlineDate||'';
-  _deadlineType=''; setDeadlineType(entry.deadlineType||'');
-
-  // Show current status
-  const statusEl=$('deadlineCurrentStatus');
-  if(entry.deadlineDate){
-    statusEl.innerHTML=buildDeadlineBadge(entry)||'';
-  } else { statusEl.innerHTML=''; }
-
-  // Show/hide action buttons
-  $('deadlineRemoveBtn').style.display=entry.deadlineDate?'':'none';
-  $('deadlineCompleteBtn').style.display=(entry.deadlineDate&&!entry.deadlineCompleted)?'':'none';
-
+function openDeadlineModal(itemId){
+  const item=data.find(i=>i.id===(itemId||currentItemId)); if(!item) return;
+  _deadlineItemId=item.id;
+  $('deadlineModalTitle').textContent=item.deadlineDate?'Edit Deadline':'Set Deadline';
+  $('deadlineModalSub').textContent=item.name;
+  $('deadlineDateInput').value=item.deadlineDate||'';
+  _deadlineType=''; setDeadlineType(item.deadlineType||'');
+  $('deadlineCurrentStatus').innerHTML=item.deadlineDate?buildDeadlineBadge(item).replace(/onclick="[^"]*"/,''):'';
+  $('deadlineRemoveBtn').style.display=item.deadlineDate?'':'none';
+  $('deadlineCompleteBtn').style.display=(item.deadlineDate&&!item.deadlineCompleted)?'':'none';
   $('deadlineOverlay').classList.remove('hidden');
 }
+function closeDeadlineModal(){ $('deadlineOverlay').classList.add('hidden'); _deadlineItemId=null; }
 
-function closeDeadlineModal(){
-  $('deadlineOverlay').classList.add('hidden');
-  _deadlineEntryId=null;
-}
-
-async function saveDeadline(){
-  const eid=_deadlineEntryId; if(!eid) return;
-  const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const entry=item.timeline.find(e=>e.id===eid); if(!entry) return;
-  const newDate=$('deadlineDateInput').value||null;
-  const newType=_deadlineType||null;
-  entry.deadlineDate=newDate;
-  entry.deadlineType=newType||'';
-  closeDeadlineModal();
+// Writes the item's deadline fields, updates memory and every view that shows it
+async function patchItemDeadline(item, fields, okMsg){
+  const prev={deadlineDate:item.deadlineDate,deadlineType:item.deadlineType,deadlineCompleted:item.deadlineCompleted,deadlineCompletedDate:item.deadlineCompletedDate};
+  const local={};
+  if('deadline_date' in fields) local.deadlineDate=fields.deadline_date;
+  if('deadline_type' in fields) local.deadlineType=fields.deadline_type||'';
+  if('deadline_completed' in fields) local.deadlineCompleted=fields.deadline_completed;
+  if('deadline_completed_date' in fields) local.deadlineCompletedDate=fields.deadline_completed_date;
+  Object.assign(item,local);
+  refreshDeadlineViews(item);
   try{
-    await SB.patch(`timeline_entries?id=eq.${eid}`,{deadline_date:newDate, deadline_type:newType});
-    await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-    renderTimeline(item); render(); toast('Deadline saved ✓');
+    await SB.patch(`items?id=eq.${item.id}`,{...fields,updated_at:new Date().toISOString()});
+    if(okMsg) toast(okMsg);
   }catch(e){
-    entry.deadlineDate=null; // rollback local change
+    Object.assign(item,prev); refreshDeadlineViews(item);
     toast('Save failed: '+e.message,'error');
   }
 }
-
-async function removeDeadline(){
-  const eid=_deadlineEntryId; if(!eid) return;
-  const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const entry=item.timeline.find(e=>e.id===eid); if(!entry) return;
-  const prev={date:entry.deadlineDate, completed:entry.deadlineCompleted, type:entry.deadlineType};
-  entry.deadlineDate=null; entry.deadlineCompleted=false; entry.deadlineType='';
-  closeDeadlineModal();
-  try{
-    await SB.patch(`timeline_entries?id=eq.${eid}`,{deadline_date:null,deadline_completed:false,deadline_type:null});
-    await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-    renderTimeline(item); render(); toast('Deadline removed');
-  }catch(e){
-    entry.deadlineDate=prev.date; entry.deadlineCompleted=prev.completed; entry.deadlineType=prev.type||'';
-    toast('Failed: '+e.message,'error');
-  }
+function refreshDeadlineViews(item){
+  render();
+  if(currentItemId===item.id && currentTab==='timeline') renderTimeline(item);
+  if(currentPage==='calendar') renderCalendar();
+  if($('calDayOverlay') && !$('calDayOverlay').classList.contains('hidden')) renderCalDay();
 }
 
-async function completeDeadline(){
-  const eid=_deadlineEntryId; if(!eid) return;
-  const item=data.find(i=>i.id===currentItemId); if(!item) return;
-  const entry=item.timeline.find(e=>e.id===eid); if(!entry) return;
-  entry.deadlineCompleted=true;
+async function saveDeadline(){
+  const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
+  const newDate=$('deadlineDateInput').value||null;
   closeDeadlineModal();
-  try{
-    await SB.patch(`timeline_entries?id=eq.${eid}`,{deadline_completed:true});
-    await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-    renderTimeline(item); render(); toast('Deadline marked complete ✓');
-  }catch(e){
-    entry.deadlineCompleted=false;
-    toast('Failed: '+e.message,'error');
-  }
+  if(!newDate) return removeDeadlineFor(item);
+  await patchItemDeadline(item,{deadline_date:newDate,deadline_type:_deadlineType||'',
+    deadline_completed:false,deadline_completed_date:null},'Deadline saved ✓');
+}
+async function removeDeadline(){
+  const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
+  closeDeadlineModal(); removeDeadlineFor(item);
+}
+function removeDeadlineFor(item){
+  return patchItemDeadline(item,{deadline_date:null,deadline_type:'',deadline_completed:false,deadline_completed_date:null},'Deadline removed');
+}
+async function completeDeadline(){
+  const item=data.find(i=>i.id===_deadlineItemId); if(!item) return;
+  closeDeadlineModal(); completeDeadlineFor(item);
+}
+function completeDeadlineFor(item){
+  return patchItemDeadline(item,{deadline_completed:true,deadline_completed_date:todayISO()},'Deadline marked complete ✓');
 }
 
 // ═══════════════════════════════════════
@@ -4719,6 +4947,8 @@ function showPage(page){
   $('pageLogistics').classList.toggle('active',page==='logistics');
   $('pageQC').classList.toggle('active',page==='qc');
   $('pageCalendar').classList.toggle('active',page==='calendar');
+  $('pageRequests').classList.toggle('active',page==='requests');
+  if(page==='requests'){ renderRequestsPage(); loadRequests(true); }
   if(page==='logistics'){ loadAirmail().then(()=>renderLogisticsPage()); }
   if(page==='qc'){ renderQCPage(); }
   if(page==='calendar'){ openCalendar(); }
@@ -5191,9 +5421,15 @@ $('vidOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) clo
 $('dupOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeDup(); });
 $('deadlineOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeDeadlineModal(); });
 $('airmailOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAirmailModal(); });
+$('reqOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqModal(); });
+$('reqDoneOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqDone(); });
+(function(){ const z=$('rdDrop');
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+  z.addEventListener('dragleave',()=>z.classList.remove('over'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');rdAddFiles(e.dataTransfer.files);}); })();
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeDetail(); closeAdd(); closeConfirm(); closeImgOverlay(); closeVidOverlay(); closeDup(); closeDeadlineModal(); closeAirmailModal(); }
+  if(e.key==='Escape'){ if(!$('reqDoneOverlay').classList.contains('hidden')){ closeReqDone(); return; } closeReqModal(); closeDetail(); closeAdd(); closeConfirm(); closeImgOverlay(); closeVidOverlay(); closeDup(); closeDeadlineModal(); closeAirmailModal(); }
   if(!$('imgOverlay').classList.contains('hidden')){
     if(e.key==='ArrowLeft') prevImg(); if(e.key==='ArrowRight') nextImg();
     if(e.key==='+') zoomIn(); if(e.key==='-') zoomOut();
@@ -5224,6 +5460,7 @@ function startAutoRefresh(){
       try{
         await loadData(true);
         loadQarmaData(true); // independent poll — not gated on items changing
+        loadRequests(true);  // sales requests — tiny updated_at check, full fetch only on change
         if(currentPage==='logistics'){ await loadAirmail(true); renderLogisticsPage(); }
         if(todoPanelOpen){
           await Promise.all([loadTodo(true), loadReports(true)]);
@@ -5486,7 +5723,6 @@ async function lookupAirmailBCData(sku){
 let calYear=null, calMonth=null;   // currently displayed month (calMonth is 0-based)
 let calTasks=[];                   // dated todo_items (to-dos + standalone calendar entries)
 let calModalDate=null;             // ISO date the day modal is showing
-let calAddType='timeline';             // 'timeline' | 'task' | 'event'
 let calFilter={sample:true,quote:true,qc:true,deadline:true,container:true,airmail:true,task:true,event:true};
 
 const CAL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5522,10 +5758,10 @@ function buildCalEvents(){
   const map={};
   const push=(date,ev)=>{ if(!date) return; const d=String(date).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return; (map[d]=map[d]||[]).push(ev); };
   (data||[]).forEach(it=>{
-    (it.timeline||[]).forEach(t=>{
-      const dlCat=calDeadlineCategory(t.deadlineType);
-      if(t.deadlineDate && calFilter[dlCat] && !t.hideFromCalendar) push(t.deadlineDate,{kind:dlCat,label:it.name,sub:t.deadlineType||t.note||'',itemId:it.id,entryId:t.id,done:!!t.deadlineCompleted});
-    });
+    if(it.deadlineDate && !it.archived){                // one deadline per item card
+      const dlCat=calDeadlineCategory(it.deadlineType);
+      if(calFilter[dlCat]) push(it.deadlineDate,{kind:dlCat,label:it.name,sub:it.deadlineType?it.deadlineType+' deadline':'Deadline',itemId:it.id,isDeadline:true,done:!!it.deadlineCompleted});
+    }
     if(calFilter.container && (it.shipMethod||'container')==='container' && it.transferReceiptDate)
       push(it.transferReceiptDate,{kind:'container',label:it.name,sub:it.containerNum?('Container '+it.containerNum):'',itemId:it.id,done:!!it.arrived});
     if(calFilter.airmail && it.shipMethod==='airmail' && it.transferReceiptDate)
@@ -5569,9 +5805,9 @@ function calTagStyle(kind,assignee){
 function calPill(ev){
   const ic=CAL_ICON[ev.kind]||'•';
   const txt=esc(ev.label||'');
-  const isDeadline=['sample','quote','qc','deadline'].includes(ev.kind) && ev.entryId;
+  const isDeadline=!!ev.isDeadline;
   const drag=isDeadline
-    ? `draggable="true" ondragstart="calDragStart(event,'${ev.entryId}','${ev.itemId}')" ondragend="calDragEnd()"`
+    ? `draggable="true" ondragstart="calDragStart(event,'${ev.itemId}')" ondragend="calDragEnd()"`
     : '';
   const draggableCls=isDeadline?' draggable':'';
   if(ev.kind==='task')
@@ -5645,47 +5881,16 @@ function calPrettyDate(iso){
 function openCalDay(iso){
   calModalDate=iso;
   $('calDayTitle').textContent=calPrettyDate(iso);
-  const itemOptions='<option value="">— None —</option>'+
-    data.filter(i=>!i.archived).slice().sort((a,b)=>a.name.localeCompare(b.name))
-      .map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
-  const sel=$('calAddItem'); sel.innerHTML=itemOptions;
-  const selTop=$('calAddItemTop');
-  if(selTop) selTop.innerHTML='<option value="">— Select item —</option>'+
-    data.filter(i=>!i.archived).slice().sort((a,b)=>a.name.localeCompare(b.name))
-      .map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
-  $('calAddText').value='';
-  $('calAddAssignee').value='';
-  sel.value='';
-  if(selTop) selTop.value='';
-  calSetAddType('timeline');
   renderCalDay();
   $('calDayOverlay').classList.remove('hidden');
-  setTimeout(()=>$('calAddText')?.focus(),120);
 }
 function closeCalDay(){ $('calDayOverlay').classList.add('hidden'); }
-
-function calSetAddType(t){
-  calAddType=t;
-  $('calTypeTimeline').classList.toggle('active',t==='timeline');
-  $('calTypeTask').classList.toggle('active',t==='task');
-  $('calTypeEvent').classList.toggle('active',t==='event');
-  $('calAssigneeField').style.display = t==='task' ? '' : 'none';
-  // "Link to item card" field at the bottom is for to-dos/calendar entries (optional link)
-  const bottomField=$('calAddItemFieldBottom');
-  if(bottomField) bottomField.style.display = t==='timeline' ? 'none' : '';
-  // Item Card select at the top is required for a Timeline Entry
-  const topField=$('calAddItemFieldTop');
-  if(topField) topField.style.display = t==='timeline' ? '' : 'none';
-  $('calAddTextLabel').textContent = t==='timeline' ? 'Timeline note' : (t==='task' ? 'New to-do' : 'New calendar entry');
-  const textInput=$('calAddText');
-  if(textInput) textInput.placeholder = t==='timeline' ? 'Timeline update note…' : (t==='task' ? 'What needs doing on this day?' : 'What\'s the entry about?');
-}
 
 function renderCalDay(){
   const body=$('calDayBody'); if(!body) return;
   const evs=(buildCalEvents()[calModalDate]||[]).slice();
   if($('calDaySub')) $('calDaySub').textContent = evs.length ? `${evs.length} item${evs.length===1?'':'s'}` : 'Nothing scheduled yet';
-  if(!evs.length){ body.innerHTML='<div class="cal-empty-day">Nothing on this day yet — add a to-do or calendar entry below.</div>'; return; }
+  if(!evs.length){ body.innerHTML='<div class="cal-empty-day">Nothing on this day.</div>'; return; }
   const order={deadline:0,qc:1,container:2,airmail:3,task:4,event:5};
   evs.sort((a,b)=>(order[a.kind]??9)-(order[b.kind]??9));
   body.innerHTML=evs.map(ev=>{
@@ -5693,13 +5898,13 @@ function renderCalDay(){
     const linkName=ev.itemId?((data.find(i=>i.id===ev.itemId)||{}).name||''):'';
     const subBits=[];
     if(ev.sub) subBits.push(esc(ev.sub));
-    if(linkName) subBits.push('🔗 '+esc(linkName));
+    if(linkName && linkName!==ev.label) subBits.push('🔗 '+esc(linkName));
     if(ev.kind==='task'&&ev.assignee) subBits.push('👤 '+esc(ev.assignee));
     const lead = editable
       ? `<div class="cal-checkbox${ev.done?' done':''}" onclick="calToggleTask('${ev.todoId}')" title="${ev.done?'Mark incomplete':'Mark complete'}"><svg viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
       : `<div class="cal-ev-ic">${CAL_ICON[ev.kind]||'•'}</div>`;
     const del = editable?`<button class="cal-ev-btn del" onclick="calDeleteTask('${ev.todoId}')" title="Delete">✕</button>`:'';
-    const dismiss = ev.kind==='deadline'?`<button class="cal-ev-btn del" onclick="calDismissDeadline('${ev.itemId}','${ev.entryId}')" title="Hide from calendar">✕</button>`:'';
+    const dismiss = ev.isDeadline&&!ev.done?`<button class="cal-ev-btn" onclick="calCompleteDeadline('${ev.itemId}')" title="Mark deadline complete">✓</button>`:'';
     const openLink = ev.itemId
       ? `<button class="cal-ev-btn" onclick="closeCalDay();showPage('main');openDetail('${ev.itemId}')" title="Open item card" style="font-size:.75rem;padding:3px 7px;margin-top:4px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2)">↗ Open</button>`
       : '';
@@ -5714,58 +5919,6 @@ function renderCalDay(){
       <div class="cal-ev-actions">${del}${dismiss}</div>
     </div>`;
   }).join('');
-}
-
-async function calAddTask(){
-  const text=$('calAddText').value.trim();
-  if(!text){ toast('Enter a title first','error'); return; }
-  if(!calModalDate) return;
-
-  if(calAddType==='timeline'){
-    const itemId=$('calAddItemTop')?.value||'';
-    if(!itemId){ toast('Select an item card first','error'); return; }
-    const item=data.find(i=>i.id===itemId); if(!item){ toast('Item not found','error'); return; }
-    const id=newId();
-    const s=getStoredSession();
-    const createdBy=s?.user?.email||'';
-    const entry={id, item_id:item.id, date:calModalDate, note:text, created_by:createdBy,
-      deadline_date:null, deadline_completed:false, deadline_completed_date:null};
-    try{
-      const result=await SB.post('timeline_entries', entry);
-      if(!result || (Array.isArray(result) && result.length===0)){
-        toast('Entry blocked by database — run the RLS SQL fix in Supabase','error');
-        return;
-      }
-      item.timeline=item.timeline||[];
-      item.timeline.push({id, date:calModalDate, note:text, createdBy,
-        createdAt:new Date().toISOString(),
-        deadlineDate:null, deadlineCompleted:false, deadlineCompletedDate:null});
-      await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
-      $('calAddText').value='';
-      render();
-      renderCalendar();
-      renderCalDay();
-      toast('Timeline entry added ✓');
-    }catch(e){ toast('Failed to add: '+e.message,'error'); }
-    return;
-  }
-
-  const body={
-    id:newId(), type:calAddType, text,
-    completed:false, bold:false, italic:false, position:0,
-    due_date:calModalDate,
-    item_id:($('calAddItem').value||null),
-    assignee: calAddType==='task' ? ($('calAddAssignee').value||'') : ''
-  };
-  try{
-    await SB.post('todo_items',body);
-    $('calAddText').value='';
-    await loadCalendarTasks();
-    renderCalendar();
-    renderCalDay();
-    if(typeof todoPanelOpen!=='undefined' && todoPanelOpen){ await loadTodo(); renderTodoList(); updateNotifBadge(); }
-    toast(calAddType==='event'?'Calendar entry added':'To-do added','success');
-  }catch(e){ toast('Failed to add: '+e.message,'error'); }
 }
 
 async function calToggleTask(id){
@@ -5790,23 +5943,17 @@ function calDeleteTask(id){
   });
 }
 
-async function calDismissDeadline(itemId, entryId){
-  const item=data.find(i=>i.id===itemId); if(!item) return;
-  const entry=item.timeline.find(t=>t.id===entryId); if(!entry) return;
-  entry.hideFromCalendar=true;
-  renderCalendar(); renderCalDay();
-  try{
-    await SB.patch(`timeline_entries?id=eq.${entryId}`,{hide_from_calendar:true});
-  }catch(e){ entry.hideFromCalendar=false; renderCalendar(); renderCalDay(); toast('Save failed','error'); }
+function calCompleteDeadline(itemId){
+  const item=data.find(i=>i.id===itemId); if(item) completeDeadlineFor(item);
 }
 
 // ── CALENDAR DRAG & DROP ──
 let _calDragData=null;
 
-function calDragStart(e, entryId, itemId){
-  _calDragData={entryId, itemId};
+function calDragStart(e, itemId){
+  _calDragData={itemId};
   e.dataTransfer.effectAllowed='move';
-  e.dataTransfer.setData('text/plain', JSON.stringify({entryId, itemId}));
+  e.dataTransfer.setData('text/plain', JSON.stringify({itemId}));
   e.stopPropagation();
 }
 function calDragEnd(){ _calDragData=null; document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over')); }
@@ -5818,23 +5965,433 @@ async function calDrop(e, targetISO){
   document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
   const raw=e.dataTransfer.getData('text/plain')||'';
   if(!raw) return;
-  let entryId, itemId;
-  try{ ({entryId,itemId}=JSON.parse(raw)); }catch(err){ return; }
-  const item=data.find(i=>i.id===itemId); if(!item) return;
-  const entry=item.timeline.find(t=>t.id===entryId); if(!entry) return;
-  if(entry.deadlineDate===targetISO) return;
-  const prev=entry.deadlineDate;
-  entry.deadlineDate=targetISO;
-  renderCalendar();
+  let itemId;
+  try{ ({itemId}=JSON.parse(raw)); }catch(err){ return; }
+  const item=data.find(i=>i.id===itemId); if(!item||!item.deadlineDate) return;
+  if(item.deadlineDate===targetISO) return;
+  await patchItemDeadline(item,{deadline_date:targetISO},
+    'Deadline moved to '+new Date(targetISO+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
+}
+
+// ═══════════════════════════════════════
+// SALES REQUESTS — tickets from sales reps (request.html) → item cards
+// Tables: requests, request_files, request_messages, request_items · bucket: request-files
+// ═══════════════════════════════════════
+const REQ_BUCKET='request-files';
+const REQ_OPEN=new Set(['New','Acknowledged','In Progress']);
+const REQ_MEDIA_EXTS=new Set(['jpg','jpeg','png','webp','mp4']); // what the Media SharePoint target accepts
+const REQ_CUSTOMER_CATEGORY={'happy beds':'Exclusive - Happy Beds','bhf':'Exclusive - BHF','wayfair':'Exclusive - Wayfair',
+  'next':'Exclusive - NEXT','marketplaces':'Exclusive - Marketplaces','mattressonline':'Exclusive - MattressOnline','mattressnextday':'Exclusive - MattressNextDay'};
+const reqBuyers=[ // who requests can be assigned to, in dropdown order
+  {email:'syrus.cripps@birlea.com',display_name:'Syrus'},
+  {email:'bethany.herron@birlea.com',display_name:'Beth'},
+  {email:'michael.prime@birlea.com',display_name:'Michael'}
+];
+// Request type → tracker category when there's no customer to go on
+const REQ_TYPE_CATEGORY={'Customer Service':'Customer Service Enquiries','Margin Sheets':'Miscellaneous','BC Set Up':'Miscellaneous','PIM Assistance':'Miscellaneous'};
+// Starting status per request type (anything not listed → Quoting)
+const REQ_TYPE_STAGE={'Customer Service':'Awaiting Response','Margin Sheets':'To-Do','BC Set Up':'To-Do','PIM Assistance':'To-Do'};
+const reqTitleText=r=>r.request_type==='Customer Service'?`SKU ${r.title}${r.cs_ticket?' · '+r.cs_ticket:''}`:r.title;
+let reqData=[], reqLinks=[], reqOpenId=null, _reqConvert=null, _reqAvailable=true;
+let _lastKnownReqTs=null, _reqKnownIds=null, _reqFiles=[], _reqMsgs=[], _reqBlobs={}, _reqDeclining=false;
+
+async function loadRequests(silent=false){
+  if(!_reqAvailable) return;
   try{
-    await SB.patch(`timeline_entries?id=eq.${entryId}`,{deadline_date:targetISO});
-    await SB.patch(`items?id=eq.${itemId}`,{updated_at:new Date().toISOString()});
-    toast('Deadline moved to '+new Date(targetISO+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
-  }catch(err){
-    entry.deadlineDate=prev;
-    renderCalendar();
-    toast('Update failed','error');
+    if(silent && _lastKnownReqTs!==null){
+      const ts=(await newestUpdatedAt('requests'))||'';
+      if(ts===_lastKnownReqTs) return; // nothing changed
+    }
+    const [rows,links]=await Promise.all([
+      SB.get('requests?select=*&order=created_at.desc&limit=1000'),
+      SB.get('request_items?select=request_id,item_id,created_at&order=created_at.asc')
+    ]);
+    reqData=rows||[]; reqLinks=links||[];
+    _lastKnownReqTs=reqData.reduce((m,r)=>r.updated_at>m?r.updated_at:m,'');
+    // Toast for anything new that arrived while the tracker was open
+    if(_reqKnownIds){
+      reqData.filter(r=>!_reqKnownIds.has(r.id)).forEach(r=>toast(`📥 New request ${r.ref} from ${reqName(r.requested_by)}: ${r.title}`));
+    }
+    _reqKnownIds=new Set(reqData.map(r=>r.id));
+    $('reqPageBtn')?.classList.remove('hidden');
+    updateReqBadge();
+    if(currentPage==='requests') renderRequestsPage();
+    if(reqOpenId && silent) refreshReqModal();
+  }catch(e){
+    // Table missing (migration not run) or no access → hide the feature quietly
+    if(/PGRST20[25]|does not exist|42P01|404/.test(e.message)){ _reqAvailable=false; $('reqPageBtn')?.classList.add('hidden'); }
   }
+}
+
+function reqName(email){
+  const b=reqBuyers.find(x=>x.email===(email||'').toLowerCase()); if(b&&b.display_name) return b.display_name;
+  const n=(email||'').split('@')[0].split('.')[0];
+  return n?n[0].toUpperCase()+n.slice(1):(email||'—');
+}
+const reqStCls=s=>'rq-'+String(s||'').replace(/\s+/g,'-');
+const reqItemsFor=id=>reqLinks.filter(l=>l.request_id===id).map(l=>data.find(i=>i.id===l.item_id)).filter(Boolean);
+const reqDays=iso=>Math.floor((Date.now()-new Date(iso))/86400000);
+
+function updateReqBadge(){
+  const open=reqData.filter(r=>REQ_OPEN.has(r.status));
+  const attention=open.filter(r=>r.status==='New'||r.buyer_unread).length;
+  const b=$('reqNotifBadge');
+  if(b){ b.textContent=attention; b.classList.toggle('show',attention>0); }
+  const fresh=open.filter(r=>r.status==='New');
+  const unassigned=open.filter(r=>!r.assigned_to);
+  const stale=fresh.filter(r=>reqDays(r.created_at)>=2);
+  const updates=open.filter(r=>r.status!=='New'&&r.buyer_unread);
+  const bn=$('reqBanner'); if(!bn) return;
+  if(!fresh.length&&!unassigned.length&&!updates.length){ bn.classList.add('hidden'); return; }
+  const parts=[];
+  if(fresh.length) parts.push(`<b>${fresh.length} new request${fresh.length>1?'s':''}</b> from sales waiting to be picked up`);
+  if(unassigned.length) parts.push(`${unassigned.length} unassigned`);
+  if(updates.length) parts.push(`${updates.length} with new messages/files`);
+  if(stale.length) parts.push(`<b style="color:var(--red)">${stale.length} waiting 2+ days</b>`);
+  bn.className='req-banner'+(stale.length?' urgent':'');
+  bn.innerHTML=`<span>📥 ${parts.join(' · ')}</span><div class="spacer"></div><button class="btn btn-sm" onclick="showPage('requests')">View requests</button>`;
+}
+
+function renderRequestsPage(){
+  const q=($('reqSearch')?.value||'').trim().toLowerCase();
+  const f=$('reqFilterSel')?.value||'open';
+  const meEmail=(getStoredSession()?.user?.email||'').toLowerCase();
+  let rows=reqData.filter(r=>{
+    const open=REQ_OPEN.has(r.status);
+    if(f==='all') return true;
+    if(f==='closed') return !open;
+    if(f==='mine') return open&&r.assigned_to===meEmail;
+    if(f==='unassigned') return open&&!r.assigned_to;
+    return open;
+  });
+  if(q) rows=rows.filter(r=>[r.ref,r.customer,r.title,r.cs_ticket,r.requested_by,r.request_type,r.description,r.assigned_to,reqName(r.assigned_to)].some(v=>(v||'').toLowerCase().includes(q)));
+  rows.sort((a,b)=>{
+    if(f!=='closed'){
+      const ao=REQ_OPEN.has(a.status), bo=REQ_OPEN.has(b.status);
+      if(ao!==bo) return ao?-1:1;
+      if((a.status==='New')!==(b.status==='New')) return a.status==='New'?-1:1;
+      if(!a.assigned_to!==!b.assigned_to) return !a.assigned_to?-1:1;
+      return a.created_at.localeCompare(b.created_at); // oldest first
+    }
+    return (b.completed_at||b.updated_at).localeCompare(a.completed_at||a.updated_at);
+  });
+  const openN=reqData.filter(r=>REQ_OPEN.has(r.status)).length;
+  if($('reqPageSub')) $('reqPageSub').textContent=`${openN} open · ${reqData.length} total`;
+  $('reqEmpty').classList.toggle('hidden',rows.length>0);
+  $('reqBody').innerHTML=rows.map(r=>{
+    const items=reqItemsFor(r.id);
+    const open=REQ_OPEN.has(r.status);
+    return `<tr class="rq-row${(r.status==='New'||r.buyer_unread)&&open?' unread':''}" onclick="openReqModal('${r.id}')">
+      <td><span class="rq-ref">${esc(r.ref)}</span></td>
+      <td>${r.customer?esc(r.customer):'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${esc(reqTitleText(r))}<div style="font-size:.74rem;color:var(--text3)">${esc(r.request_type)}${r.buyer_unread&&r.status!=='New'?' · <span style="color:var(--accent)">● new activity</span>':''}</div></td>
+      <td>${esc(reqName(r.requested_by))}${r.department?`<div style="font-size:.72rem;color:var(--text3)">${esc(r.department)}</div>`:''}</td>
+      <td>${r.assigned_to?esc(reqName(r.assigned_to)):'<span style="color:var(--amber)">Unassigned</span>'}</td>
+      <td><span class="rq-pill ${reqStCls(r.status)}">${esc(r.status)}</span></td>
+      <td>${items.length?items.map(i=>`<div style="font-size:.78rem">${esc(i.name)}</div>`).join(''):'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="font-size:.8rem;color:${r.status==='New'&&reqDays(r.created_at)>=2?'var(--red);font-weight:600':'var(--text3)'}">${reqDays(r.created_at)===0?'Today':reqDays(r.created_at)+'d ago'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Ticket modal ──
+async function openReqModal(id){
+  reqOpenId=id; _reqDeclining=false;
+  $('rqBody').innerHTML='<div style="color:var(--text3);font-size:.85rem">Loading…</div>';
+  $('reqOverlay').classList.remove('hidden');
+  const r=reqData.find(x=>x.id===id);
+  if(r&&r.buyer_unread&&!VIEW_ONLY){
+    r.buyer_unread=false; updateReqBadge(); if(currentPage==='requests') renderRequestsPage();
+    SB.patch(`requests?id=eq.${id}`,{buyer_unread:false}).catch(()=>{});
+  }
+  await refreshReqModal();
+}
+function closeReqModal(){ reqOpenId=null; $('reqOverlay')?.classList.add('hidden'); }
+
+async function refreshReqModal(){
+  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r){ closeReqModal(); return; }
+  try{
+    [_reqFiles,_reqMsgs]=await Promise.all([
+      SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
+      SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`)
+    ]);
+  }catch(e){ toast('Could not load request: '+e.message,'error'); }
+  if(reqOpenId!==id) return;
+  const draft=$('rqMsgText')?.value||'', declineDraft=$('rqDeclineReason')?.value||'';
+  const focusId=document.activeElement?.id;
+  const items=reqItemsFor(id), open=REQ_OPEN.has(r.status);
+  const me=(getStoredSession()?.user?.email||'').toLowerCase();
+  const unmoved=_reqFiles.filter(f=>!f.sp_path&&!f.is_completion);
+  const repFiles=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>!f.is_completion);
+  const doneFiles=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>f.is_completion);
+  $('rqRef').textContent=r.ref;
+  $('rqPills').innerHTML=`<span class="rq-pill ${reqStCls(r.status)}">${esc(r.status)}</span>`;
+  $('rqTitle').textContent=reqTitleText(r);
+  $('rqBody').innerHTML=`
+    ${r.status==='Declined'?`<div class="rq-desc" style="border-color:rgba(239,68,68,.4)"><b>Declined</b>${r.decline_reason?' — '+esc(r.decline_reason):''}</div>`:''}
+    ${r.status==='Complete'&&(r.completion_notes||doneFiles.length)?`<div class="rq-done">
+      <div class="section-title" style="margin:0">✔ Completed${r.completed_at?' '+fmtEntryDate(r.completed_at.slice(0,10),true):''} — sent to ${esc(reqName(r.requested_by))}</div>
+      ${r.completion_notes?`<div class="rq-desc">${esc(r.completion_notes)}</div>`:''}
+      ${doneFiles.length?`<div class="rq-thumbs">${doneFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`:''}
+    </div>`:''}
+    <div class="rq-kv">
+      ${r.customer?`<div><b>Customer</b><span>${esc(r.customer)}</span></div>`:''}
+      <div><b>Type</b><span>${esc(r.request_type)}</span></div>
+      ${r.request_type==='Customer Service'?`<div><b>SKU</b><span>${esc(r.title)}</span></div><div><b>CS Ticket</b><span>${esc(r.cs_ticket||'—')}</span></div>`:''}
+      <div><b>From</b><span>${esc(reqName(r.requested_by))}${r.department?' · '+esc(r.department):''}</span></div>
+      <div><b>Received</b><span>${fmtEntryDate(r.created_at.slice(0,10),true)}</span></div>
+      ${r.target_price?`<div><b>Ideal / target sales price</b><span>${esc(r.target_price)}</span></div>`:''}
+      ${r.acknowledged_at?`<div><b>Picked up</b><span>${fmtEntryDate(r.acknowledged_at.slice(0,10),true)} · ${esc(reqName(r.acknowledged_by))}</span></div>`:''}
+    </div>
+    <div class="rq-sec" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="section-title" style="margin:0">Assigned to</div>
+      <select id="rqAssign" onchange="assignRequest('${id}',this.value)" style="font-size:.82rem;padding:5px 28px 5px 10px"${open?'':' disabled'}>
+        <option value="">— Unassigned —</option>
+        ${reqBuyers.map(b=>`<option value="${esc(b.email)}"${b.email===r.assigned_to?' selected':''}>${esc(b.display_name||reqName(b.email))}</option>`).join('')}
+        ${r.assigned_to&&!reqBuyers.some(b=>b.email===r.assigned_to)?`<option value="${esc(r.assigned_to)}" selected>${esc(reqName(r.assigned_to))}</option>`:''}
+      </select>
+      ${open&&r.assigned_to!==me?`<button class="btn btn-ghost btn-sm" onclick="assignRequest('${id}','${esc(me)}')">Assign to me</button>`:''}
+      <span style="font-size:.76rem;color:var(--text3)">${esc(reqName(r.requested_by))} sees who's on it</span>
+    </div>
+    ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
+    <div class="rq-sec">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Item cards (${items.length})
+        ${open?`<button class="btn btn-sm" style="margin-left:auto;text-transform:none;letter-spacing:0" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}</div>
+      ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span><span class="badge ${STAGE_CLS[i.stage]||''}">${esc(i.stage)}</span></div>`).join('')}</div>`
+        :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), or be completed without one.</div>`}
+    </div>
+    <div class="rq-sec">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Attachments (${repFiles.length})
+        ${unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
+          ${items.length>1?`<select id="rqSpTarget" style="font-size:.75rem;padding:4px 24px 4px 8px">${items.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')}</select>`:''}
+          <button class="btn btn-sm" onclick="copyRequestFilesToSp('${id}',$('rqSpTarget')?.value||'${items[0].id}')">📁 Copy ${unmoved.length} to SharePoint</button></span>`:''}
+      </div>
+      ${repFiles.length?`<div class="rq-thumbs" id="rqThumbs">${repFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`
+        :'<div style="font-size:.84rem;color:var(--text3)">No attachments.</div>'}
+    </div>
+    <div class="rq-sec" style="margin-bottom:0">
+      <div class="section-title">Messages with ${esc(reqName(r.requested_by))}</div>
+      <div class="rq-msgs" id="rqMsgs">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):'<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on the rep\'s request page.</div>'}</div>
+      <div class="rq-reply"><textarea id="rqMsgText" placeholder="Reply to ${esc(reqName(r.requested_by))}…"></textarea><button class="btn" onclick="sendReqMsg('${id}')">Send</button></div>
+    </div>`;
+  if(draft) $('rqMsgText').value=draft;
+  if(declineDraft&&$('rqDeclineReason')) $('rqDeclineReason').value=declineDraft;
+  const m=$('rqMsgs'); if(m) m.scrollTop=m.scrollHeight;
+  if(focusId==='rqMsgText'||focusId==='rqDeclineReason'){ const el=$(focusId); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); } }
+  $('rqFooter').innerHTML=open?`
+      ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
+      <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" onclick="completeRequest('${id}')" title="Removes it from the open list">✔ Mark complete</button>`
+    :`<button class="btn btn-ghost" onclick="setReqStatus('${id}','In Progress')">↺ Reopen</button>
+      <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
+      <div class="spacer"></div><button class="btn btn-ghost" onclick="closeReqModal()">Close</button>`;
+  reqHydrateThumbs();
+}
+
+function reqThumbHTML(f,i){
+  return `<div class="rq-thumb" data-i="${i}" onclick="openReqFile(${i})" title="${esc(f.name)}">
+    <span><span class="rq-ic">${reqIsImg(f)?'🖼️':reqIsVid(f)?'🎬':fileIconByName(f.name)}</span>${esc(f.name)}</span>${f.sp_path?'<span class="rq-sp">SP ✓</span>':''}</div>`;
+}
+const reqIsImg=f=>/^image\//.test(f.mime||'')||/\.(jpe?g|png|webp|gif)$/i.test(f.name);
+const reqIsVid=f=>/^video\//.test(f.mime||'')||/\.(mp4|mov|webm)$/i.test(f.name);
+async function reqBlob(f){
+  const path=f.storage_path.split('/').map(encodeURIComponent).join('/');
+  const r=await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/${REQ_BUCKET}/${path}`,{headers:await authHeaders(),cache:'no-store'});
+  if(!r.ok) throw new Error('Download failed ('+r.status+') — the file may have been cleared from Supabase');
+  return r.blob();
+}
+async function reqBlobUrl(f){
+  if(!_reqBlobs[f.storage_path]) _reqBlobs[f.storage_path]=URL.createObjectURL(await reqBlob(f));
+  return _reqBlobs[f.storage_path];
+}
+function reqHydrateThumbs(){
+  _reqFiles.forEach((f,i)=>{
+    if(!reqIsImg(f)||f.size>8*1048576) return;
+    reqBlobUrl(f).then(u=>{ const el=document.querySelector(`#rqBody .rq-thumb[data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('afterbegin',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
+  });
+}
+async function openReqFile(i){
+  const f=_reqFiles[i]; if(!f) return;
+  try{
+    const u=await reqBlobUrl(f);
+    if(reqIsVid(f)&&/\.mp4$/i.test(f.name)){ openVidPreview(u,f.name); return; }
+    const a=document.createElement('a'); a.href=u;
+    if(reqIsImg(f)||/\.pdf$/i.test(f.name)) a.target='_blank'; else a.download=f.name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){ toast(e.message,'error'); }
+}
+
+async function setReqStatus(id,status,extra){
+  try{
+    await SB.patch(`requests?id=eq.${id}`,{status,...(extra||{})});
+    await loadRequests();
+    if(reqOpenId===id) refreshReqModal();
+    toast(`${reqData.find(r=>r.id===id)?.ref||'Request'} → ${status}`);
+  }catch(e){ toast('Update failed: '+e.message,'error'); }
+}
+async function assignRequest(id,email){
+  try{
+    await SB.patch(`requests?id=eq.${id}`,{assigned_to:email||''});
+    await loadRequests();
+    if(reqOpenId===id) refreshReqModal();
+    toast(email?`Assigned to ${reqName(email)}`:'Unassigned');
+  }catch(e){ toast('Assign failed: '+e.message,'error'); }
+}
+function declineRequest(id){
+  const reason=($('rqDeclineReason')?.value||'').trim();
+  if(!reason){ toast('Add a reason so the rep knows why','error'); return; }
+  _reqDeclining=false;
+  setReqStatus(id,'Declined',{decline_reason:reason});
+}
+// ── Complete: notes + files for the requester ──
+let _rdReqId=null, _rdPending=[];
+function completeRequest(id){
+  const r=reqData.find(x=>x.id===id); if(!r) return;
+  _rdReqId=id; _rdPending=[];
+  const n=reqItemsFor(id).length;
+  $('rdTitle').textContent=`Complete ${r.ref}`;
+  $('rdSub').textContent=`${reqName(r.requested_by)} will see these details and files on their request page.${n?'':' No item card was created for this request.'}`;
+  $('rdNotes').value=r.completion_notes||'';
+  rdRender();
+  $('rdSaveBtn').disabled=false; $('rdSaveBtn').textContent='✔ Complete request';
+  $('reqDoneOverlay').classList.remove('hidden');
+  setTimeout(()=>$('rdNotes').focus(),50);
+}
+function closeReqDone(){ $('reqDoneOverlay')?.classList.add('hidden'); _rdReqId=null; _rdPending=[]; }
+function rdAddFiles(list){
+  [...list].forEach(f=>{
+    if(f.size>50*1048576){ toast(f.name+' is over 50 MB','error'); return; }
+    _rdPending.push({file:f,state:''});
+  });
+  rdRender();
+}
+function rdRemove(i){ _rdPending.splice(i,1); rdRender(); }
+function rdRender(){
+  $('rdFileRows').innerHTML=_rdPending.map((p,i)=>`<div class="rq-file-row"><span>${fileIconByName(p.file.name)}</span><span class="nm">${esc(p.file.name)}</span>
+    <span style="font-size:.74rem;color:var(--text3);font-family:'DM Mono',monospace">${(p.file.size/1048576).toFixed(1)} MB</span>
+    ${p.state?`<span style="font-size:.78rem">${p.state}</span>`:`<button class="ebtn del" onclick="rdRemove(${i})">✕</button>`}</div>`).join('');
+}
+async function saveReqDone(){
+  const id=_rdReqId; const r=reqData.find(x=>x.id===id); if(!r) return;
+  const notes=$('rdNotes').value.trim();
+  const btn=$('rdSaveBtn'); btn.disabled=true;
+  const me=(getStoredSession()?.user?.email||'').toLowerCase();
+  let failed=0;
+  for(let i=0;i<_rdPending.length;i++){
+    const p=_rdPending[i]; if(p.state==='✓') continue;
+    btn.textContent=`Uploading ${i+1}/${_rdPending.length}…`; p.state='…'; rdRender();
+    try{
+      const safe=p.file.name.normalize('NFKD').replace(/[^\w.\- ]+/g,'').replace(/\s+/g,'_').slice(-120)||'file';
+      const path=`${id}/done-${newId().slice(0,8)}-${safe}`;
+      await SB.upload(REQ_BUCKET,path.split('/').map(encodeURIComponent).join('/'),p.file);
+      await SB.post('request_files',{request_id:id,name:p.file.name,storage_path:path,mime:p.file.type||'',size:p.file.size,uploaded_by:me,is_completion:true});
+      p.state='✓';
+    }catch(e){ p.state='✗'; failed++; }
+    rdRender();
+  }
+  if(failed){ btn.disabled=false; btn.textContent='Retry & complete'; toast(`${failed} file${failed>1?'s':''} failed to upload — remove or retry`,'error'); return; }
+  try{
+    await SB.patch(`requests?id=eq.${id}`,{status:'Complete',completion_notes:notes});
+    closeReqDone(); await loadRequests();
+    if(reqOpenId===id) refreshReqModal();
+    toast(`${r.ref} completed ✓`);
+  }catch(e){ btn.disabled=false; btn.textContent='✔ Complete request'; toast('Complete failed: '+e.message,'error'); }
+}
+function deleteRequest(id){
+  const r=reqData.find(x=>x.id===id); if(!r) return;
+  confirmAction(`Delete ${r.ref}?`,'The request, its messages and attachments are removed for you and the rep. Any item cards created from it stay in the tracker. This cannot be undone.',async()=>{
+    try{
+      const files=await SB.get(`request_files?request_id=eq.${id}&select=storage_path`).catch(()=>[]);
+      if(files.length){ // remove the uploaded files from Supabase storage too
+        await fetch(`${SUPABASE_URL}/storage/v1/object/${REQ_BUCKET}`,{method:'DELETE',
+          headers:await authHeaders({'Content-Type':'application/json'}),body:JSON.stringify({prefixes:files.map(f=>f.storage_path)})}).catch(()=>{});
+      }
+      await SB.delete(`requests?id=eq.${id}`); // messages, files and item links cascade
+      closeReqModal(); await loadRequests(); toast(`${r.ref} deleted`);
+    }catch(e){ toast('Delete failed: '+e.message,'error'); }
+  });
+}
+async function sendReqMsg(id){
+  const t=($('rqMsgText')?.value||'').trim(); if(!t) return;
+  try{ await SB.post('request_messages',{request_id:id,body:t}); $('rqMsgText').value=''; await refreshReqModal(); }
+  catch(e){ toast('Message failed: '+e.message,'error'); }
+}
+
+// ── Convert: reuse the normal Add Item modal, pre-filled ──
+function createItemFromRequest(id){
+  const r=reqData.find(x=>x.id===id); if(!r) return;
+  closeReqModal();
+  openAddModal();
+  _reqConvert=id;
+  $('add-name').value=r.request_type==='Customer Service'?`${r.title}${r.cs_ticket?' - '+r.cs_ticket:''}`:r.title;
+  // Category: fixed by type (CS / Margin Sheets / BC / PIM), else by customer (NPD)
+  const cat=REQ_TYPE_CATEGORY[r.request_type]||(r.customer?REQ_CUSTOMER_CATEGORY[r.customer.trim().toLowerCase()]||'Exclusive - Other':'');
+  if(cat&&[...$('add-category').options].some(o=>o.value===cat)) $('add-category').value=cat;
+  $('add-stage').value=REQ_TYPE_STAGE[r.request_type]||'Quoting';
+  const who=reqName(r.assigned_to||(getStoredSession()?.user?.email||'').toLowerCase());
+  if(r.request_type==='Customer Service'){
+    $('add-stage').disabled=true;                 // CS cards always start as Awaiting Response
+    $('add-note').value=`Sent query to Factory - ${who} is working on this`;
+  }else{
+    // "Request Received - <details> - <who> is working on this"
+    const details=(r.description||r.title||'').replace(/\s+/g,' ').trim();
+    $('add-note').value=`Request Received - ${details} - ${who} is working on this`;
+  }
+  $('addSaveBtn').textContent='Create item card';
+  setTimeout(()=>$('add-name').focus(),50);
+}
+
+async function afterRequestItemCreated(reqId,item){
+  try{
+    await SB.post('request_items',{request_id:reqId,item_id:item.id});
+    const r=reqData.find(x=>x.id===reqId);
+    if(r&&(r.status==='New'||r.status==='Acknowledged')) await SB.patch(`requests?id=eq.${reqId}`,{status:'In Progress'});
+    await loadRequests();
+  }catch(e){ toast('Item created, but linking it to the request failed: '+e.message,'error'); return; }
+  await openReqModal(reqId);
+  const unmoved=_reqFiles.filter(f=>!f.sp_path&&!f.is_completion);
+  if(unmoved.length){
+    confirmAction('Copy attachments to SharePoint?',
+      `${unmoved.length} file${unmoved.length>1?'s':''} from this request will be saved to "${item.name}": photos/MP4 → Media, everything else → Sales Request Files (Quotations folder).`,
+      ()=>copyRequestFilesToSp(reqId,item.id));
+  }
+}
+
+async function copyRequestFilesToSp(reqId,itemId){
+  const item=data.find(i=>i.id===itemId); if(!item){ toast('Item not found','error'); return; }
+  if(!('showDirectoryPicker' in window)){ toast('SharePoint saving needs desktop Chrome or Edge','error'); return; }
+  // Ask for folder permission first, while we still have the click
+  const needMedia=_reqFiles.some(f=>!f.sp_path&&!f.is_completion&&REQ_MEDIA_EXTS.has(f.name.split('.').pop().toLowerCase()));
+  const needOther=_reqFiles.some(f=>!f.sp_path&&!f.is_completion&&!REQ_MEDIA_EXTS.has(f.name.split('.').pop().toLowerCase()));
+  if(needMedia&&!(await getSpRoot('media'))){ toast('Connect the Media folder first (open the item → Media tab → Connect)','error'); return; }
+  if(needOther&&!(await getSpRoot('request'))){ toast('Connect the Quotations folder first (open the item → Files tab → Connect)','error'); return; }
+  let files;
+  try{ files=await SB.get(`request_files?request_id=eq.${reqId}&sp_path=is.null&is_completion=is.false&select=*&order=created_at.asc`); }
+  catch(e){ toast('Could not read request files: '+e.message,'error'); return; }
+  let ok=0;
+  for(const [n,f] of files.entries()){
+    const ext=f.name.split('.').pop().toLowerCase();
+    const kind=REQ_MEDIA_EXTS.has(ext)?'media':'request';
+    toast(`Copying ${n+1}/${files.length} to SharePoint…`);
+    let file;
+    try{ const b=await reqBlob(f); file=new File([b],f.name,{type:f.mime||b.type}); }
+    catch(e){ toast(f.name+': '+e.message,'error'); continue; }
+    const saved=await saveFileToSp(file,kind,item); if(!saved) continue;
+    try{
+      const id=newId(), isImg=kind==='media';
+      await SB.post('file_links',{id,item_id:item.id,name:saved.finalName,url:saved.url,added_date:todayISO(),is_upload:true,file_size:file.size,is_image:isImg,kind,sp_path:saved.spPath});
+      await SB.patch(`request_files?id=eq.${f.id}`,{sp_path:saved.spPath,moved_at:new Date().toISOString()});
+      if(isImg){ item.images=item.images||[]; item.images.push({id,name:saved.finalName,url:saved.url,kind,spPath:saved.spPath,uploadDate:todayISO(),localUrl:URL.createObjectURL(file)}); }
+      else { item.files=item.files||[]; item.files.push({id,name:saved.finalName,url:saved.url,uploadDate:todayISO(),size:file.size,kind,spPath:saved.spPath}); }
+      ok++;
+    }catch(e){ toast('Saved to SharePoint, but linking failed: '+e.message,'error'); }
+  }
+  if(ok){
+    await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()}).catch(()=>{});
+    toast(`${ok} file${ok>1?'s':''} saved to SharePoint ✓`);
+  }
+  if(reqOpenId===reqId) refreshReqModal();
 }
 
 function startBCBackgroundSync(){
@@ -5842,16 +6399,25 @@ function startBCBackgroundSync(){
   setInterval(runBCBackgroundSync, 5 * 60 * 1000);
 }
 
+let VIEW_ONLY=false;
 async function bootApp(){
+  // Sales reps have their own page; this tracker is buyers-only (enforced by RLS too)
+  try{
+    const role = await SB.req('POST','rpc/my_role',{});
+    if(role==='requester'||role==='sales'){ location.replace('request.html'); return; } // portal users
+    if(role==='viewer'){ VIEW_ONLY=true; document.body.classList.add('view-only'); }
+    if(role===null) toast('Your login isn\'t set up for the tracker yet — ask Syrus to add you','error');
+  }catch(e){ /* requests migration not run yet — carry on as before */ }
   const s = getStoredSession();
   const label = document.getElementById('loggedInAs');
   if(s && s.user && s.user.email && label) label.textContent = s.user.email;
   loadConfig();
   loadTheme();
   populateCategoryFilter();
-  loadData().then(()=>{ startBCBackgroundSync(); loadQarmaData(); });
+  loadData().then(()=>{ if(!VIEW_ONLY) startBCBackgroundSync(); loadQarmaData(); }); // viewers never write BC data
   loadAirmail();
   Promise.all([loadTodo(), loadReports()]).then(()=>updateNotifBadge());
+  loadRequests();
   startAutoRefresh();
 }
 
