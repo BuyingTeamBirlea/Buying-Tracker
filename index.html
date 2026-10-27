@@ -2247,10 +2247,12 @@ function renderTimeline(item){
     <div class="add-entry-row">
       <div class="field date-field"><label>Date</label><input type="date" id="entryDate" value="${todayISO()}"></div>
       <div class="field note-field"><label>Note</label><input type="text" id="entryNote" placeholder="Update note…" onkeydown="if(event.key==='Enter')addEntry()"></div>
-      <div class="field" style="flex:0 0 150px"><label>Deadline (optional)</label><input type="date" id="entryDeadline"></div>
-      <div class="field" style="flex:0 0 140px"><label>Deadline supplier</label><select id="entryDeadlineSupplier">${dlSupplierOptions(item,(item.supplierArr||[]).length===1?item.supplierArr[0]:'')}</select></div>
-      <div class="field" style="flex:0 0 110px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
       <button class="btn btn-sm" style="align-self:flex-end" onclick="addEntry()">+ Add</button>
+    </div>
+    <div class="add-entry-row" style="margin-top:8px">
+      <div class="field" style="flex:0 0 150px"><label>Deadline (optional)</label><input type="date" id="entryDeadline"></div>
+      <div class="field" style="flex:0 0 160px"><label>Deadline supplier</label><select id="entryDeadlineSupplier">${dlSupplierOptions(item,(item.supplierArr||[]).length===1?item.supplierArr[0]:'')}</select></div>
+      <div class="field" style="flex:0 0 120px"><label>Deadline type</label><select id="entryDeadlineType"><option value="Sample">Sample</option><option value="Quote">Quote</option><option value="QC">QC</option><option value="">Other</option></select></div>
     </div>`;
 
   // First render for this item → jump to the newest end; re-renders keep position
