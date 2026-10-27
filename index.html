@@ -4837,8 +4837,7 @@ function latestDeadlineBadge(item){
   const d=open[0], days=diffDays(todayISO(),d.date);
   const col=days>3?'#4ade80':days>0?'#fbbf24':days===0?'#fb923c':'#f87171';
   const tip=open.map(x=>`${[x.supplier,x.type].filter(Boolean).join(' – ')||'Deadline'} – ${dlDaysText(x)} (${fmtShort(x.date)})`).join('\n');
-  const short=[d.type||d.supplier].filter(Boolean).map(esc).join('');
-  return `<span title="${esc(tip)}" style="font-size:.7rem;font-weight:600;color:${col};font-family:'DM Mono',monospace;white-space:nowrap"> · ${short?short+' ':''}${dlDaysText(d)}${open.length>1?` <span style="color:var(--text3)">+${open.length-1}</span>`:''}</span>`;
+  return `<span title="${esc(tip)}" style="font-size:.7rem;font-weight:600;color:${col};font-family:'DM Mono',monospace;white-space:nowrap"> · ${dlDaysText(d)}</span>`;
 }
 
 function dlSupplierOptions(item,selected){
