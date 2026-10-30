@@ -672,6 +672,20 @@ body.view-only #rqAssign ~ .btn,
 body.view-only [onclick^="createItemFromRequest"],
 body.view-only [onclick^="copyRequestFilesToSp"],
 body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="export"]){display:none!important}
+.rq-pick-list{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.rq-pick{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;font-size:.86rem}
+.rq-pick:hover{border-color:var(--accent)}
+.rq-pick .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq-pick .sup{font-size:.74rem;color:var(--text3);white-space:nowrap}
+.rq-unlink{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.9rem;padding:2px 4px;border-radius:4px}
+.rq-unlink:hover{color:var(--red);background:rgba(239,68,68,.1)}
+.rq-tabs{display:flex;gap:2px;padding:0 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.rq-tabs .tab-btn .cnt{font-size:.68rem;background:var(--bg4);color:var(--text2);border-radius:100px;padding:1px 6px;margin-left:5px;font-family:'DM Mono',monospace}
+.rq-file-link{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:.84rem;margin-top:6px}
+.rq-file-link a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-decoration:none}
+.rq-file-link a:hover{color:var(--accent2)}
+.rq-file-link .k{font-size:.7rem;color:var(--text3);white-space:nowrap}
+.rq-sub{font-size:.76rem;color:var(--text3);margin:-4px 0 8px}
 .rq-done{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px}
 .rq-done .rq-desc{background:var(--bg2);margin:8px 0 10px}
 .rq-drop{border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;text-align:center;color:var(--text2);cursor:pointer;font-size:.86rem;transition:all .15s}
@@ -851,13 +865,14 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
         <option value="unassigned">Unassigned</option>
         <option value="all">All</option>
       </select>
+      <button class="btn btn-sm" style="margin-left:auto" onclick="openReqNew()" title="Create a request on someone's behalf, e.g. for work already under way">＋ New request</button>
     </div>
     <div class="logi-table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Ref</th><th>Customer</th><th>Request</th><th>From</th>
-            <th>Assigned To</th><th>Status</th><th>Item Cards</th><th>Received</th>
+            <th>Ref</th><th>Team</th><th>From</th><th>Request</th>
+            <th>Status</th><th>Item Cards</th><th>Assigned To</th><th>Last Actioned</th>
           </tr>
         </thead>
         <tbody id="reqBody"></tbody>
@@ -1263,14 +1278,79 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
 <div class="overlay hidden" id="reqOverlay">
   <div class="modal" style="max-width:760px">
     <div class="modal-header">
-      <div>
+      <div style="flex:1;min-width:0">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="rq-ref" id="rqRef"></span><span id="rqPills"></span></div>
-        <div class="modal-title" id="rqTitle" style="margin-top:4px"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+          <div class="modal-title" id="rqTitle"></div>
+          <div id="rqAssignWrap" style="margin-left:auto;display:flex;align-items:center;gap:6px"></div>
+        </div>
       </div>
       <button class="modal-close" onclick="closeReqModal()">✕</button>
     </div>
+    <div class="rq-tabs" id="rqTabs"></div>
     <div class="modal-body" id="rqBody"></div>
     <div class="modal-footer" id="rqFooter"></div>
+  </div>
+</div>
+
+<!-- LINK EXISTING ITEM CARD MODAL -->
+<div class="overlay hidden" id="reqLinkOverlay">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div><div class="modal-title">Link an existing item card</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="rlSub"></div></div>
+      <button class="modal-close" onclick="closeReqLink()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-wrap" style="max-width:none"><span class="search-icon">🔍</span>
+        <input type="text" id="rlSearch" placeholder="Search name, ref code, supplier…" oninput="renderReqLinkList()"></div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);margin-top:8px;cursor:pointer">
+        <input type="checkbox" id="rlArchived" onchange="renderReqLinkList()"> Include archived cards</label>
+      <div class="rq-pick-list" id="rlList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW REQUEST (ON SOMEONE'S BEHALF) MODAL -->
+<div class="overlay hidden" id="reqNewOverlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div><div class="modal-title">New request</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px">Raised on someone's behalf. It appears on their request page straight away.</div></div>
+      <button class="modal-close" onclick="closeReqNew()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field"><label>Requested by *</label><select id="rnWho"></select></div>
+        <div class="field"><label>Request type *</label><select id="rnType" onchange="reqNewTypeChanged()">
+          <option>New Product Development</option><option>Margin Sheets</option><option>BC Set Up</option>
+          <option>PIM Assistance</option><option>Customer Service</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field" id="rnCustField"><label>Customer *</label><select id="rnCustomer">
+          <option value="">Select…</option><option>Happy Beds</option><option>BHF</option><option>Wayfair</option><option>NEXT</option>
+          <option>Marketplaces</option><option>MattressOnline</option><option>MattressNextDay</option></select></div>
+        <div class="field" id="rnCsField" style="display:none"><label>CS Ticket *</label><input type="text" id="rnCs" placeholder="e.g. CS-104582"></div>
+        <div class="field"><label id="rnTitleLabel">Title *</label><input type="text" id="rnTitle" maxlength="140"></div>
+      </div>
+      <div class="form-row form-row-1">
+        <div class="field"><label id="rnDescLabel">Details</label><textarea id="rnDesc"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="field" id="rnPriceField"><label>Target price (optional)</label><input type="text" id="rnPrice"></div>
+        <div class="field"><label>Status</label><select id="rnStatus">
+          <option>In Progress</option><option>New</option><option>Acknowledged</option><option>Complete</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Worked on by</label><select id="rnAssign"></select></div>
+        <div class="field"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReqNew()">Cancel</button>
+      <div class="spacer"></div>
+      <button class="btn" id="rnSaveBtn" onclick="saveReqNew()">Create request</button>
+    </div>
   </div>
 </div>
 
@@ -5499,13 +5579,17 @@ $('deadlineOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget
 $('airmailOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAirmailModal(); });
 $('reqOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqModal(); });
 $('reqDoneOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqDone(); });
+$('reqLinkOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqLink(); });
+$('reqNewOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqNew(); });
 (function(){ const z=$('rdDrop');
   z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
   z.addEventListener('dragleave',()=>z.classList.remove('over'));
   z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');rdAddFiles(e.dataTransfer.files);}); })();
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ if(!$('reqDoneOverlay').classList.contains('hidden')){ closeReqDone(); return; } closeReqModal(); closeDetail(); closeAdd(); closeConfirm(); closeImgOverlay(); closeVidOverlay(); closeDup(); closeDeadlineModal(); closeAirmailModal(); }
+  if(e.key==='Escape'){ if(!$('reqDoneOverlay').classList.contains('hidden')){ closeReqDone(); return; }
+    if(!$('reqLinkOverlay').classList.contains('hidden')){ closeReqLink(); return; }
+    if(!$('reqNewOverlay').classList.contains('hidden')){ closeReqNew(); return; } closeReqModal(); closeDetail(); closeAdd(); closeConfirm(); closeImgOverlay(); closeVidOverlay(); closeDup(); closeDeadlineModal(); closeAirmailModal(); }
   if(!$('imgOverlay').classList.contains('hidden')){
     if(e.key==='ArrowLeft') prevImg(); if(e.key==='ArrowRight') nextImg();
     if(e.key==='+') zoomIn(); if(e.key==='-') zoomOut();
@@ -6108,6 +6192,25 @@ function reqName(email){
 const reqStCls=s=>'rq-'+String(s||'').replace(/\s+/g,'-');
 const reqItemsFor=id=>reqLinks.filter(l=>l.request_id===id).map(l=>data.find(i=>i.id===l.item_id)).filter(Boolean);
 const reqDays=iso=>Math.floor((Date.now()-new Date(iso))/86400000);
+// Ref shown for a ticket: the linked item card's ref code once there is one, else the REQ number
+function reqDisplayRef(r,items){ const it=(items||[]).find(i=>i.refCode); return it?it.refCode:r.ref; }
+// Status shown for a ticket: Complete, else the linked item card status(es), else In Progress
+function reqStatusHTML(r,items){
+  if(r.status==='Complete') return `<span class="rq-pill rq-Complete">Complete</span>`;
+  if(items&&items.length) return [...new Set(items.map(i=>i.stage))].map(stageBadge).join(' ');
+  return `<span class="rq-pill rq-In-Progress">In Progress</span>`;
+}
+// Chase tracking: the item card's days-inactive when linked (worst card), else days since the buying team last actioned the ticket
+function reqLastActionedHTML(r,items){
+  if(r.status==='Complete') return '<span style="color:var(--text3);font-size:.78rem">—</span>';
+  if(items&&items.length){
+    const tracked=items.filter(i=>!i.archived&&!NO_INACTIVE.has(i.stage));
+    if(!tracked.length) return daysBadge(0,items[0].stage);
+    return daysBadge(Math.max(...tracked.map(daysInactive)),'');
+  }
+  const n=reqDays(r.last_actioned_at||r.created_at);
+  return `<span title="Last actioned by buying ${fmtEntryDate((r.last_actioned_at||r.created_at).slice(0,10),true)}">${daysBadge(Math.max(0,n),'')}</span>`;
+}
 
 function updateReqBadge(){
   const open=reqData.filter(r=>REQ_OPEN.has(r.status));
@@ -6141,7 +6244,7 @@ function renderRequestsPage(){
     if(f==='unassigned') return open&&!r.assigned_to;
     return open;
   });
-  if(q) rows=rows.filter(r=>[r.ref,r.customer,r.title,r.cs_ticket,r.requested_by,r.request_type,r.description,r.assigned_to,reqName(r.assigned_to)].some(v=>(v||'').toLowerCase().includes(q)));
+  if(q) rows=rows.filter(r=>[r.ref,reqDisplayRef(r,reqItemsFor(r.id)),r.department,r.customer,r.title,r.cs_ticket,r.requested_by,r.request_type,r.description,r.assigned_to,reqName(r.assigned_to)].some(v=>(v||'').toLowerCase().includes(q)));
   rows.sort((a,b)=>{
     if(f!=='closed'){
       const ao=REQ_OPEN.has(a.status), bo=REQ_OPEN.has(b.status);
@@ -6159,21 +6262,23 @@ function renderRequestsPage(){
     const items=reqItemsFor(r.id);
     const open=REQ_OPEN.has(r.status);
     return `<tr class="rq-row${(r.status==='New'||r.buyer_unread)&&open?' unread':''}" onclick="openReqModal('${r.id}')">
-      <td><span class="rq-ref">${esc(r.ref)}</span></td>
-      <td>${r.customer?esc(r.customer):'<span style="color:var(--text3)">—</span>'}</td>
-      <td>${esc(reqTitleText(r))}<div style="font-size:.74rem;color:var(--text3)">${esc(r.request_type)}${r.buyer_unread&&r.status!=='New'?' · <span style="color:var(--accent)">● new activity</span>':''}</div></td>
-      <td>${esc(reqName(r.requested_by))}${r.department?`<div style="font-size:.72rem;color:var(--text3)">${esc(r.department)}</div>`:''}</td>
-      <td>${r.assigned_to?esc(reqName(r.assigned_to)):'<span style="color:var(--amber)">Unassigned</span>'}</td>
-      <td><span class="rq-pill ${reqStCls(r.status)}">${esc(r.status)}</span></td>
+      <td><span class="rq-ref">${esc(reqDisplayRef(r,items))}</span></td>
+      <td>${r.department?esc(r.department):'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${esc(reqName(r.requested_by))}</td>
+      <td>${esc(reqTitleText(r))}<div style="font-size:.74rem;color:var(--text3)">${esc(r.request_type)}${r.customer?' · '+esc(r.customer):''}${r.buyer_unread&&r.status!=='New'?' · <span style="color:var(--accent)">● new activity</span>':''}</div></td>
+      <td>${reqStatusHTML(r,items)}</td>
       <td>${items.length?items.map(i=>`<div style="font-size:.78rem">${esc(i.name)}</div>`).join(''):'<span style="color:var(--text3)">—</span>'}</td>
-      <td style="font-size:.8rem;color:${r.status==='New'&&reqDays(r.created_at)>=2?'var(--red);font-weight:600':'var(--text3)'}">${reqDays(r.created_at)===0?'Today':reqDays(r.created_at)+'d ago'}</td>
+      <td>${r.assigned_to?esc(reqName(r.assigned_to)):'<span style="color:var(--amber)">Unassigned</span>'}</td>
+      <td>${reqLastActionedHTML(r,items)}</td>
     </tr>`;
   }).join('');
 }
 
 // ── Ticket modal ──
+let _reqTab='details';
+function setReqTab(t){ _reqTab=t; refreshReqModal(true); }
 async function openReqModal(id){
-  reqOpenId=id; _reqDeclining=false;
+  reqOpenId=id; _reqDeclining=false; _reqTab='details';
   $('rqBody').innerHTML='<div style="color:var(--text3);font-size:.85rem">Loading…</div>';
   $('reqOverlay').classList.remove('hidden');
   const r=reqData.find(x=>x.id===id);
@@ -6185,60 +6290,150 @@ async function openReqModal(id){
 }
 function closeReqModal(){ reqOpenId=null; $('reqOverlay')?.classList.add('hidden'); }
 
-async function refreshReqModal(){
-  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r){ closeReqModal(); return; }
+// ── Link an existing item card to a request (for work that started before the ticket) ──
+let _rlReqId=null;
+function openReqLink(reqId){
+  const r=reqData.find(x=>x.id===reqId); if(!r) return;
+  _rlReqId=reqId;
+  $('rlSub').textContent=`${r.ref} · ${reqTitleText(r)} — ${reqName(r.requested_by)} will see the card's full timeline`;
+  $('rlSearch').value=''; $('rlArchived').checked=false;
+  renderReqLinkList();
+  $('reqLinkOverlay').classList.remove('hidden');
+  setTimeout(()=>$('rlSearch').focus(),50);
+}
+function closeReqLink(){ $('reqLinkOverlay')?.classList.add('hidden'); _rlReqId=null; }
+function renderReqLinkList(){
+  const q=($('rlSearch').value||'').trim().toLowerCase();
+  const withArch=$('rlArchived').checked;
+  const linked=new Set(reqLinks.filter(l=>l.request_id===_rlReqId).map(l=>l.item_id));
+  const list=data.filter(i=>!linked.has(i.id)&&(withArch||!i.archived)&&(!q||matchesItemSearch(i,q)))
+    .sort((a,b)=>a.name.localeCompare(b.name)).slice(0,80);
+  $('rlList').innerHTML=list.length?list.map(i=>`<div class="rq-pick" onclick="linkReqItem('${i.id}')">
+      <span class="rq-ref">${esc(i.refCode||'')}</span><span class="nm">${esc(i.name)}</span>
+      <span class="sup">${esc(i.supplier||'')}</span>${stageBadge(i.stage)}${i.archived?'<span class="badge badge-archived">Archived</span>':''}</div>`).join('')
+    :'<div style="font-size:.84rem;color:var(--text3);padding:6px 2px">No matching item cards.</div>';
+}
+async function linkReqItem(itemId){
+  const reqId=_rlReqId; const r=reqData.find(x=>x.id===reqId); const item=data.find(i=>i.id===itemId);
+  if(!r||!item) return;
+  closeReqLink();
   try{
-    [_reqFiles,_reqMsgs]=await Promise.all([
-      SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
-      SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`)
-    ]);
-  }catch(e){ toast('Could not load request: '+e.message,'error'); }
-  if(reqOpenId!==id) return;
-  const draft=$('rqMsgText')?.value||'', declineDraft=$('rqDeclineReason')?.value||'';
+    await SB.post('request_items',{request_id:reqId,item_id:itemId});
+    if(r.status==='New'||r.status==='Acknowledged') await SB.patch(`requests?id=eq.${reqId}`,{status:'In Progress'});
+    await loadRequests();
+    if(reqOpenId===reqId) refreshReqModal();
+    toast(`${item.name} linked to ${r.ref} ✓`);
+  }catch(e){ toast('Link failed: '+e.message,'error'); }
+}
+function unlinkReqItem(reqId,itemId){
+  const r=reqData.find(x=>x.id===reqId); const item=data.find(i=>i.id===itemId);
+  confirmAction('Unlink item card?',`"${item?.name||'This card'}" will no longer show on ${r?.ref||'the request'}. The item card itself is not changed.`,async()=>{
+    try{
+      await SB.delete(`request_items?request_id=eq.${reqId}&item_id=eq.${encodeURIComponent(itemId)}`);
+      await loadRequests();
+      if(reqOpenId===reqId) refreshReqModal();
+      toast('Unlinked');
+    }catch(e){ toast('Unlink failed: '+e.message,'error'); }
+  });
+}
+
+// ── New request on someone's behalf (e.g. back-filling tickets for work already done) ──
+let _rnRequesters=[];
+async function openReqNew(){
+  try{ _rnRequesters=await SB.get('app_users?role=eq.requester&select=email,display_name,department&order=department.asc,display_name.asc'); }
+  catch(e){ _rnRequesters=[]; }
+  if(!_rnRequesters.length){ toast('No request-page users set up yet','error'); return; }
+  const depts=[...new Set(_rnRequesters.map(u=>u.department||'Other'))];
+  $('rnWho').innerHTML='<option value="">Select…</option>'+depts.map(d=>`<optgroup label="${esc(d)}">${
+    _rnRequesters.filter(u=>(u.department||'Other')===d).map(u=>`<option value="${esc(u.email)}">${esc(u.display_name||reqName(u.email))}</option>`).join('')}</optgroup>`).join('');
+  const meEmail=(getStoredSession()?.user?.email||'').toLowerCase();
+  $('rnAssign').innerHTML='<option value="">— Unassigned —</option>'+reqBuyers.map(b=>`<option value="${b.email}"${b.email===meEmail?' selected':''}>${b.display_name}</option>`).join('');
+  ['rnTitle','rnCs','rnDesc','rnPrice'].forEach(k=>$(k).value='');
+  $('rnCustomer').value=''; $('rnType').value='New Product Development'; $('rnStatus').value='In Progress';
+  reqNewTypeChanged();
+  $('rnSaveBtn').disabled=false; $('rnSaveBtn').textContent='Create request';
+  $('reqNewOverlay').classList.remove('hidden');
+}
+function closeReqNew(){ $('reqNewOverlay')?.classList.add('hidden'); }
+function reqNewTypeChanged(){
+  const t=$('rnType').value, cs=t==='Customer Service', npd=t==='New Product Development';
+  $('rnCustField').style.display=npd?'':'none';
+  $('rnPriceField').style.display=npd?'':'none';
+  $('rnCsField').style.display=cs?'':'none';
+  $('rnTitleLabel').textContent=cs?'SKU *':'Title *';
+  $('rnDescLabel').textContent=cs?'Query':'Details';
+}
+async function saveReqNew(){
+  const t=$('rnType').value, cs=t==='Customer Service', npd=t==='New Product Development';
+  const who=$('rnWho').value, title=$('rnTitle').value.trim(), cust=npd?$('rnCustomer').value:'', csNo=cs?$('rnCs').value.trim():'';
+  const miss=[!who&&'requested by',!title&&(cs?'SKU':'title'),npd&&!cust&&'customer',cs&&!csNo&&'CS ticket'].filter(Boolean);
+  if(miss.length){ toast('Please add: '+miss.join(', '),'error'); return; }
+  const u=_rnRequesters.find(x=>x.email===who)||{};
+  const btn=$('rnSaveBtn'); btn.disabled=true; btn.textContent='Creating…';
+  try{
+    const [row]=await SB.post('requests',{
+      requested_by:who, department:u.department||'', request_type:t, customer:cust, title, cs_ticket:csNo,
+      description:$('rnDesc').value.trim(), target_price:npd?$('rnPrice').value.trim():'',
+      status:$('rnStatus').value, assigned_to:$('rnAssign').value, buyer_unread:false, rep_unread:true
+    });
+    if(_reqKnownIds) _reqKnownIds.add(row.id); // you made it — no "new request" pop-up
+    closeReqNew(); await loadRequests();
+    toast(`${row.ref} created for ${u.display_name||reqName(who)} ✓`);
+    openReqModal(row.id); // straight into it, ready to link existing item cards
+  }catch(e){ btn.disabled=false; btn.textContent='Create request'; toast('Create failed: '+e.message,'error'); }
+}
+
+async function refreshReqModal(noFetch){
+  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r){ closeReqModal(); return; }
+  if(!noFetch){
+    try{
+      [_reqFiles,_reqMsgs]=await Promise.all([
+        SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
+        SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`)
+      ]);
+    }catch(e){ toast('Could not load request: '+e.message,'error'); }
+    if(reqOpenId!==id) return;
+  }
+  const draft=$('rqMsgText')?.value||'';
   const focusId=document.activeElement?.id;
   const items=reqItemsFor(id), open=REQ_OPEN.has(r.status);
   const me=(getStoredSession()?.user?.email||'').toLowerCase();
-  const unmoved=_reqFiles.filter(f=>!f.sp_path&&!f.is_completion);
-  const repFiles=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>!f.is_completion);
-  const doneFiles=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>f.is_completion);
-  $('rqRef').textContent=r.ref;
-  $('rqPills').innerHTML=`<span class="rq-pill ${reqStCls(r.status)}">${esc(r.status)}</span>`;
+  const all=_reqFiles.map((f,i)=>[f,i]);
+  const repFiles=all.filter(([f])=>!f.is_completion&&!f.shared_by_buyer);
+  const sharedFiles=all.filter(([f])=>f.shared_by_buyer||f.is_completion);
+  const itemFileCount=items.reduce((n,i)=>n+(i.files||[]).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
+  const rep=esc(reqName(r.requested_by));
+
+  $('rqRef').textContent=reqDisplayRef(r,items);
+  $('rqPills').innerHTML=`${reqDisplayRef(r,items)!==r.ref?`<span class="rq-ref" style="opacity:.7">${esc(r.ref)}</span>`:''}${reqStatusHTML(r,items)}`;
   $('rqTitle').textContent=reqTitleText(r);
-  $('rqBody').innerHTML=`
-    ${r.status==='Declined'?`<div class="rq-desc" style="border-color:rgba(239,68,68,.4)"><b>Declined</b>${r.decline_reason?' — '+esc(r.decline_reason):''}</div>`:''}
-    ${r.status==='Complete'&&(r.completion_notes||doneFiles.length)?`<div class="rq-done">
-      <div class="section-title" style="margin:0">✔ Completed${r.completed_at?' '+fmtEntryDate(r.completed_at.slice(0,10),true):''} — sent to ${esc(reqName(r.requested_by))}</div>
-      ${r.completion_notes?`<div class="rq-desc">${esc(r.completion_notes)}</div>`:''}
-      ${doneFiles.length?`<div class="rq-thumbs">${doneFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`:''}
-    </div>`:''}
-    <div class="rq-kv">
-      ${r.customer?`<div><b>Customer</b><span>${esc(r.customer)}</span></div>`:''}
-      <div><b>Type</b><span>${esc(r.request_type)}</span></div>
-      ${r.request_type==='Customer Service'?`<div><b>SKU</b><span>${esc(r.title)}</span></div><div><b>CS Ticket</b><span>${esc(r.cs_ticket||'—')}</span></div>`:''}
-      <div><b>From</b><span>${esc(reqName(r.requested_by))}${r.department?' · '+esc(r.department):''}</span></div>
-      <div><b>Received</b><span>${fmtEntryDate(r.created_at.slice(0,10),true)}</span></div>
-      ${r.target_price?`<div><b>Ideal / target sales price</b><span>${esc(r.target_price)}</span></div>`:''}
-      ${r.acknowledged_at?`<div><b>Picked up</b><span>${fmtEntryDate(r.acknowledged_at.slice(0,10),true)} · ${esc(reqName(r.acknowledged_by))}</span></div>`:''}
-    </div>
-    <div class="rq-sec" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <div class="section-title" style="margin:0">Assigned to</div>
-      <select id="rqAssign" onchange="assignRequest('${id}',this.value)" style="font-size:.82rem;padding:5px 28px 5px 10px"${open?'':' disabled'}>
-        <option value="">— Unassigned —</option>
-        ${reqBuyers.map(b=>`<option value="${esc(b.email)}"${b.email===r.assigned_to?' selected':''}>${esc(b.display_name||reqName(b.email))}</option>`).join('')}
-        ${r.assigned_to&&!reqBuyers.some(b=>b.email===r.assigned_to)?`<option value="${esc(r.assigned_to)}" selected>${esc(reqName(r.assigned_to))}</option>`:''}
-      </select>
-      ${open&&r.assigned_to!==me?`<button class="btn btn-ghost btn-sm" onclick="assignRequest('${id}','${esc(me)}')">Assign to me</button>`:''}
-      <span style="font-size:.76rem;color:var(--text3)">${esc(reqName(r.requested_by))} sees who's on it</span>
-    </div>
-    ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
+  $('rqAssignWrap').innerHTML=`<span style="font-size:.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Assigned to</span>
+    <select id="rqAssign" onchange="assignRequest('${id}',this.value)" style="font-size:.82rem;padding:5px 28px 5px 10px"${open?'':' disabled'}>
+      <option value="">— Unassigned —</option>
+      ${reqBuyers.map(b=>`<option value="${esc(b.email)}"${b.email===r.assigned_to?' selected':''}>${esc(b.display_name||reqName(b.email))}</option>`).join('')}
+      ${r.assigned_to&&!reqBuyers.some(b=>b.email===r.assigned_to)?`<option value="${esc(r.assigned_to)}" selected>${esc(reqName(r.assigned_to))}</option>`:''}
+    </select>
+    ${open&&r.assigned_to!==me?`<button class="btn btn-ghost btn-sm" onclick="assignRequest('${id}','${esc(me)}')">Me</button>`:''}`;
+  const tab=(k,label,n)=>`<button class="tab-btn${_reqTab===k?' active':''}" onclick="setReqTab('${k}')">${label}${n?`<span class="cnt">${n}</span>`:''}</button>`;
+  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('files','📁 Files',repFiles.length+sharedFiles.length+itemFileCount)+tab('messages','💬 Messages',_reqMsgs.length);
+
+  let html='';
+  if(_reqTab==='files'){
+    const unmoved=repFiles.filter(([f])=>!f.sp_path);
+    const fileRow=(name,url,kindLabel)=>`<div class="rq-file-link"><span>${fileIconByName(name)}</span><a href="${esc(url)}" target="_blank" rel="noopener" title="${esc(name)}">${esc(name)}</a>${kindLabel?`<span class="k">${esc(kindLabel)}</span>`:''}</div>`;
+    const KIND_LABEL={margin:'Margin sheet',spec:'Spec form',quote:'Quotation',request:'Sales request file'};
+    html=`
     <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">Item cards (${items.length})
-        ${open?`<button class="btn btn-sm" style="margin-left:auto;text-transform:none;letter-spacing:0" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}</div>
-      ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span><span class="badge ${STAGE_CLS[i.stage]||''}">${esc(i.stage)}</span></div>`).join('')}</div>`
-        :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), or be completed without one.</div>`}
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Shared with ${rep} (${sharedFiles.length})
+        <span style="margin-left:auto;display:flex;gap:8px;text-transform:none;letter-spacing:0;font-weight:500;font-size:.72rem">
+          <span id="spStatus-request"></span><span id="spStatus-media"></span></span></div>
+      <div class="rq-sub">Saved to SharePoint and shown on ${rep}'s request page (Files / Media tabs). Photos &amp; MP4 → Images For Buying Tracker · everything else → Buying Tracker Quotations.</div>
+      <div class="rq-drop" id="rqShareDrop" onclick="$('rqShareInput').click()">📎 Drop files or images to share, or click to choose
+        <input type="file" id="rqShareInput" multiple class="hidden" onchange="reqShareFiles(this.files);this.value=''"></div>
+      ${sharedFiles.length?`<div class="rq-thumbs" style="margin-top:10px">${sharedFiles.map(([f,i])=>reqThumbHTML(f,i,true)).join('')}</div>`:''}
     </div>
     <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">Attachments (${repFiles.length})
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Attachments from ${rep} (${repFiles.length})
         ${unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
           ${items.length>1?`<select id="rqSpTarget" style="font-size:.75rem;padding:4px 24px 4px 8px">${items.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')}</select>`:''}
           <button class="btn btn-sm" onclick="copyRequestFilesToSp('${id}',$('rqSpTarget')?.value||'${items[0].id}')">📁 Copy ${unmoved.length} to SharePoint</button></span>`:''}
@@ -6246,15 +6441,67 @@ async function refreshReqModal(){
       ${repFiles.length?`<div class="rq-thumbs" id="rqThumbs">${repFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`
         :'<div style="font-size:.84rem;color:var(--text3)">No attachments.</div>'}
     </div>
-    <div class="rq-sec" style="margin-bottom:0">
-      <div class="section-title">Messages with ${esc(reqName(r.requested_by))}</div>
-      <div class="rq-msgs" id="rqMsgs">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):'<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on the rep\'s request page.</div>'}</div>
-      <div class="rq-reply"><textarea id="rqMsgText" placeholder="Reply to ${esc(reqName(r.requested_by))}…"></textarea><button class="btn" onclick="sendReqMsg('${id}')">Send</button></div>
+    ${items.map(it=>{
+      const files=(it.files||[]).filter(f=>!isImageFile(f.name)), links=it.fileLinks||[], imgs=it.images||[];
+      return `<div class="rq-sec">
+        <div class="section-title">From item card · ${esc(it.name)} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${files.length+links.length+imgs.length})</span></div>
+        <div class="rq-sub">Everything on this card's Files &amp; Media tabs — ${rep} can see these too.</div>
+        ${files.map(f=>fileRow(f.name,f.url,KIND_LABEL[f.kind]||'File')).join('')}
+        ${links.map(l=>fileRow(l.name||l.url,l.url,'Link')).join('')}
+        ${imgs.length?`<div class="rq-thumbs" style="margin-top:8px">${imgs.map(m=>`<div class="rq-thumb" onclick="window.open('${esc(m.url)}','_blank')" title="${esc(m.name)}">
+            <span><span class="rq-ic">${isVideo(m.name)?'🎬':'🖼️'}</span>${esc(m.name)}</span>${isVideo(m.name)?'':`<img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" onerror="this.remove()">`}</div>`).join('')}</div>`:''}
+        ${!files.length&&!links.length&&!imgs.length?'<div style="font-size:.84rem;color:var(--text3)">Nothing on this card yet.</div>':''}
+      </div>`;}).join('')}`;
+  }else if(_reqTab==='messages'){
+    html=`<div class="rq-sec" style="margin-bottom:0">
+      <div class="rq-msgs" id="rqMsgs" style="max-height:52vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
+      <div class="rq-reply"><textarea id="rqMsgText" placeholder="Reply to ${rep}…"></textarea><button class="btn" onclick="sendReqMsg('${id}')">Send</button></div>
     </div>`;
-  if(draft) $('rqMsgText').value=draft;
-  if(declineDraft&&$('rqDeclineReason')) $('rqDeclineReason').value=declineDraft;
-  const m=$('rqMsgs'); if(m) m.scrollTop=m.scrollHeight;
-  if(focusId==='rqMsgText'||focusId==='rqDeclineReason'){ const el=$(focusId); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); } }
+  }else{
+    const doneFiles=all.filter(([f])=>f.is_completion);
+    html=`
+    ${r.status==='Declined'?`<div class="rq-desc" style="border-color:rgba(239,68,68,.4)"><b>Declined</b>${r.decline_reason?' — '+esc(r.decline_reason):''}</div>`:''}
+    ${r.status==='Complete'&&(r.completion_notes||doneFiles.length)?`<div class="rq-done">
+      <div class="section-title" style="margin:0">✔ Completed${r.completed_at?' '+fmtEntryDate(r.completed_at.slice(0,10),true):''} — sent to ${rep}</div>
+      ${r.completion_notes?`<div class="rq-desc">${esc(r.completion_notes)}</div>`:''}
+      ${doneFiles.length?`<div class="rq-thumbs">${doneFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`:''}
+    </div>`:''}
+    <div class="rq-kv">
+      ${r.customer?`<div><b>Customer</b><span>${esc(r.customer)}</span></div>`:''}
+      <div><b>Type</b><span>${esc(r.request_type)}</span></div>
+      ${r.request_type==='Customer Service'?`<div><b>SKU</b><span>${esc(r.title)}</span></div><div><b>CS Ticket</b><span>${esc(r.cs_ticket||'—')}</span></div>`:''}
+      <div><b>From</b><span>${rep}${r.department?' · '+esc(r.department):''}</span></div>
+      <div><b>Received</b><span>${fmtEntryDate(r.created_at.slice(0,10),true)}</span></div>
+      ${r.target_price?`<div><b>Ideal / target sales price</b><span>${esc(r.target_price)}</span></div>`:''}
+      ${r.acknowledged_at?`<div><b>Picked up</b><span>${fmtEntryDate(r.acknowledged_at.slice(0,10),true)} · ${esc(reqName(r.acknowledged_by))}</span></div>`:''}
+      <div><b>Last actioned</b><span>${reqLastActionedHTML(r,items)}</span></div>
+    </div>
+    ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
+    <div class="rq-sec" style="margin-bottom:0">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Item cards (${items.length})
+        <span style="margin-left:auto;display:flex;gap:6px;text-transform:none;letter-spacing:0">
+          <button class="btn btn-ghost btn-sm" onclick="openReqLink('${id}')" title="Attach an item card you've already been working on">🔗 Link existing</button>
+          ${open?`<button class="btn btn-sm" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}
+        </span></div>
+      ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span>${stageBadge(i.stage)}${daysBadge(daysInactive(i),i.stage)}<button class="rq-unlink" title="Unlink from this request (the item card itself is kept)" onclick="event.stopPropagation();unlinkReqItem('${id}','${i.id}')">✕</button></div>`).join('')}</div>`
+        :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), link existing ones, or be completed without one.</div>`}
+    </div>`;
+  }
+  $('rqBody').innerHTML=html;
+  if(_reqTab==='messages'){
+    if(draft) $('rqMsgText').value=draft;
+    const m=$('rqMsgs'); if(m) m.scrollTop=m.scrollHeight;
+    if(focusId==='rqMsgText'){ const el=$('rqMsgText'); el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
+  }
+  if(_reqTab==='files'){
+    const z=$('rqShareDrop');
+    if(z){
+      z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+      z.addEventListener('dragleave',()=>z.classList.remove('over'));
+      z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');reqShareFiles(e.dataTransfer.files);});
+    }
+    refreshSpStatus('request'); refreshSpStatus('media');
+  }
   $('rqFooter').innerHTML=open?`
       ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
@@ -6266,9 +6513,40 @@ async function refreshReqModal(){
   reqHydrateThumbs();
 }
 
-function reqThumbHTML(f,i){
+// Share files on the ticket itself via SharePoint (works with or without a linked item card)
+async function reqShareFiles(list){
+  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r) return;
+  const files=[...list]; if(!files.length) return;
+  const me=(getStoredSession()?.user?.email||'').toLowerCase();
+  const target={refCode:reqDisplayRef(r,reqItemsFor(id)), name:reqTitleText(r), category:''}; // names the SharePoint file
+  let ok=0;
+  for(const [n,f] of files.entries()){
+    const kind=REQ_MEDIA_EXTS.has((f.name.split('.').pop()||'').toLowerCase())?'media':'request';
+    toast(`Sharing ${files.length>1?(n+1)+'/'+files.length+' ':''}to SharePoint…`);
+    const saved=await saveFileToSp(f,kind,target); if(!saved) continue;
+    try{
+      await SB.post('request_files',{request_id:id,name:saved.finalName,storage_path:'',mime:f.type||'',size:f.size,
+        uploaded_by:me,sp_path:saved.spPath,sp_url:saved.url,is_image:kind==='media',shared_by_buyer:true});
+      ok++;
+    }catch(e){ toast('Saved to SharePoint, but linking it to the ticket failed: '+e.message,'error'); }
+  }
+  if(ok){ toast(`${ok} file${ok>1?'s':''} shared with ${reqName(r.requested_by)} ✓`); await refreshReqModal(); }
+}
+function unshareReqFile(fileId){
+  const f=_reqFiles.find(x=>x.id===fileId); if(!f) return;
+  confirmAction('Remove from ticket?',`"${f.name}" will no longer show on the request page. The file stays in SharePoint.`,async()=>{
+    try{ await SB.delete(`request_files?id=eq.${fileId}`); await refreshReqModal(); toast('Removed'); }
+    catch(e){ toast('Remove failed: '+e.message,'error'); }
+  });
+}
+
+function reqThumbHTML(f,i,removable){
+  const spImg=f.sp_url&&(f.is_image||reqIsImg(f))&&!reqIsVid(f);
   return `<div class="rq-thumb" data-i="${i}" onclick="openReqFile(${i})" title="${esc(f.name)}">
-    <span><span class="rq-ic">${reqIsImg(f)?'🖼️':reqIsVid(f)?'🎬':fileIconByName(f.name)}</span>${esc(f.name)}</span>${f.sp_path?'<span class="rq-sp">SP ✓</span>':''}</div>`;
+    <span><span class="rq-ic">${reqIsImg(f)?'🖼️':reqIsVid(f)?'🎬':fileIconByName(f.name)}</span>${esc(f.name)}</span>
+    ${spImg?`<img src="${esc(spThumbUrl(f.sp_url))}" alt="" onerror="this.remove()">`:''}
+    ${f.sp_path?'<span class="rq-sp">SP ✓</span>':''}
+    ${removable&&f.shared_by_buyer?`<button class="rq-unlink" style="position:absolute;top:3px;right:3px;z-index:2;background:var(--bg2)" title="Remove from ticket" onclick="event.stopPropagation();unshareReqFile('${f.id}')">✕</button>`:''}</div>`;
 }
 const reqIsImg=f=>/^image\//.test(f.mime||'')||/\.(jpe?g|png|webp|gif)$/i.test(f.name);
 const reqIsVid=f=>/^video\//.test(f.mime||'')||/\.(mp4|mov|webm)$/i.test(f.name);
@@ -6284,12 +6562,13 @@ async function reqBlobUrl(f){
 }
 function reqHydrateThumbs(){
   _reqFiles.forEach((f,i)=>{
-    if(!reqIsImg(f)||f.size>8*1048576) return;
+    if(!f.storage_path||!reqIsImg(f)||f.size>8*1048576) return; // SharePoint-shared files use their own preview
     reqBlobUrl(f).then(u=>{ const el=document.querySelector(`#rqBody .rq-thumb[data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('afterbegin',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
   });
 }
 async function openReqFile(i){
   const f=_reqFiles[i]; if(!f) return;
+  if(f.sp_url){ window.open(f.sp_url,'_blank','noopener'); return; }
   try{
     const u=await reqBlobUrl(f);
     if(reqIsVid(f)&&/\.mp4$/i.test(f.name)){ openVidPreview(u,f.name); return; }
