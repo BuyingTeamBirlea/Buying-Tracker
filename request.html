@@ -53,6 +53,15 @@ button,input,select,textarea{font-family:inherit}
 .page-head h1{font-size:1.35rem;font-weight:600}
 .page-head p{color:var(--text3);font-size:.85rem;margin-top:3px}
 .page-head .spacer{flex:1}
+.list-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.list-tools .search{flex:1;min-width:200px;position:relative}
+.list-tools .search input{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 12px 8px 32px;border-radius:var(--radius-sm);font-size:.86rem;outline:none}
+.list-tools .search input:focus{border-color:var(--accent)}
+.list-tools .search span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.85rem;opacity:.6}
+.list-tools select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--radius-sm);font-size:.84rem;outline:none;cursor:pointer}
+.list-tools select:focus{border-color:var(--accent)}
+.list-tools .clear{background:none;border:none;color:var(--accent);font-size:.8rem;cursor:pointer;text-decoration:underline}
+.list-count{font-size:.78rem;color:var(--text3);margin:-4px 0 10px}
 .seg{display:inline-flex;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;gap:2px}
 .seg button{background:none;border:none;color:var(--text2);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:.82rem}
 .seg button.active{background:var(--bg4);color:var(--text)}
@@ -66,7 +75,10 @@ button,input,select,textarea{font-family:inherit}
 .ref{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text3)}
 .req-title{font-weight:600;font-size:.95rem}
 .req-meta{font-size:.8rem;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap}
-.req-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.req-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px}
+.side-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap}
+.side-row .mini-item{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.req-flags{display:flex;gap:10px;margin-top:4px}
 .new-dot{font-size:.7rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:.74rem;font-weight:500;white-space:nowrap}
 .st-New{background:rgba(79,110,247,.15);color:#8aa0fb}
@@ -152,8 +164,8 @@ body.light-mode .days-green{color:#15803d}body.light-mode .days-amber{color:#b45
 .latest small{display:block;font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:3px}
 
 /* request tabs */
-.dtabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--bg2)}
-.dtab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:10px 12px;font-size:.88rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:-1px}
+.dtabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;scrollbar-width:none}
+.dtab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:10px 9px;white-space:nowrap;flex-shrink:0;font-size:.88rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:-1px}
 .dtab:hover{color:var(--text)}
 .dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .dtab .cnt{font-size:.7rem;background:var(--bg4);color:var(--text2);border-radius:100px;padding:1px 7px;font-family:'DM Mono',monospace}
@@ -182,6 +194,13 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
 .f-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-row .k{font-size:.72rem;color:var(--text3);white-space:nowrap}
 .sp-note{font-size:.76rem;color:var(--text3);margin-top:12px}
+.f-row .nm{cursor:pointer}
+.f-act{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.76rem;font-weight:500;text-decoration:none;white-space:nowrap;cursor:pointer}
+.f-act:hover{border-color:var(--accent);color:var(--text)}
+.f-act.desk{background:var(--accent);border-color:var(--accent);color:#fff}
+.f-act.desk:hover{background:var(--accent2)}
+.sp-bar{display:flex;align-items:center;gap:10px;background:rgba(245,158,11,.1);border-bottom:1px solid rgba(245,158,11,.35);padding:9px 20px;font-size:.82rem}
+.sp-bar span{flex:1}
 
 /* detail drawer */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;justify-content:flex-end;backdrop-filter:blur(3px)}
@@ -246,7 +265,8 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
   .form-grid{grid-template-columns:1fr}
   .who{display:none}
   .req-card{grid-template-columns:1fr}
-  .req-side{flex-direction:row;align-items:center;justify-content:flex-start}
+  .req-side{align-items:flex-start}
+  .side-row{justify-content:flex-start;flex-wrap:wrap}
   .main{padding:16px 14px 50px}
 }
 </style>
@@ -316,6 +336,24 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
         </div>
         <button class="btn" onclick="showForm()">+ New request</button>
       </div>
+      <div class="list-tools">
+        <div class="search"><span>🔍</span><input id="lfSearch" placeholder="Search ref, title, customer, SKU…" oninput="renderList()"></div>
+        <select id="lfPerson" class="hidden" onchange="renderList()" title="Filter by person"></select>
+        <select id="lfType" onchange="renderList()" title="Filter by request type">
+          <option value="">All types</option><option>New Product Development</option><option>Margin Sheets</option>
+          <option>BC Set Up</option><option>PIM Assistance</option><option>Customer Service</option></select>
+        <select id="lfCustomer" onchange="renderList()" title="Filter by customer"><option value="">All customers</option></select>
+        <select id="lfSort" onchange="renderList()" title="Sort">
+          <option value="updated">Sort: Last update</option>
+          <option value="sent_new">Sort: Sent (newest)</option>
+          <option value="sent_old">Sort: Sent (oldest)</option>
+          <option value="az">Sort: Title A–Z</option>
+          <option value="za">Sort: Title Z–A</option>
+          <option value="chase">Sort: Longest since update</option>
+          <option value="person">Sort: Person</option></select>
+        <button class="clear hidden" id="lfClear" onclick="clearListFilters()">Clear</button>
+      </div>
+      <div class="list-count" id="listCount"></div>
       <div class="req-list" id="reqList"></div>
     </section>
 
@@ -400,6 +438,7 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
       <button class="icon-btn" onclick="closeDetail()" title="Close">✕</button>
     </div>
     <div class="dtabs" id="dTabs"></div>
+    <div class="sp-bar hidden" id="spBar"><span>🔑 Sign in to SharePoint once to see these images — after that they load automatically.</span><button class="btn btn-sm" onclick="spReauth()">Sign in to SharePoint</button></div>
     <div class="drawer-body" id="dBody"></div>
   </div>
 </div>
@@ -636,10 +675,57 @@ function setScope(sc){
   renderList();
 }
 document.querySelectorAll('#scopeSeg button').forEach(b=>b.addEventListener('click',()=>setScope(b.dataset.s)));
+// ── Filters & sort ──
+// Last update = newest of: the ticket changing (messages, status, files…) or a linked item card's latest timeline entry
+function lastUpdate(r){
+  let t=r.updated_at||r.created_at;
+  progress.filter(p=>p.request_id===r.id&&p.last_activity).forEach(p=>{ const d=p.last_activity+'T23:59:59'; if(d>t) t=d; });
+  return t;
+}
+function chaseDays(r){
+  if(!OPEN_ST.has(r.status)) return -1; // finished tickets go to the bottom
+  const ds=progress.filter(p=>p.request_id===r.id).map(daysInactive).filter(n=>n!=null);
+  return ds.length?Math.max(...ds):Math.floor((Date.now()-new Date(r.updated_at||r.created_at))/86400000);
+}
+function fillListFilters(){
+  const base=requests.filter(r=>scope==='dept'||r.requested_by===me);
+  const keep=(id,opts,first)=>{ const el=$(id), v=el.value;
+    el.innerHTML=`<option value="">${first}</option>`+opts.map(([val,lab])=>`<option value="${esc(val)}">${esc(lab)}</option>`).join('');
+    if(opts.some(([val])=>val===v)) el.value=v; };
+  const people=[...new Set(base.map(r=>r.requested_by))].map(e=>[e,e===me?'Me ('+nameOf(e)+')':nameOf(e)]).sort((a,b)=>a[1].localeCompare(b[1]));
+  keep('lfPerson',people,'Everyone');
+  $('lfPerson').classList.toggle('hidden',scope!=='dept');
+  if(scope!=='dept') $('lfPerson').value='';
+  const custs=[...new Set(base.map(r=>r.customer).filter(Boolean))].sort().map(c=>[c,c]);
+  keep('lfCustomer',custs,'All customers');
+  $('lfCustomer').classList.toggle('hidden',!custs.length);
+}
+function clearListFilters(){ ['lfSearch','lfPerson','lfType','lfCustomer'].forEach(id=>$(id).value=''); $('lfSort').value='updated'; renderList(); }
+
 function renderList(){
+  fillListFilters();
+  const q=($('lfSearch').value||'').trim().toLowerCase(), who=$('lfPerson').value, type=$('lfType').value, cust=$('lfCustomer').value, sort=$('lfSort').value;
   const list=requests
     .filter(r=>scope==='dept'||r.requested_by===me)
-    .filter(r=>filter==='all'||(filter==='open'?OPEN_ST.has(r.status):!OPEN_ST.has(r.status)));
+    .filter(r=>filter==='all'||(filter==='open'?OPEN_ST.has(r.status):!OPEN_ST.has(r.status)))
+    .filter(r=>!who||r.requested_by===who)
+    .filter(r=>!type||r.request_type===type)
+    .filter(r=>!cust||r.customer===cust)
+    .filter(r=>!q||[r.ref,displayRef(r),r.title,r.customer,r.cs_ticket,r.description,r.request_type,nameOf(r.requested_by),
+                    ...progress.filter(p=>p.request_id===r.id).map(p=>p.name)].some(v=>(v||'').toLowerCase().includes(q)))
+    .sort((a,b)=>{
+      if(sort==='sent_new') return b.created_at.localeCompare(a.created_at);
+      if(sort==='sent_old') return a.created_at.localeCompare(b.created_at);
+      if(sort==='az') return (a.title||'').localeCompare(b.title||'',undefined,{sensitivity:'base'});
+      if(sort==='za') return (b.title||'').localeCompare(a.title||'',undefined,{sensitivity:'base'});
+      if(sort==='chase') return chaseDays(b)-chaseDays(a);
+      if(sort==='person') return nameOf(a.requested_by).localeCompare(nameOf(b.requested_by))||b.created_at.localeCompare(a.created_at);
+      return lastUpdate(b).localeCompare(lastUpdate(a));
+    });
+  const filtered=!!(q||who||type||cust);
+  $('lfClear').classList.toggle('hidden',!filtered&&sort==='updated');
+  $('listCount').textContent=`${list.length} request${list.length===1?'':'s'}${filtered?' match':''}`;
+  if(!list.length&&filtered){ $('reqList').innerHTML=`<div class="empty"><h3>No matching requests</h3><p><button class="clear" onclick="clearListFilters()">Clear filters</button></p></div>`; return; }
   if(!list.length){
     const who=scope==='dept'?`the ${esc(myDept)} team`:'you';
     $('reqList').innerHTML=`<div class="empty"><h3>${filter==='open'?'No open requests':'Nothing here yet'}</h3><p>${filter==='open'?(scope==='mine'?'Tap "+ New request" to send one to the buying team.':`No open requests from ${who}.`):''}</p></div>`;
@@ -652,13 +738,13 @@ function renderList(){
         <div class="req-top"><span class="ref">${esc(displayRef(r))}</span></div>
         <div class="req-title">${reqTitle(r)}</div>
         <div class="req-meta">${r.customer?`<span>${esc(r.customer)}</span>`:''}<span>${esc(r.request_type)}</span><span>Sent ${fmtDate(r.created_at)}${r.requested_by!==me?' by '+esc(nameOf(r.requested_by)):''}</span>${assigneeHTML(r)}</div>
+        ${r.rep_unread||(r.status==='Complete'&&r.completion_notes)?`<div class="req-flags">${r.rep_unread?'<span class="new-dot">● Update</span>':''}${r.status==='Complete'&&r.completion_notes?'<span class="done-tag">📄 Details ready</span>':''}</div>`:''}
       </div>
       <div class="req-side">
-        <span style="display:inline-flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${statusHTML(r)}</span>
-        ${r.rep_unread?'<span class="new-dot">● Update</span>':''}
-        ${r.status==='Complete'&&r.completion_notes?'<span class="done-tag">📄 Details ready</span>':''}
+        ${items.length&&r.status!=='Complete'
+          ? items.map(i=>`<div class="side-row"><span class="mini-item" title="${esc(i.name)}">${esc(i.name)}</span>${stagePill(i.stage)}${daysBadge(i)}</div>`).join('')
+          : `<div class="side-row">${items.length?items.map(i=>`<span class="mini-item" title="${esc(i.name)}">${esc(i.name)}</span>`).join(''):''}${statusHTML(r)}</div>`}
       </div>
-      ${items.length?`<div class="mini-items">${items.map(i=>`<span class="mini-item">${esc(i.name)}</span>${stagePill(i.stage)}${daysBadge(i)}`).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -705,7 +791,7 @@ async function openDetail(id){
   const r=requests.find(x=>x.id===id);
   if(r&&r.rep_unread){ r.rep_unread=false; renderList(); SB.rpc('mark_request_read',{p_id:id}).catch(()=>{}); }
 }
-function closeDetail(){ openId=null; $('detailOv').classList.add('hidden'); }
+function closeDetail(){ openId=null; $('detailOv').classList.add('hidden'); $('spBar')?.classList.add('hidden'); }
 $('detailOv').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeDetail(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeLightbox(); closeDetail(); closePwModal(); } });
 function setDetailTab(t){ detailTab=t; renderDetailView(); if(t==='messages') setTimeout(()=>{ const m=$('dMsgs'); if(m) m.scrollTop=m.scrollHeight; },0); }
@@ -831,6 +917,48 @@ function filesForView(media){
     if(m===media) out.push({src:'item',name:f.name,url:f.url,sp:!!f.sp_path,kind:f.is_upload?(KIND_LABEL[f.kind]||'File'):'Link',group:`${f.item_name}${f.ref_code?' · '+f.ref_code:''}`}); });
   return out;
 }
+// Office desktop app link — same as the Buying Tracker (edits save straight back to SharePoint)
+function officeDesktopUrl(webUrl,name){
+  const ext=((name||'').split('.').pop()||'').toLowerCase();
+  const app={xlsx:'excel',xlsm:'excel',xls:'excel',xlsb:'excel',csv:'excel',
+             docx:'word',docm:'word',doc:'word',pptx:'powerpoint',pptm:'powerpoint',ppt:'powerpoint'}[ext];
+  return app?{href:`ms-${app}:ofe|u|${webUrl}`,label:{excel:'Excel',word:'Word',powerpoint:'PowerPoint'}[app]}:null;
+}
+
+// ── SharePoint sign-in (same approach as the tracker) ──
+// Image previews come from SharePoint, so the browser needs a SharePoint sign-in once.
+// If a preview can't load, show the bar; signing in opens SharePoint in a small window,
+// Microsoft signs you in (usually automatically), the window closes and the images load.
+let _spProbe=null;
+function spImgFail(img){
+  const src=img.getAttribute('src'); img.remove();
+  if(!_spProbe) _spProbe=src;
+  $('spBar')?.classList.remove('hidden');
+}
+function _spCanLoad(u){
+  return new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(false),8000);
+    i.onload=()=>{clearTimeout(t);res(true)}; i.onerror=()=>{clearTimeout(t);res(false)};
+    i.src=u+(u.includes('?')?'&':'?')+'r='+Date.now(); });
+}
+async function spReauth(){
+  const w=window.open(SP_HOST+'/_layouts/15/sharepoint.aspx','spSignin','width=520,height=640');
+  if(!w){ toast('Pop-up blocked — allow pop-ups for this page, then try again','error'); return; }
+  toast('Signing in to SharePoint…');
+  const probe=_spProbe;
+  for(let i=0;i<60;i++){
+    await new Promise(r=>setTimeout(r,2000));
+    if(probe&&await _spCanLoad(probe)){
+      try{ w.close(); }catch(e){}
+      _spProbe=null; $('spBar')?.classList.add('hidden');
+      if(openId) renderDetailView();
+      toast('SharePoint connected ✓');
+      return;
+    }
+    if(w.closed&&i>2) break;
+  }
+  toast('Still can\'t reach SharePoint — check you are signed in with your Birlea Microsoft account','error');
+}
+
 function openViewFile(src,key){
   if(src==='ticket'){ const f=detailFiles[key]; if(f&&f.sp_url) window.open(f.sp_url,'_blank','noopener'); else openFile(key); return; }
   window.open(key,'_blank','noopener');
@@ -845,8 +973,12 @@ function filesViewHTML(r,media){
     return `<div class="file-group"><div class="sec-title">${esc(g)} (${rows.length})</div>${media
       ?`<div class="thumbs">${rows.map(x=>`<div class="thumb" onclick="${open(x)}" title="${esc(x.name)}">
           <span><span class="ic">${isVidName(x.name)?'🎬':'🖼️'}</span>${esc(x.name)}</span>
-          ${!isVidName(x.name)&&x.url?`<img src="${esc(x.sp?spThumb(x.url):x.url)}" alt="" onerror="this.remove()">`:''}</div>`).join('')}</div>`
-      :rows.map(x=>`<div class="f-row" onclick="${open(x)}" title="${esc(x.name)}"><span>${fileIcon(x.name)}</span><span class="nm">${esc(x.name)}</span>${x.kind?`<span class="k">${esc(x.kind)}</span>`:''}<span class="k">↗</span></div>`).join('')}</div>`;
+          ${!isVidName(x.name)&&x.url?`<img src="${esc(x.sp?spThumb(x.url):x.url)}" alt="" onerror="${x.sp?'spImgFail(this)':'this.remove()'}">`:''}</div>`).join('')}</div>`
+      :rows.map(x=>{
+        const desk=x.sp&&x.url?officeDesktopUrl(x.url,x.name):null;
+        return `<div class="f-row" title="${esc(x.name)}"><span>${fileIcon(x.name)}</span><span class="nm" onclick="${open(x)}">${esc(x.name)}</span>${x.kind?`<span class="k">${esc(x.kind)}</span>`:''}
+          ${desk?`<a class="f-act desk" href="${esc(desk.href)}" title="Opens in the ${desk.label} app on your computer">🖥 Open in ${desk.label}</a>`:''}
+          <button class="f-act" onclick="${open(x)}" title="${x.sp?'Open in SharePoint (browser)':'Open'}">↗ ${desk?'Browser':'Open'}</button></div>`;}).join('')}</div>`;
   }).join('')+(list.some(x=>x.sp)?'<div class="sp-note">Files open in SharePoint — you\'ll need to be signed in with your Birlea Microsoft account.</div>':'');
 }
 
