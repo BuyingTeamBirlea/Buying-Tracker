@@ -186,6 +186,9 @@ td{padding:10px 13px;font-size:.875rem;vertical-align:middle}
 .td-name span,.td-supplier span,.td-cat span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .td-supplier{color:var(--text2);max-width:150px;font-size:.82rem}
 .td-cat{max-width:130px;color:var(--text2);font-size:.8rem}
+.td-req{width:1%;white-space:nowrap;padding-left:4px!important;padding-right:4px!important}
+.req-chip{display:inline-block;font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;padding:2px 6px;border-radius:4px;border:1px solid rgba(79,110,247,.35);background:rgba(79,110,247,.1);color:var(--accent2);cursor:pointer;line-height:1.4;margin:1px 0}
+.req-chip:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .td-note{color:var(--text2);max-width:240px;font-size:.8rem}
 .td-note span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .td-date{color:var(--text3);font-size:.82rem;white-space:nowrap;font-family:'DM Mono',monospace}
@@ -833,7 +836,7 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
     <table>
       <thead>
         <tr>
-          <th>Category</th><th>Range / Product</th><th>Suppliers</th>
+          <th>Category</th><th class="td-req" title="Linked sales request">Req</th><th>Range / Product</th><th>Suppliers</th>
           <th>Status</th><th>Last Updated</th><th>Days Inactive</th>
           <th>Latest Note</th>
         </tr>
@@ -1283,7 +1286,7 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
     <div class="modal-header">
       <div style="flex:1;min-width:0">
         <div class="rq-ref" id="rqRef"></div>
-        <div class="rq-ref" id="rqItemRef" style="color:var(--accent2);margin-top:2px"></div>
+        <div id="rqItemRef" style="margin-top:4px"></div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
           <div class="modal-title" id="rqTitle"></div><span id="rqPills" style="display:inline-flex;gap:4px;flex-wrap:wrap"></span><span id="rqChase"></span>
           <div id="rqAssignWrap" style="margin-left:auto;display:flex;align-items:center;gap:6px"></div>
@@ -2193,6 +2196,7 @@ function renderTable(){
     const days=daysInactive(item), note=latestNote(item), lu=lastUpdated(item);
     rows.push(`<tr class="${isChase(item)?'chase-row':''}${item.archived?' archived-row':''}" data-id="${item.id}">
       <td class="td-cat">${catCellHTML(item.category)}</td>
+      <td class="td-req">${itemReqButtons(item.id)}</td>
       <td class="td-name"><span title="${esc(item.name)}">${esc(item.name)}</span>${item.archived?'<br><span class="badge badge-archived">Archived</span>':''}</td>
       <td class="td-supplier"><span title="${esc(item.supplier||'')}">${esc(item.supplier||'—')}</span></td>
       <td>${stageBadge(item.stage)}</td>
@@ -6178,6 +6182,7 @@ async function loadRequests(silent=false){
       reqData.filter(r=>!_reqKnownIds.has(r.id)).forEach(r=>toast(`📥 New request ${r.ref} from ${reqName(r.requested_by)}: ${r.title}`));
     }
     _reqKnownIds=new Set(reqData.map(r=>r.id));
+    if(typeof currentPage==='undefined'||currentPage==='main') renderTable();
     $('reqPageBtn')?.classList.remove('hidden');
     updateReqBadge();
     if(currentPage==='requests') renderRequestsPage();
@@ -6197,6 +6202,12 @@ const reqStCls=s=>'rq-'+String(s||'').replace(/\s+/g,'-');
 const reqItemsFor=id=>reqLinks.filter(l=>l.request_id===id).map(l=>data.find(i=>i.id===l.item_id)).filter(Boolean);
 const reqDays=iso=>Math.floor((Date.now()-new Date(iso))/86400000);
 // Ref shown for a ticket: the linked item card's ref code once there is one, else the REQ number
+// Small REQ button(s) on the main item list → opens the linked request
+function itemReqButtons(itemId){
+  if(typeof reqLinks==='undefined'||!reqLinks.length) return '';
+  const reqs=reqLinks.filter(l=>l.item_id===itemId).map(l=>reqData.find(r=>r.id===l.request_id)).filter(Boolean);
+  return reqs.map(r=>`<span class="req-chip" title="Open request ${esc(r.ref)}: ${esc(reqTitleText(r))}" onclick="event.stopPropagation();openReqModal('${r.id}')">${esc(r.ref)}</span>`).join('<br>');
+}
 function reqDisplayRef(r,items){ const it=(items||[]).find(i=>i.refCode); return it?it.refCode:r.ref; }
 // Status shown for a ticket: Complete, else the linked item card status(es), else In Progress
 function reqStatusHTML(r,items){
@@ -6411,7 +6422,7 @@ async function refreshReqModal(noFetch){
   const cardRefs=items.map(i=>i.refCode).filter(Boolean);
   const headTitle=items.length===1?items[0].name:reqTitleText(r);   // one linked card → its title, otherwise the request's
   $('rqRef').textContent=r.ref;
-  $('rqItemRef').textContent=cardRefs.join(' · ');
+  $('rqItemRef').innerHTML=cardRefs.map(c=>`<span style="font-family:'DM Mono',monospace;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-size:.75rem;color:var(--accent2);cursor:pointer;user-select:all;margin-right:6px" title="Click to copy reference code" onclick="copyRefCode('${esc(c)}')">${esc(c)}</span>`).join('');
   $('rqItemRef').style.display=cardRefs.length?'':'none';
   $('rqTitle').textContent=headTitle;
   $('rqPills').innerHTML=reqStatusHTML(r,items);
