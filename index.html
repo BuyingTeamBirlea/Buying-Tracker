@@ -684,6 +684,9 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
 .rq-file-link{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:.84rem;margin-top:6px}
 .rq-file-link a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-decoration:none}
 .rq-file-link a:hover{color:var(--accent2)}
+.rq-file-link a.btn{flex:0 0 auto;overflow:visible;color:#fff}
+.rq-file-link a.btn-ghost{color:var(--text2)}
+.rq-file-link a.btn:hover{color:#fff}.rq-file-link a.btn-ghost:hover{color:var(--text)}
 .rq-file-link .k{font-size:.7rem;color:var(--text3);white-space:nowrap}
 .rq-sub{font-size:.76rem;color:var(--text3);margin:-4px 0 8px}
 .rq-done{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px}
@@ -1279,9 +1282,10 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
   <div class="modal" style="max-width:760px">
     <div class="modal-header">
       <div style="flex:1;min-width:0">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="rq-ref" id="rqRef"></span><span id="rqPills"></span></div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
-          <div class="modal-title" id="rqTitle"></div>
+        <div class="rq-ref" id="rqRef"></div>
+        <div class="rq-ref" id="rqItemRef" style="color:var(--accent2);margin-top:2px"></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <div class="modal-title" id="rqTitle"></div><span id="rqPills" style="display:inline-flex;gap:4px;flex-wrap:wrap"></span><span id="rqChase"></span>
           <div id="rqAssignWrap" style="margin-left:auto;display:flex;align-items:center;gap:6px"></div>
         </div>
       </div>
@@ -6404,9 +6408,14 @@ async function refreshReqModal(noFetch){
   const itemFileCount=items.reduce((n,i)=>n+(i.files||[]).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
   const rep=esc(reqName(r.requested_by));
 
-  $('rqRef').textContent=reqDisplayRef(r,items);
-  $('rqPills').innerHTML=`${reqDisplayRef(r,items)!==r.ref?`<span class="rq-ref" style="opacity:.7">${esc(r.ref)}</span>`:''}${reqStatusHTML(r,items)}`;
-  $('rqTitle').textContent=reqTitleText(r);
+  const cardRefs=items.map(i=>i.refCode).filter(Boolean);
+  const headTitle=items.length===1?items[0].name:reqTitleText(r);   // one linked card → its title, otherwise the request's
+  $('rqRef').textContent=r.ref;
+  $('rqItemRef').textContent=cardRefs.join(' · ');
+  $('rqItemRef').style.display=cardRefs.length?'':'none';
+  $('rqTitle').textContent=headTitle;
+  $('rqPills').innerHTML=reqStatusHTML(r,items);
+  $('rqChase').innerHTML=reqLastActionedHTML(r,items);
   $('rqAssignWrap').innerHTML=`<span style="font-size:.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Assigned to</span>
     <select id="rqAssign" onchange="assignRequest('${id}',this.value)" style="font-size:.82rem;padding:5px 28px 5px 10px"${open?'':' disabled'}>
       <option value="">— Unassigned —</option>
@@ -6415,43 +6424,61 @@ async function refreshReqModal(noFetch){
     </select>
     ${open&&r.assigned_to!==me?`<button class="btn btn-ghost btn-sm" onclick="assignRequest('${id}','${esc(me)}')">Me</button>`:''}`;
   const tab=(k,label,n)=>`<button class="tab-btn${_reqTab===k?' active':''}" onclick="setReqTab('${k}')">${label}${n?`<span class="cnt">${n}</span>`:''}</button>`;
-  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('files','📁 Files',repFiles.length+sharedFiles.length+itemFileCount)+tab('messages','💬 Messages',_reqMsgs.length);
+  const isMediaName=n=>isImageFile(n)||isVideo(n)||/\.(mov|webm)$/i.test(n||'');
+  const isMediaRF=f=>f.is_image||isMediaName(f.name);
+  const nFiles=all.filter(([f])=>!isMediaRF(f)).length+items.reduce((n,i)=>n+(i.files||[]).filter(f=>!isMediaName(f.name)).length+(i.fileLinks||[]).length,0);
+  const nMedia=all.filter(([f])=>isMediaRF(f)).length+items.reduce((n,i)=>n+(i.images||[]).length,0);
+  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('files','📁 Files',nFiles)+tab('media','🖼️ Media',nMedia)+tab('messages','💬 Messages',_reqMsgs.length);
 
   let html='';
-  if(_reqTab==='files'){
+  if(_reqTab==='files'||_reqTab==='media'){
+    const media=_reqTab==='media';
     const unmoved=repFiles.filter(([f])=>!f.sp_path);
-    const fileRow=(name,url,kindLabel)=>`<div class="rq-file-link"><span>${fileIconByName(name)}</span><a href="${esc(url)}" target="_blank" rel="noopener" title="${esc(name)}">${esc(name)}</a>${kindLabel?`<span class="k">${esc(kindLabel)}</span>`:''}</div>`;
+    const pick=list=>list.filter(([f])=>isMediaRF(f)===media);
+    const shared=pick(sharedFiles), mine=pick(repFiles);
     const KIND_LABEL={margin:'Margin sheet',spec:'Spec form',quote:'Quotation',request:'Sales request file'};
+    // one file row: name opens in the browser, Office files also get "Open in Excel/Word/PowerPoint"
+    const fileRow=(name,url,kindLabel,isSp)=>{
+      const desk=isSp?officeDesktopUrl(url,name):null;
+      return `<div class="rq-file-link"><span>${fileIconByName(name)}</span><a href="${esc(url)}" target="_blank" rel="noopener" title="${esc(name)}">${esc(name)}</a>${kindLabel?`<span class="k">${esc(kindLabel)}</span>`:''}
+        ${desk?`<a class="btn btn-sm" style="flex:0 0 auto" href="${esc(desk.href)}" title="Opens in the ${desk.label} app">🖥 ${desk.label}</a>`:''}
+        <a class="btn btn-ghost btn-sm" style="flex:0 0 auto" href="${esc(url)}" target="_blank" rel="noopener">↗ ${desk?'Browser':'Open'}</a></div>`;
+    };
+    const mediaThumb=m=>`<div class="rq-thumb" onclick="window.open('${esc(m.url)}','_blank')" title="${esc(m.name)}">
+        <span><span class="rq-ic">${isVideo(m.name)?'🎬':'🖼️'}</span>${esc(m.name)}</span>${isVideo(m.name)?'':`<img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" onerror="this.remove()">`}</div>`;
+    const cardSecs=items.map(it=>{
+      if(media){
+        const imgs=it.images||[];
+        return `<div class="rq-sec"><div class="section-title">Media · ${esc(it.name)}${it.refCode?' · '+esc(it.refCode):''} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${imgs.length})</span></div>
+          ${imgs.length?`<div class="rq-thumbs">${imgs.map(mediaThumb).join('')}</div>`:'<div style="font-size:.84rem;color:var(--text3)">No images or videos on this card.</div>'}</div>`;
+      }
+      const files=(it.files||[]).filter(f=>!isMediaName(f.name)), links=it.fileLinks||[];
+      return `<div class="rq-sec"><div class="section-title">Files · ${esc(it.name)}${it.refCode?' · '+esc(it.refCode):''} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${files.length+links.length})</span></div>
+        ${files.map(f=>fileRow(f.name,f.url,KIND_LABEL[f.kind]||'File',!!f.spPath||/sharepoint\.com/i.test(f.url||''))).join('')}
+        ${links.map(l=>fileRow(l.name||l.url,l.url,'Link',/sharepoint\.com/i.test(l.url||''))).join('')}
+        ${!files.length&&!links.length?'<div style="font-size:.84rem;color:var(--text3)">No files on this card.</div>':''}</div>`;
+    }).join('');
     html=`
     <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">Shared with ${rep} (${sharedFiles.length})
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Shared with ${rep} (${shared.length})
         <span style="margin-left:auto;display:flex;gap:8px;text-transform:none;letter-spacing:0;font-weight:500;font-size:.72rem">
-          <span id="spStatus-request"></span><span id="spStatus-media"></span></span></div>
-      <div class="rq-sub">Saved to SharePoint and shown on ${rep}'s request page (Files / Media tabs). Photos &amp; MP4 → Images For Buying Tracker · everything else → Buying Tracker Quotations.</div>
-      <div class="rq-drop" id="rqShareDrop" onclick="$('rqShareInput').click()">📎 Drop files or images to share, or click to choose
-        <input type="file" id="rqShareInput" multiple class="hidden" onchange="reqShareFiles(this.files);this.value=''"></div>
-      ${sharedFiles.length?`<div class="rq-thumbs" style="margin-top:10px">${sharedFiles.map(([f,i])=>reqThumbHTML(f,i,true)).join('')}</div>`:''}
+          <span id="spStatus-${media?'media':'request'}"></span></span></div>
+      <div class="rq-sub">Saved to SharePoint and shown on ${rep}'s request page. ${media?'Photos &amp; MP4 → Images For Buying Tracker.':'Files → Buying Tracker Quotations.'}</div>
+      <div class="rq-drop" id="rqShareDrop" onclick="$('rqShareInput').click()">${media?'📷 Drop photos or videos to share':'📎 Drop files to share'}, or click to choose
+        <input type="file" id="rqShareInput" multiple class="hidden"${media?' accept="image/*,video/mp4"':''} onchange="reqShareFiles(this.files);this.value=''"></div>
+      ${shared.length?`<div class="rq-thumbs" style="margin-top:10px">${shared.map(([f,i])=>reqThumbHTML(f,i,true)).join('')}</div>`:''}
     </div>
+    ${cardSecs}
     <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">Attachments from ${rep} (${repFiles.length})
-        ${unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">${media?'Images':'Attachments'} from ${rep} (${mine.length})
+        ${!media&&unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
           ${items.length>1?`<select id="rqSpTarget" style="font-size:.75rem;padding:4px 24px 4px 8px">${items.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')}</select>`:''}
           <button class="btn btn-sm" onclick="copyRequestFilesToSp('${id}',$('rqSpTarget')?.value||'${items[0].id}')">📁 Copy ${unmoved.length} to SharePoint</button></span>`:''}
       </div>
-      ${repFiles.length?`<div class="rq-thumbs" id="rqThumbs">${repFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`
-        :'<div style="font-size:.84rem;color:var(--text3)">No attachments.</div>'}
-    </div>
-    ${items.map(it=>{
-      const files=(it.files||[]).filter(f=>!isImageFile(f.name)), links=it.fileLinks||[], imgs=it.images||[];
-      return `<div class="rq-sec">
-        <div class="section-title">From item card · ${esc(it.name)} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${files.length+links.length+imgs.length})</span></div>
-        <div class="rq-sub">Everything on this card's Files &amp; Media tabs — ${rep} can see these too.</div>
-        ${files.map(f=>fileRow(f.name,f.url,KIND_LABEL[f.kind]||'File')).join('')}
-        ${links.map(l=>fileRow(l.name||l.url,l.url,'Link')).join('')}
-        ${imgs.length?`<div class="rq-thumbs" style="margin-top:8px">${imgs.map(m=>`<div class="rq-thumb" onclick="window.open('${esc(m.url)}','_blank')" title="${esc(m.name)}">
-            <span><span class="rq-ic">${isVideo(m.name)?'🎬':'🖼️'}</span>${esc(m.name)}</span>${isVideo(m.name)?'':`<img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" onerror="this.remove()">`}</div>`).join('')}</div>`:''}
-        ${!files.length&&!links.length&&!imgs.length?'<div style="font-size:.84rem;color:var(--text3)">Nothing on this card yet.</div>':''}
-      </div>`;}).join('')}`;
+      ${mine.length?`<div class="rq-thumbs" id="rqThumbs">${mine.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`
+        :`<div style="font-size:.84rem;color:var(--text3)">${media?'No images from the requester.':'No attachments.'}</div>`}
+      ${!media&&unmoved.length&&items.length?'<div class="rq-sub" style="margin-top:6px">Copy to SharePoint moves all their attachments (files and images) onto the item card.</div>':''}
+    </div>`;
   }else if(_reqTab==='messages'){
     html=`<div class="rq-sec" style="margin-bottom:0">
       <div class="rq-msgs" id="rqMsgs" style="max-height:52vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
@@ -6474,7 +6501,7 @@ async function refreshReqModal(noFetch){
       <div><b>Received</b><span>${fmtEntryDate(r.created_at.slice(0,10),true)}</span></div>
       ${r.target_price?`<div><b>Ideal / target sales price</b><span>${esc(r.target_price)}</span></div>`:''}
       ${r.acknowledged_at?`<div><b>Picked up</b><span>${fmtEntryDate(r.acknowledged_at.slice(0,10),true)} · ${esc(reqName(r.acknowledged_by))}</span></div>`:''}
-      <div><b>Last actioned</b><span>${reqLastActionedHTML(r,items)}</span></div>
+      ${items.length===1&&items[0].name!==reqTitleText(r)?`<div><b>Request title</b><span>${esc(reqTitleText(r))}</span></div>`:''}
     </div>
     ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
     <div class="rq-sec" style="margin-bottom:0">
@@ -6493,14 +6520,14 @@ async function refreshReqModal(noFetch){
     const m=$('rqMsgs'); if(m) m.scrollTop=m.scrollHeight;
     if(focusId==='rqMsgText'){ const el=$('rqMsgText'); el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
   }
-  if(_reqTab==='files'){
+  if(_reqTab==='files'||_reqTab==='media'){
     const z=$('rqShareDrop');
     if(z){
       z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
       z.addEventListener('dragleave',()=>z.classList.remove('over'));
       z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');reqShareFiles(e.dataTransfer.files);});
     }
-    refreshSpStatus('request'); refreshSpStatus('media');
+    refreshSpStatus(_reqTab==='media'?'media':'request');
   }
   $('rqFooter').innerHTML=open?`
       ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
