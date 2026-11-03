@@ -836,7 +836,7 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
     <table>
       <thead>
         <tr>
-          <th>Category</th><th class="td-req" title="Linked sales request">Req</th><th>Range / Product</th><th>Suppliers</th>
+          <th class="td-req" title="Linked request">Request</th><th>Category</th><th>Range / Product</th><th>Suppliers</th>
           <th>Status</th><th>Last Updated</th><th>Days Inactive</th>
           <th>Latest Note</th>
         </tr>
@@ -2195,8 +2195,8 @@ function renderTable(){
   for(const item of items){
     const days=daysInactive(item), note=latestNote(item), lu=lastUpdated(item);
     rows.push(`<tr class="${isChase(item)?'chase-row':''}${item.archived?' archived-row':''}" data-id="${item.id}">
-      <td class="td-cat">${catCellHTML(item.category)}</td>
       <td class="td-req">${itemReqButtons(item.id)}</td>
+      <td class="td-cat">${catCellHTML(item.category)}</td>
       <td class="td-name"><span title="${esc(item.name)}">${esc(item.name)}</span>${item.archived?'<br><span class="badge badge-archived">Archived</span>':''}</td>
       <td class="td-supplier"><span title="${esc(item.supplier||'')}">${esc(item.supplier||'—')}</span></td>
       <td>${stageBadge(item.stage)}</td>
