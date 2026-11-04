@@ -6349,11 +6349,34 @@ function reqLastActionedHTML(r,items){
   return `<span title="Last actioned by buying ${fmtEntryDate((r.last_actioned_at||r.created_at).slice(0,10),true)}">${daysBadge(Math.max(0,n),'')}</span>`;
 }
 
+// Teams-style red badge with a white number on the tab / window icon
+let _favImg=null, _favLast=-1;
+function setFaviconBadge(n){
+  if(n===_favLast) return; _favLast=n;
+  const link=document.querySelector('link[rel="icon"]'); if(!link) return;
+  const draw=()=>{
+    const S=64, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d');
+    x.drawImage(_favImg,0,0,S,S);
+    if(n>0){
+      const t=n>99?'99+':String(n), r=S*0.15, cx=S-r, cy=r;   // circle ≈ 30% of the icon, tucked into the top-right like Teams
+      x.fillStyle='#e5383b'; x.beginPath();
+      if(t.length>1){ const w=r*(t.length>2?1.1:0.55); x.moveTo(cx-w,cy-r); x.arc(cx-w,cy,r,-Math.PI/2,Math.PI/2,true); x.arc(cx,cy,r,Math.PI/2,-Math.PI/2,true); x.closePath(); }
+      else x.arc(cx,cy,r,0,Math.PI*2);
+      x.fill();
+      x.fillStyle='#fff'; x.font=`600 ${Math.round(r*1.35)}px "Segoe UI",Arial,sans-serif`; x.textAlign='center'; x.textBaseline='middle';
+      x.fillText(t,t.length>1?cx-r*(t.length>2?0.55:0.28):cx,cy+r*0.06);
+    }
+    link.href=c.toDataURL('image/png');
+  };
+  if(_favImg&&_favImg.complete) return draw();
+  _favImg=new Image(); _favImg.onload=draw; _favImg.src='icon-192.png';
+}
 function updateReqBadge(){
   const open=reqData.filter(r=>REQ_OPEN.has(r.status));
   const attention=open.filter(r=>r.status==='New'||r.buyer_unread).length;
   // Number on the installed app's taskbar icon + the browser tab, like Teams
   try{ if(navigator.setAppBadge){ attention?navigator.setAppBadge(attention):navigator.clearAppBadge(); } }catch(e){}
+  setFaviconBadge(attention);
   document.title=(attention?`(${attention}) `:'')+'Buying Tracker';
   const b=$('reqNotifBadge');
   if(b){ b.textContent=attention; b.classList.toggle('show',attention>0); }
