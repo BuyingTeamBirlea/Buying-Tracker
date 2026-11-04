@@ -75,6 +75,8 @@ button,input,select,textarea{font-family:inherit}
 .ref{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text3)}
 .req-title{font-weight:600;font-size:.95rem}
 .req-meta{font-size:.8rem;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap}
+.cs-meta{gap:0}
+.cs-meta>span+span::before{content:'•';margin:0 8px;color:var(--text3)}
 .req-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px}
 .side-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap}
 .side-row .mini-item{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -239,7 +241,39 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
 .msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:.88rem;line-height:1.45;white-space:pre-wrap;background:var(--bg3);border:1px solid var(--border);align-self:flex-start}
 .msg.mine{align-self:flex-end;background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.35)}
 .msg small{display:block;font-size:.7rem;color:var(--text3);margin-top:4px}
-.msg-box{display:flex;gap:8px;margin-top:10px}
+.msg-box{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+.msg-box.over textarea{border-color:var(--accent);background:rgba(79,110,247,.06)}
+.msg-attach{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:1.05rem;padding:0 11px;color:var(--text2)}
+.msg-attach:hover{border-color:var(--accent)}
+.msg-pending{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.msg-pending span{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:3px 10px;font-size:.78rem}
+.msg-pending button{background:none;border:none;color:var(--text3);cursor:pointer}
+.msg-files{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.msg-file{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;font-size:.78rem;cursor:pointer;max-width:260px;white-space:nowrap}
+.msg-file .nm{overflow:hidden;text-overflow:ellipsis}
+.msg-file a{color:var(--accent);text-decoration:none;font-weight:600}
+.msg-img{width:120px;height:90px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;position:relative}
+.msg-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.msg.action-msg{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.07)}
+.act-box{margin:0 20px;margin-top:14px;border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.08);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.act-box h4{font-size:.8rem;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;margin:0;flex:1}
+.act-box .go{font-size:.78rem;color:#dc2626;font-weight:600;white-space:nowrap}
+.act-check{white-space:normal;display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(239,68,68,.35);font-size:.84rem;font-weight:600;color:var(--text);cursor:pointer;user-select:none}
+.act-check input{width:17px;height:17px;accent-color:#16a34a;cursor:pointer}
+.act-check.done{color:#16a34a;border-top-color:rgba(22,163,74,.35)}
+.act-check small{font-weight:400;color:var(--text3);font-size:.74rem}
+.msg.del{position:relative;padding-right:26px}
+.msg-x{position:absolute;top:4px;right:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:.72rem;line-height:1;padding:3px 5px;border-radius:4px;opacity:.5;white-space:normal}
+.msg:hover .msg-x{opacity:1}
+.msg-x:hover{color:var(--red);background:var(--bg2)}
+.msg.action-done{border-color:rgba(22,163,74,.4);background:rgba(22,163,74,.07)}
+.act-box .ins{white-space:pre-wrap;font-size:.92rem;line-height:1.45}
+.act-box .meta{font-size:.76rem;color:var(--text3);margin-top:6px}
+.act-box .done-row{display:flex;gap:8px;margin-top:10px}
+.act-box .done-row input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--radius-sm);font-size:.86rem;outline:none}
+.act-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:.74rem;font-weight:700;background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.4);white-space:nowrap;vertical-align:middle}
+.req-title .act-tag{margin-left:8px;font-size:.72rem}
+.act-count{display:inline-flex;margin-left:10px;vertical-align:middle;font-size:.78rem}
 .msg-box textarea{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:var(--radius-sm);font-size:.88rem;outline:none;resize:none;height:60px}
 .msg-box textarea:focus{border-color:var(--accent)}
 
@@ -321,7 +355,7 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
     <section id="listView">
       <div class="page-head">
         <div>
-          <h1 id="listTitle">My requests</h1>
+          <h1><span id="listTitle">My requests</span><span class="act-count" id="actCount"></span></h1>
           <p id="listSub">Track every request you've sent and see the item cards as they move through buying.</p>
         </div>
         <div class="spacer"></div>
@@ -437,6 +471,7 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
       </div>
       <button class="icon-btn" onclick="closeDetail()" title="Close">✕</button>
     </div>
+    <div id="dAction"></div>
     <div class="dtabs" id="dTabs"></div>
     <div class="sp-bar hidden" id="spBar"><span>🔑 Sign in to SharePoint once to see these images — after that they load automatically.</span><button class="btn btn-sm" onclick="spReauth()">Sign in to SharePoint</button></div>
     <div class="drawer-body" id="dBody"></div>
@@ -519,6 +554,7 @@ const SB={
     const t=await r.text(); return t?JSON.parse(t):null;
   },
   get:p=>SB.req('GET',p), post:(p,b)=>SB.req('POST',p,b),
+  del:p=>SB.req('DELETE',p),
   rpc:(fn,args)=>SB.req('POST','rpc/'+fn,args||{}),
   async upload(path,file){
     const r=await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`,{method:'POST',
@@ -601,6 +637,7 @@ $('menuBtn').addEventListener('click',e=>{ e.stopPropagation(); $('menu').classL
 document.addEventListener('click',()=>$('menu').classList.remove('open'));
 
 // ═══ STATE ═══
+let actions=[]; // ⚡ action-needed tasks the buying team has set (RLS: own + department)
 let me='', myDept='', myRole=null, requests=[], progress=[], filter='open', openId=null, lastTs=null, pollTimer=null;
 const OPEN_ST=new Set(['New','Acknowledged','In Progress']);
 
@@ -612,6 +649,8 @@ async function boot(){
   $('trackerLink').classList.toggle('hidden',myRole!=='buyer'&&myRole!=='viewer');
   try{ const u=await SB.get(`app_users?email=eq.${encodeURIComponent(me)}&select=department`); myDept=u&&u[0]?u[0].department:''; }catch(e){ myDept=''; }
   if(myDept){ $('scopeDeptBtn').textContent=`All ${myDept}`; $('scopeSeg').classList.remove('hidden'); }
+  // Customer Service work as one queue: open on every CS ticket, with "My requests" as the switch
+  if(myDept==='Customer Service'){ scope='dept'; $('scopeSeg').prepend($('scopeDeptBtn')); }
   setScope(scope);
   if(!myRole){ $('noRole').classList.remove('hidden'); $('listView').classList.add('hidden'); return; }
   await loadAll();
@@ -620,15 +659,40 @@ async function boot(){
 
 async function loadAll(){
   try{
-    const [reqs,prog]=await Promise.all([
+    const [reqs,prog,acts]=await Promise.all([
       SB.get(`requests?select=*&order=created_at.desc`),          // RLS: own + same department
-      SB.rpc('request_progress')
+      SB.rpc('request_progress'),
+      SB.get(`request_actions?select=*&order=created_at.desc`).catch(()=>[])
     ]);
-    requests=reqs||[]; progress=prog||[];
+    requests=reqs||[]; progress=prog||[]; actions=acts||[];
+    updateTitleBadge();
     lastTs=requests.reduce((m,r)=>r.updated_at>m?r.updated_at:m,'');
     renderList();
     if(openId) renderDetail(openId,true);
+    openDeepLink();
   }catch(e){ toast('Could not load requests: '+e.message,'error'); }
+}
+const firstName=email=>(nameOf(email)||'').split(' ')[0];
+const openAction=reqId=>actions.find(a=>a.request_id===reqId&&a.status==='open');
+// Email links open straight onto the ticket: request.html?req=<id>
+let _deepLinkDone=false;
+function openDeepLink(){
+  if(_deepLinkDone) return; _deepLinkDone=true;
+  const id=new URLSearchParams(location.search).get('req'); if(!id) return;
+  const r=requests.find(x=>x.id===id); if(!r){ toast('That request is not available to your login','error'); return; }
+  if(r.requested_by!==me&&scope!=='dept') setScope('dept');
+  history.replaceState(null,'',location.pathname);
+  openDetail(id);
+}
+// Count on the browser tab (and app icon, if installed): updates for you + actions waiting
+function updateTitleBadge(){
+  const mineIds=new Set(requests.filter(r=>r.requested_by===me).map(r=>r.id));
+  const n=requests.filter(r=>mineIds.has(r.id)&&r.rep_unread).length
+        +actions.filter(a=>a.status==='open'&&mineIds.has(a.request_id)).length;
+  document.title=(n?`(${n}) `:'')+'Buying Requests';
+  try{ if(navigator.setAppBadge){ n?navigator.setAppBadge(n):navigator.clearAppBadge(); } }catch(e){}
+  const waiting=actions.filter(a=>a.status==='open'&&(scope==='dept'||mineIds.has(a.request_id))).length;
+  const el=$('actCount'); if(el){ el.innerHTML=waiting?`<span class="act-tag">⚡ ${waiting} action${waiting>1?'s':''} waiting</span>`:''; }
 }
 // Light poll: one tiny row unless something changed. Item-card stage changes don't touch
 // requests.updated_at, so progress is refreshed on its own every poll (small RPC).
@@ -649,7 +713,12 @@ document.querySelectorAll('#filterSeg button').forEach(b=>b.addEventListener('cl
   filter=b.dataset.f; document.querySelectorAll('#filterSeg button').forEach(x=>x.classList.toggle('active',x===b)); renderList();
 }));
 const stCls=s=>'st-'+s.replace(/\s+/g,'-');
-const reqTitle=r=>r.request_type==='Customer Service'?`SKU ${esc(r.title)}${r.cs_ticket?' · '+esc(r.cs_ticket):''}`:esc(r.title);
+// Customer Service tickets read "Ticket 1000 - HAP-ALAB46OAK" (same as the tracker)
+const reqTitle=r=>{
+  if(r.request_type!=='Customer Service') return esc(r.title);
+  const t=(r.cs_ticket||'').trim().replace(/^ticket\s*/i,'');
+  return t?`Ticket ${esc(t)} - ${esc(r.title)}`:esc(r.title);
+};
 function assigneeHTML(r){
   if(!OPEN_ST.has(r.status)&&!r.assigned_to) return '';
   return r.assigned_to?`<span>👤 ${esc(nameOf(r.assigned_to))} is on it</span>`:`<span style="color:var(--amber)">Not assigned yet</span>`;
@@ -663,11 +732,12 @@ function dueHTML(r){
 // Scope: just my requests (default) or everything my department has raised
 let scope='mine'; // always opens on the user's own requests
 function setScope(sc){
+  setTimeout(updateTitleBadge,0);
   scope=(sc==='dept'&&myDept)?'dept':'mine';
   document.querySelectorAll('#scopeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.s===scope));
   if(scope==='dept'){
     $('listTitle').textContent=`All ${myDept} requests`;
-    $('listSub').textContent=`Every request the ${myDept} team has sent, and the item cards as they move through buying.`;
+    $('listSub').textContent=`Every request from the ${myDept} team.`;
   }else{
     $('listTitle').textContent='My requests';
     $('listSub').textContent=`Track every request you've sent and see the item cards as they move through buying.`;
@@ -720,6 +790,7 @@ function renderList(){
       if(sort==='za') return (b.title||'').localeCompare(a.title||'',undefined,{sensitivity:'base'});
       if(sort==='chase') return chaseDays(b)-chaseDays(a);
       if(sort==='person') return nameOf(a.requested_by).localeCompare(nameOf(b.requested_by))||b.created_at.localeCompare(a.created_at);
+      if(!!openAction(a.id)!==!!openAction(b.id)) return openAction(a.id)?-1:1; // things waiting on you first
       return lastUpdate(b).localeCompare(lastUpdate(a));
     });
   const filtered=!!(q||who||type||cust);
@@ -736,8 +807,10 @@ function renderList(){
     return `<div class="req-card${r.rep_unread?' unread':''}" onclick="openDetail('${r.id}')">
       <div>
         <div class="req-top"><span class="ref">${esc(displayRef(r))}</span></div>
-        <div class="req-title">${reqTitle(r)}</div>
-        <div class="req-meta">${r.customer?`<span>${esc(r.customer)}</span>`:''}<span>${esc(r.request_type)}</span><span>Sent ${fmtDate(r.created_at)}${r.requested_by!==me?' by '+esc(nameOf(r.requested_by)):''}</span>${assigneeHTML(r)}</div>
+        <div class="req-title">${reqTitle(r)}${openAction(r.id)?`<span class="act-tag" title="${esc(openAction(r.id).instruction)}">⚡ ${esc(firstName(r.requested_by))} - Action Needed</span>`:''}</div>
+        ${r.request_type==='Customer Service'
+          ?`<div class="req-meta cs-meta"><span>Customer Service</span><span>${r.requested_by===me?'You':esc(nameOf(r.requested_by))}</span><span>Sent ${fmtDate(r.created_at)}</span>${assigneeHTML(r)||`<span>${esc(r.status)}</span>`}</div>`
+          :`<div class="req-meta">${r.customer?`<span>${esc(r.customer)}</span>`:''}<span>${esc(r.request_type)}</span><span>Sent ${fmtDate(r.created_at)}${r.requested_by!==me?' by '+esc(nameOf(r.requested_by)):''}</span>${assigneeHTML(r)}</div>`}
         ${r.rep_unread||(r.status==='Complete'&&r.completion_notes)?`<div class="req-flags">${r.rep_unread?'<span class="new-dot">● Update</span>':''}${r.status==='Complete'&&r.completion_notes?'<span class="done-tag">📄 Details ready</span>':''}</div>`:''}
       </div>
       <div class="req-side">
@@ -783,9 +856,9 @@ function progressHTML(p){
 
 // ═══ DETAIL ═══
 // Three views, like the tabs on an item card: Request · Timeline · Messages
-let detailFiles=[], detailMsgs=[], detailTimeline=[], detailItemFiles=[], blobCache={}, detailTab='info';
+let detailFiles=[], detailMsgs=[], detailTimeline=[], detailItemFiles=[], blobCache={}, detailTab='timeline';
 async function openDetail(id){
-  openId=id; detailTab='info'; $('detailOv').classList.remove('hidden');
+  openId=id; detailTab='timeline'; msgPending=[]; $('detailOv').classList.remove('hidden');
   $('dTabs').innerHTML=''; $('dBody').innerHTML='<div class="hint">Loading…</div>';
   await renderDetail(id,false);
   const r=requests.find(x=>x.id===id);
@@ -813,31 +886,34 @@ async function renderDetail(id,quiet){
 function renderDetailView(){
   const id=openId; const r=requests.find(x=>x.id===id); if(!r) return;
   const draft=$('msgText')?.value||'';
+  const a=openAction(id);
+  $('dAction').innerHTML=a?`<div class="act-box" onclick="setDetailTab('messages')" title="${esc(a.instruction)}">
+      <h4>⚡ ${esc(firstName(r.requested_by))} - Action needed${a.created_by?' · from '+esc(nameOf(a.created_by)):''}</h4>
+      ${detailTab!=='messages'?'<span class="go">Tick it off in Messages →</span>':''}
+    </div>`:'';
   const items=progress.filter(p=>p.request_id===id);
   $('dRef').textContent=displayRef(r);
   $('dPills').innerHTML=statusHTML(r);
   $('dTitle').innerHTML=reqTitle(r);
   const tlCount=detailTimeline.length;
   const tab=(k,label,extra)=>`<button class="dtab${detailTab===k?' active':''}" onclick="setDetailTab('${k}')">${label}${extra||''}</button>`;
+  if(!['timeline','messages','files'].includes(detailTab)) detailTab='timeline';
   $('dTabs').innerHTML=
-    tab('info','📋 Request')+
-    tab('timeline','🕒 Timeline',items.length?`<span class="cnt">${tlCount}</span>`:'')+
-    tab('files','📁 Files',(()=>{ const n=filesForView(false).length; return n?`<span class="cnt">${n}</span>`:''; })())+
-    tab('media','🖼️ Media',(()=>{ const n=filesForView(true).length; return n?`<span class="cnt">${n}</span>`:''; })())+
-    tab('messages','💬 Messages',detailMsgs.length?`<span class="cnt">${detailMsgs.length}</span>`:'');
+    tab('timeline','🕒 Timeline',items.length&&tlCount?`<span class="cnt">${tlCount}</span>`:'')+
+    tab('messages','💬 Messages'+(detailMsgs.some(m=>detailFiles.some(f=>f.message_id===m.id))?' 📎':''),detailMsgs.length?`<span class="cnt">${detailMsgs.length}</span>`:'')+
+    tab('files','📁 Files & Media',(()=>{ const n=filesForView().length; return n?`<span class="cnt">${n}</span>`:''; })());
   const body=$('dBody');
-  if(detailTab==='timeline') body.innerHTML=timelineViewHTML(r,items);
-  else if(detailTab==='files') body.innerHTML=filesViewHTML(r,false);
-  else if(detailTab==='media') body.innerHTML=filesViewHTML(r,true);
+  if(detailTab==='files') body.innerHTML=filesViewHTML(r);
   else if(detailTab==='messages') body.innerHTML=messagesViewHTML(r);
-  else body.innerHTML=infoViewHTML(r);
+  else body.innerHTML=infoViewHTML(r)+`<div><div class="sec-title">Timeline</div>${timelineViewHTML(r,items)}</div>`;
   if(draft&&$('msgText')) $('msgText').value=draft;
-  if(detailTab==='info') hydrateThumbs();
+  if(detailTab!=='messages') hydrateThumbs();
+  if(detailTab==='messages'){ wireMsgBox(); hydrateThumbs(); const m=$('dMsgs'); if(m) m.scrollTop=m.scrollHeight; }
 }
 
 // 1 ── Request: what was submitted
 function infoViewHTML(r){
-  const repFiles=detailFiles.map((f,i)=>[f,i]).filter(([f])=>!f.is_completion&&!f.shared_by_buyer);
+  const repFiles=detailFiles.map((f,i)=>[f,i]).filter(([f])=>!f.is_completion&&!f.shared_by_buyer&&!f.message_id);
   const doneFiles=detailFiles.map((f,i)=>[f,i]).filter(([f])=>f.is_completion);
   return `
     ${r.status==='Complete'?`<div class="done-box">
@@ -857,12 +933,10 @@ function infoViewHTML(r){
       </div>
     </div>
     ${r.description?`<div><div class="sec-title">${r.request_type==='Customer Service'?'Query':'Details'}</div><div class="desc">${esc(r.description)}</div></div>`:''}
-    <div>
-      <div class="sec-title">Attachments (${repFiles.length})</div>
-      ${repFiles.length?`<div class="thumbs" id="dThumbs">${repFiles.map(([f,i])=>thumbHTML(f,i)).join('')}</div>`:'<div class="hint">No attachments.</div>'}
-      ${OPEN_ST.has(r.status)?`<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="$('addFiles').click()">📎 Add more files</button>
-      <input type="file" id="addFiles" multiple class="hidden" onchange="addMoreFiles(event,'${r.id}')">`:''}
-    </div>`;
+    ${repFiles.length?`<div>
+      <div class="sec-title">Attachments sent with the request (${repFiles.length})</div>
+      <div class="thumbs" id="dThumbs">${repFiles.map(([f,i])=>thumbHTML(f,i)).join('')}</div>
+    </div>`:''}`;
 }
 
 // 2 ── Timeline: every update on each linked item card, oldest → latest, with its deadlines
@@ -907,14 +981,18 @@ function timelineViewHTML(r,items){
 const KIND_LABEL={margin:'Margin sheet',spec:'Spec form',quote:'Quotation',request:'Sales request file',media:'Media'};
 const isImgName=n=>/\.(jpe?g|png|webp|gif|heic)$/i.test(n||'');
 const isVidName=n=>/\.(mp4|mov|webm)$/i.test(n||'');
-function filesForView(media){
+function filesForView(){
   const out=[];
-  detailFiles.forEach((f,i)=>{ if(!(f.shared_by_buyer||f.is_completion)) return;
-    const m=f.is_image||isImgName(f.name)||isVidName(f.name);
-    if(m===media) out.push({src:'ticket',i,name:f.name,url:f.sp_url||'',sp:!!f.sp_url,group:'From the buying team'}); });
-  detailItemFiles.forEach(f=>{
-    const m=f.is_image||isImgName(f.name)||isVidName(f.name);
-    if(m===media) out.push({src:'item',name:f.name,url:f.url,sp:!!f.sp_path,kind:f.is_upload?(KIND_LABEL[f.kind]||'File'):'Link',group:`${f.item_name}${f.ref_code?' · '+f.ref_code:''}`}); });
+  const isM=f=>!!(f.is_image||isImgName(f.name)||isVidName(f.name));
+  detailFiles.forEach((f,i)=>{
+    let group, kind='';
+    if(f.message_id){ group='Shared in Messages'; const who=(detailMsgs.find(m=>m.id===f.message_id)||{}).author||f.uploaded_by||''; kind=who===me?'From you':who?'From '+nameOf(who):''; }
+    else if(f.shared_by_buyer||f.is_completion) group='From the buying team';
+    else group='Sent with the request';
+    out.push({src:'ticket',i,f,name:f.name,url:f.sp_url||'',sp:!!f.sp_url,media:isM(f),kind,group});
+  });
+  detailItemFiles.forEach(f=>out.push({src:'item',name:f.name,url:f.url,sp:!!f.sp_path,media:isM(f),
+    kind:f.is_upload?(KIND_LABEL[f.kind]||'File'):'Link',group:`${f.item_name}${f.ref_code?' · '+f.ref_code:''}`}));
   return out;
 }
 // Office desktop app link — same as the Buying Tracker (edits save straight back to SharePoint)
@@ -963,31 +1041,81 @@ function openViewFile(src,key){
   if(src==='ticket'){ const f=detailFiles[key]; if(f&&f.sp_url) window.open(f.sp_url,'_blank','noopener'); else openFile(key); return; }
   window.open(key,'_blank','noopener');
 }
-function filesViewHTML(r,media){
-  const list=filesForView(media);
-  if(!list.length) return `<div class="hint">${media?'No images or videos yet.':'No files yet.'} Anything the buying team shares on this request${progress.some(p=>p.request_id===r.id)?' or adds to its item cards':''} will show here.</div>`;
-  const groups=[...new Set(list.map(x=>x.group))];
+function filesViewHTML(r){
+  const list=filesForView();
+  if(!list.length) return `<div class="hint">No files or images yet. Anything sent with the request, shared in Messages${progress.some(p=>p.request_id===r.id)?' or added to its item cards':''} will show here.</div>`;
+  const order=['Sent with the request','Shared in Messages','From the buying team'];
+  const groups=[...new Set(list.map(x=>x.group))].sort((a,b)=>(order.indexOf(a)+1||9)-(order.indexOf(b)+1||9));
   const open=x=>x.src==='ticket'?`openViewFile('ticket',${x.i})`:`openViewFile('item','${esc(x.url).replace(/'/g,"\\'")}')`;
-  return groups.map(g=>{
-    const rows=list.filter(x=>x.group===g);
-    return `<div class="file-group"><div class="sec-title">${esc(g)} (${rows.length})</div>${media
-      ?`<div class="thumbs">${rows.map(x=>`<div class="thumb" onclick="${open(x)}" title="${esc(x.name)}">
+  const thumb=x=>x.src==='ticket'&&!x.url
+    ?`<div class="thumb" data-i="${x.i}" onclick="${open(x)}" title="${esc(x.name)}"><span><span class="ic">${isVidName(x.name)?'🎬':'🖼️'}</span>${esc(x.name)}</span></div>`
+    :`<div class="thumb" onclick="${open(x)}" title="${esc(x.name)}">
           <span><span class="ic">${isVidName(x.name)?'🎬':'🖼️'}</span>${esc(x.name)}</span>
-          ${!isVidName(x.name)&&x.url?`<img src="${esc(x.sp?spThumb(x.url):x.url)}" alt="" onerror="${x.sp?'spImgFail(this)':'this.remove()'}">`:''}</div>`).join('')}</div>`
-      :rows.map(x=>{
-        const desk=x.sp&&x.url?officeDesktopUrl(x.url,x.name):null;
-        return `<div class="f-row" title="${esc(x.name)}"><span>${fileIcon(x.name)}</span><span class="nm" onclick="${open(x)}">${esc(x.name)}</span>${x.kind?`<span class="k">${esc(x.kind)}</span>`:''}
+          ${!isVidName(x.name)&&x.url?`<img src="${esc(x.sp?spThumb(x.url):x.url)}" alt="" onerror="${x.sp?'spImgFail(this)':'this.remove()'}">`:''}</div>`;
+  const row=x=>{
+    const desk=x.sp&&x.url?officeDesktopUrl(x.url,x.name):null;
+    return `<div class="f-row" title="${esc(x.name)}"><span>${fileIcon(x.name)}</span><span class="nm" onclick="${open(x)}">${esc(x.name)}</span>${x.kind?`<span class="k">${esc(x.kind)}</span>`:''}
           ${desk?`<a class="f-act desk" href="${esc(desk.href)}" title="Opens in the ${desk.label} app on your computer">🖥 Open in ${desk.label}</a>`:''}
-          <button class="f-act" onclick="${open(x)}" title="${x.sp?'Open in SharePoint (browser)':'Open'}">↗ ${desk?'Browser':'Open'}</button></div>`;}).join('')}</div>`;
+          <button class="f-act" onclick="${open(x)}" title="${x.sp?'Open in SharePoint (browser)':'Open'}">↗ ${desk?'Browser':'Open'}</button></div>`;};
+  return groups.map(g=>{
+    const rows=list.filter(x=>x.group===g), med=rows.filter(x=>x.media), fil=rows.filter(x=>!x.media);
+    return `<div class="file-group"><div class="sec-title">${esc(g)} (${rows.length})</div>
+      ${fil.map(row).join('')}
+      ${med.length?`<div class="thumbs"${fil.length?' style="margin-top:8px"':''}>${med.map(thumb).join('')}</div>`:''}</div>`;
   }).join('')+(list.some(x=>x.sp)?'<div class="sp-note">Files open in SharePoint — you\'ll need to be signed in with your Birlea Microsoft account.</div>':'');
 }
 
 // 3 ── Messages: between the requester and the buying team
+function msgFilesHTML(m){
+  const fs=detailFiles.map((f,i)=>[f,i]).filter(([f])=>f.message_id===m.id); if(!fs.length) return '';
+  return `<div class="msg-files">${fs.map(([f,i])=>{
+    const img=(f.is_image||isImgName(f.name))&&!isVidName(f.name);
+    if(img) return `<div class="msg-img" data-i="${i}" onclick="openFile(${i})" title="${esc(f.name)}">🖼️${f.sp_url?`<img src="${esc(spThumb(f.sp_url))}" alt="" onerror="spImgFail(this)">`:''}</div>`;
+    const desk=f.sp_url?officeDesktopUrl(f.sp_url,f.name):null;
+    return `<span class="msg-file" title="${esc(f.name)}" onclick="openFile(${i})">${isVidName(f.name)?'🎬':fileIcon(f.name)}<span class="nm">${esc(f.name)}</span>${desk?`<a href="${esc(desk.href)}" onclick="event.stopPropagation()" title="Open in ${desk.label}">🖥 ${desk.label}</a>`:''}</span>`;
+  }).join('')}</div>`;
+}
+let msgPending=[];
 function messagesViewHTML(r){
   return `<div>
-      <div class="msgs" id="dMsgs" style="max-height:calc(100vh - 330px);overflow-y:auto">${detailMsgs.length?detailMsgs.map(m=>`<div class="msg ${m.author===me?'mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(nameOf(m.author))} · ${fmtWhen(m.created_at)}</small></div>`).join(''):'<div class="hint">No messages yet. Use this instead of email so nothing gets lost.</div>'}</div>
-      <div class="msg-box"><textarea id="msgText" placeholder="Message ${r.assigned_to?esc(nameOf(r.assigned_to)):'the buying team'}…"></textarea><button class="btn" onclick="sendMsg('${r.id}')">Send</button></div>
+      <div class="msgs" id="dMsgs" style="max-height:calc(100vh - 380px);overflow-y:auto">${detailMsgs.length?detailMsgs.map(m=>`<div class="msg ${m.author===me?'mine del':''}${(a=>a?(a.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(msgAction(m))}">${m.author===me?`<button class="msg-x" title="Remove this message" onclick="deleteMsg('${m.id}')">✕</button>`:''}${m.body?esc(m.body):''}${msgFilesHTML(m)}${actionCheckHTML(m)}<small>${m.author===me?'You':esc(nameOf(m.author))} · ${fmtWhen(m.created_at)}</small></div>`).join(''):'<div class="hint">No messages yet. Use this instead of email so nothing gets lost.</div>'}</div>
+      <div class="msg-box" id="msgBox">
+        <button class="msg-attach" title="Attach files or images (you can also paste or drag them in)" onclick="$('msgFiles').click()">📎</button>
+        <input type="file" id="msgFiles" multiple class="hidden" onchange="addMsgFiles(this.files);this.value=''">
+        <textarea id="msgText" placeholder="Message ${r.assigned_to?esc(nameOf(r.assigned_to)):'the buying team'}… (paste or drop files here)"></textarea>
+        <button class="btn" id="msgSendBtn" onclick="sendMsg('${r.id}')">Send</button></div>
+      <div class="msg-pending" id="msgPending">${pendingChips()}</div>
     </div>`;
+}
+function pendingChips(){ return msgPending.map((f,i)=>`<span>${(f.type||'').startsWith('image/')?'🖼️':fileIcon(f.name)} ${esc(f.name)} <button onclick="msgPending.splice(${i},1);$('msgPending').innerHTML=pendingChips()">✕</button></span>`).join(''); }
+function addMsgFiles(list){
+  [...list].forEach(f=>{ if(f.size>25*1048576){ toast(`${f.name} is over 25 MB — too big for the chat`,'error'); return; } msgPending.push(f); });
+  if($('msgPending')) $('msgPending').innerHTML=pendingChips();
+}
+function wireMsgBox(){
+  const box=$('msgBox'), ta=$('msgText'); if(!box||box.dataset.wired) return; box.dataset.wired=1;
+  box.addEventListener('dragover',e=>{e.preventDefault();box.classList.add('over');});
+  box.addEventListener('dragleave',()=>box.classList.remove('over'));
+  box.addEventListener('drop',e=>{e.preventDefault();box.classList.remove('over');if(e.dataTransfer.files.length) addMsgFiles(e.dataTransfer.files);});
+  ta.addEventListener('paste',e=>{
+    const files=[...(e.clipboardData?.items||[])].filter(it=>it.kind==='file').map(it=>it.getAsFile()).filter(Boolean)
+      .map((f,i)=>f.name&&f.name!=='image.png'?f:new File([f],`Pasted image ${new Date().toTimeString().slice(0,8).replace(/:/g,'.')}${i?'-'+i:''}.png`,{type:f.type||'image/png'}));
+    if(files.length){ e.preventDefault(); addMsgFiles(files); }
+  });
+  ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)) sendMsg(openId); });
+}
+async function sendMsg(id){
+  const t=$('msgText').value.trim(); if(!t&&!msgPending.length) return;
+  const btn=$('msgSendBtn'); btn.disabled=true; btn.textContent=msgPending.length?'Uploading…':'Sending…';
+  try{
+    const [m]=await SB.post('request_messages',{request_id:id,body:t,author:me});
+    let failed=0;
+    for(const f of msgPending){ try{ await uploadOne(id,f,m.id); }catch(e){ failed++; } }
+    if(failed) toast(`${failed} file${failed>1?'s':''} failed to upload`,'error');
+    msgPending=[]; $('msgText').value='';
+    await loadAll(); setDetailTab('messages');
+  }catch(e){ toast('Message failed: '+e.message,'error'); }
+  btn.disabled=false; btn.textContent='Send';
 }
 // Same initials + colours as the Buying Tracker timeline
 const USER_TAGS={'syrus.cripps@birlea.com':{initials:'SC',color:'#4f6ef7'},'michael.prime@birlea.com':{initials:'MP',color:'#ef4444'},'bethany.herron@birlea.com':{initials:'BH',color:'#22c55e'}};
@@ -1023,8 +1151,8 @@ async function getBlobUrl(f){
 }
 function hydrateThumbs(){
   detailFiles.forEach((f,i)=>{
-    if(!isImg(f)||f.size>8*1048576) return;
-    getBlobUrl(f).then(u=>{ const el=document.querySelector(`#dBody .thumb[data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('beforeend',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
+    if(!f.storage_path||!isImg(f)||f.size>8*1048576) return;
+    getBlobUrl(f).then(u=>{ const el=document.querySelector(`#dBody [data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('beforeend',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
   });
 }
 async function openFile(i){
@@ -1040,7 +1168,38 @@ async function openFile(i){
 function closeLightbox(){ $('lightbox').classList.add('hidden'); $('lbContent').innerHTML=''; }
 $('lightbox').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeLightbox(); });
 
-async function sendMsg(id){
+// The buying team's "⚡ Action needed" message carries a tick box the requester toggles
+const msgAction=m=>actions.find(a=>a.message_id===m.id&&a.status!=='cancelled');
+function actionCheckHTML(m){
+  const a=msgAction(m); if(!a) return '';
+  const done=a.status==='done';
+  return `<label class="act-check${done?' done':''}" onclick="event.stopPropagation()"><input type="checkbox"${done?' checked':''} onchange="toggleAction('${a.id}',this.checked,this)">${done?`Actioned <small>· ${esc(a.done_by===me?'you':nameOf(a.done_by||''))}${a.done_at?' · '+fmtWhen(a.done_at):''}</small>`:'Tick when actioned'}</label>`;
+}
+// Remove one of your own messages (and anything attached to it) from both sides of the chat
+async function deleteMsg(msgId){
+  const n=detailFiles.filter(f=>f.message_id===msgId).length;
+  if(!confirm(`Remove this message${n?` and its ${n} attachment${n>1?'s':''}`:''}? It disappears for the buying team too.`)) return;
+  try{
+    const gone=await SB.del(`request_messages?id=eq.${msgId}`);
+    if(!gone||!gone.length) throw new Error('not allowed — ask the buying team to remove it');
+    await loadAll(); toast('Message removed');
+  }
+  catch(e){ toast('Could not remove: '+e.message,'error'); }
+}
+async function toggleAction(actionId,checked,el){
+  if(el) el.disabled=true;
+  try{
+    if(checked){ await SB.rpc('complete_request_action',{p_action:actionId,p_note:''}); toast('Marked as actioned ✓ — the buying team has been told'); }
+    else{ await SB.rpc('reopen_request_action',{p_action:actionId}); toast('Action reopened'); }
+    await loadAll();
+  }catch(e){ if(el){ el.disabled=false; el.checked=!checked; } toast('Could not update: '+e.message,'error'); }
+}
+async function markActionDone(actionId){
+  const note=($('actNote')?.value||'').trim();
+  try{ await SB.rpc('complete_request_action',{p_action:actionId,p_note:note}); toast('Marked as done ✓ — the buying team has been told'); await loadAll(); }
+  catch(e){ toast('Could not mark as done: '+e.message,'error'); }
+}
+async function sendMsg_old(id){
   const t=$('msgText').value.trim(); if(!t) return;
   try{ await SB.post('request_messages',{request_id:id,body:t,author:me}); $('msgText').value=''; await loadAll(); setDetailTab('messages'); }
   catch(e){ toast('Message failed: '+e.message,'error'); }
@@ -1060,10 +1219,11 @@ function checkFile(f){
   if(f.size>MAX_MB*1048576){ toast(`${f.name} is over ${MAX_MB} MB — compress it or send a link in the details`,'error'); return false; }
   return true;
 }
-async function uploadOne(reqId,f){
+async function uploadOne(reqId,f,messageId){
   const path=`${reqId}/${newId().slice(0,8)}-${safeName(f.name)}`;
   await SB.upload(path.split('/').map(encodeURIComponent).join('/'),f);
-  await SB.post('request_files',{request_id:reqId,name:f.name,storage_path:path,mime:f.type||'',size:f.size,uploaded_by:me});
+  await SB.post('request_files',{request_id:reqId,name:f.name,storage_path:path,mime:f.type||'',size:f.size,uploaded_by:me,
+    is_image:(f.type||'').startsWith('image/'),...(messageId?{message_id:messageId}:{})});
 }
 
 // ═══ FORM ═══

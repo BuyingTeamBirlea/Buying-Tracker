@@ -648,6 +648,15 @@ body.light-mode .rq-Complete{color:#15803d}body.light-mode .rq-Declined{color:#b
 .rq-link:hover{border-color:var(--accent)}
 .rq-msgs{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto}
 .rq-msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:.86rem;line-height:1.45;white-space:pre-wrap;background:var(--bg3);border:1px solid var(--border);align-self:flex-start}
+.rq-seg{display:inline-flex;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px;gap:2px}
+.rq-seg button{background:none;border:none;color:var(--text2);font-size:.8rem;font-weight:500;padding:5px 11px;border-radius:5px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.rq-seg button:hover{color:var(--text)}
+.rq-seg button.on{background:var(--accent);color:#fff}
+.rq-msg.del{position:relative;padding-right:26px}
+.rq-msg-x{position:absolute;top:4px;right:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:.72rem;line-height:1;padding:3px 5px;border-radius:4px;opacity:.5;transition:opacity .15s}
+.rq-msg:hover .rq-msg-x{opacity:1}
+.rq-msg-x:hover{color:var(--red);background:var(--bg3)}
+body.view-only .rq-msg-x{display:none}
 .rq-msg.mine{align-self:flex-end;background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.35)}
 .rq-msg small{display:block;font-size:.68rem;color:var(--text3);margin-top:3px}
 .rq-reply{display:flex;gap:8px;margin-top:8px}
@@ -692,6 +701,29 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
 .rq-file-link a.btn:hover{color:#fff}.rq-file-link a.btn-ghost:hover{color:var(--text)}
 .rq-file-link .k{font-size:.7rem;color:var(--text3);white-space:nowrap}
 .rq-sub{font-size:.76rem;color:var(--text3);margin:-4px 0 8px}
+.rq-act{border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.08);border-radius:var(--radius);padding:11px 13px;margin-bottom:14px}
+.rq-act b.h{font-size:.72rem;color:#dc2626;text-transform:uppercase;letter-spacing:.05em}
+.rq-act .ins{white-space:pre-wrap;font-size:.9rem;margin:5px 0}
+.rq-wait{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:.72rem;font-weight:700;background:rgba(239,68,68,.15);color:#dc2626;border:1px solid rgba(239,68,68,.4);white-space:nowrap}
+body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
+.rq-msg.action-msg{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.08)}
+.rq-msg.action-done{border-color:rgba(22,163,74,.4);background:rgba(22,163,74,.07)}
+.rq-msg-files{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rq-msg-file{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:.76rem;cursor:pointer;max-width:260px;white-space:nowrap}
+.rq-msg-file .nm{overflow:hidden;text-overflow:ellipsis}
+.rq-msg-file a{color:var(--accent2);text-decoration:none;font-weight:600}
+.rq-msg-img{width:110px;height:82px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.rq-msg-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rq-reply.over textarea{border-color:var(--accent)}
+.rq-attach{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:0 10px;font-size:1rem;color:var(--text2)}
+.rq-pend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rq-pend span{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:2px 9px;font-size:.76rem}
+.rq-pend button{background:none;border:none;color:var(--text3);cursor:pointer}
+.rq-notes{font-size:.78rem;color:var(--text3);display:flex;flex-direction:column;gap:3px}
+.rq-type-opts{display:flex;flex-direction:column;gap:8px}
+.rq-type-opts label{display:flex;gap:10px;align-items:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;cursor:pointer;font-size:.86rem}
+.rq-type-opts label:has(input:checked){border-color:var(--accent);background:rgba(79,110,247,.08)}
+.rq-type-opts small{display:block;color:var(--text3);font-size:.76rem;margin-top:2px}
 .rq-done{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px}
 .rq-done .rq-desc{background:var(--bg2);margin:8px 0 10px}
 .rq-drop{border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;text-align:center;color:var(--text2);cursor:pointer;font-size:.86rem;transition:all .15s}
@@ -864,13 +896,14 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
         <span class="search-icon">🔍</span>
         <input type="text" id="reqSearch" placeholder="Search ref, customer, title, rep…" oninput="renderRequestsPage()">
       </div>
-      <select id="reqFilterSel" onchange="renderRequestsPage()" style="font-size:.82rem">
-        <option value="open">Open</option>
-        <option value="closed">Closed</option>
-        <option value="mine">Assigned to me</option>
-        <option value="unassigned">Unassigned</option>
-        <option value="all">All</option>
-      </select>
+      <div class="rq-seg" id="reqDeptSeg">
+        <button data-v="Sales" onclick="setReqSeg('dept',this.dataset.v)">💼 Sales</button>
+        <button data-v="Customer Service" onclick="setReqSeg('dept',this.dataset.v)">🎧 Customer Service</button>
+      </div>
+      <div class="rq-seg" id="reqStatusSeg">
+        <button data-v="open" class="on" onclick="setReqSeg('status',this.dataset.v)">Open</button>
+        <button data-v="closed" onclick="setReqSeg('status',this.dataset.v)">Closed</button>
+      </div>
       <button class="btn btn-sm" style="margin-left:auto" onclick="openReqNew()" title="Create a request on someone's behalf, e.g. for work already under way">＋ New request</button>
     </div>
     <div class="logi-table-wrap">
@@ -1357,6 +1390,56 @@ body.view-only #menuDropdown button:not([onclick="signOut()"]):not([onclick^="ex
       <button class="btn btn-ghost" onclick="closeReqNew()">Cancel</button>
       <div class="spacer"></div>
       <button class="btn" id="rnSaveBtn" onclick="saveReqNew()">Create request</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFY REQUESTER MODAL -->
+<div class="overlay hidden" id="reqNotifyOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div><div class="modal-title" id="rnfTitle">Email an update</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="rnfSub"></div></div>
+      <button class="modal-close" onclick="closeReqNotify()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="rq-type-opts">
+        <label><input type="radio" name="rnfType" value="message" checked><span>💬 <b>New message</b><small>Includes your latest message from the chat</small></span></label>
+        <label><input type="radio" name="rnfType" value="timeline"><span>🕒 <b>Timeline update</b><small>Includes the latest timeline entry on the linked item card</small></span></label>
+        <label><input type="radio" name="rnfType" value="file"><span>📁 <b>New file uploaded</b><small>Lists the files you've shared most recently</small></span></label>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Note (optional)</label><input type="text" id="rnfNote" placeholder="e.g. Samples arriving Friday"></div>
+      <div class="rq-notes" id="rnfHistory" style="margin-top:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReqNotify()">Cancel</button>
+      <div class="spacer"></div>
+      <button class="btn" id="rnfSendBtn" onclick="sendReqNotify()">📧 Send email</button>
+    </div>
+  </div>
+</div>
+
+<!-- REQUEST ACTION MODAL -->
+<div class="overlay hidden" id="reqActOverlay">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div><div class="modal-title">⚡ Request action</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="raSub"></div></div>
+      <button class="modal-close" onclick="closeReqAct()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:12px"><label>What do they need to do? *</label>
+        <textarea id="raIns" style="min-height:90px" placeholder="e.g. Review the attached margin sheet and confirm the RRP"></textarea></div>
+      <div class="field"><label>Files (optional) — saved to SharePoint, shown in the chat</label>
+        <div class="rq-drop" id="raDrop" onclick="$('raFiles').click()">📎 Drop files here or click to choose</div>
+        <input type="file" id="raFiles" multiple class="hidden" onchange="raAdd(this.files);this.value=''">
+        <div class="rq-pend" id="raPend"></div></div>
+      <div style="font-size:.8rem;color:var(--text3);margin-top:10px" id="raEmailNote"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReqAct()">Cancel</button>
+      <div class="spacer"></div>
+      <button class="btn" id="raSaveBtn" onclick="saveReqAct()">⚡ Send action</button>
     </div>
   </div>
 </div>
@@ -3804,7 +3887,8 @@ function setupSpSections(){
 }
 
 async function refreshSpStatus(kind){
-  const el=$('spStatus-'+kind); if(!el) return;
+  const els=[...document.querySelectorAll(`[id="spStatus-${kind}"]`)]; if(!els.length) return;
+  const el={set innerHTML(v){ els.forEach(e=>e.innerHTML=v); }};
   if(!('showDirectoryPicker' in window)){
     el.innerHTML='<span style="color:var(--amber)">SharePoint saving needs desktop Chrome or Edge</span>'; return;
   }
@@ -5587,6 +5671,12 @@ $('deadlineOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget
 $('airmailOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAirmailModal(); });
 $('reqOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqModal(); });
 $('reqDoneOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqDone(); });
+$('reqNotifyOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqNotify(); });
+$('reqActOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqAct(); });
+(function(){ const z=$('raDrop');
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+  z.addEventListener('dragleave',()=>z.classList.remove('over'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');raAdd(e.dataTransfer.files);}); })();
 $('reqLinkOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqLink(); });
 $('reqNewOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeReqNew(); });
 (function(){ const z=$('rdDrop');
@@ -5596,6 +5686,8 @@ $('reqNewOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) 
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ if(!$('reqDoneOverlay').classList.contains('hidden')){ closeReqDone(); return; }
+    if(!$('reqNotifyOverlay').classList.contains('hidden')){ closeReqNotify(); return; }
+    if(!$('reqActOverlay').classList.contains('hidden')){ closeReqAct(); return; }
     if(!$('reqLinkOverlay').classList.contains('hidden')){ closeReqLink(); return; }
     if(!$('reqNewOverlay').classList.contains('hidden')){ closeReqNew(); return; } closeReqModal(); closeDetail(); closeAdd(); closeConfirm(); closeImgOverlay(); closeVidOverlay(); closeDup(); closeDeadlineModal(); closeAirmailModal(); }
   if(!$('imgOverlay').classList.contains('hidden')){
@@ -6160,7 +6252,32 @@ const reqBuyers=[ // who requests can be assigned to, in dropdown order
 const REQ_TYPE_CATEGORY={'Customer Service':'Customer Service Enquiries','Margin Sheets':'Miscellaneous','BC Set Up':'Miscellaneous','PIM Assistance':'Miscellaneous'};
 // Starting status per request type (anything not listed → Quoting)
 const REQ_TYPE_STAGE={'Customer Service':'Awaiting Response','Margin Sheets':'To-Do','BC Set Up':'To-Do','PIM Assistance':'To-Do'};
-const reqTitleText=r=>r.request_type==='Customer Service'?`SKU ${r.title}${r.cs_ticket?' · '+r.cs_ticket:''}`:r.title;
+// Customer Service tickets read "Ticket 1000 - HAP-ALAB46OAK"
+const reqTitleText=r=>{
+  if(r.request_type!=='Customer Service') return r.title;
+  const t=(r.cs_ticket||'').trim().replace(/^ticket\s*/i,'');
+  return t?`Ticket ${t} - ${r.title}`:r.title;
+};
+let reqOpenActions=[], _reqNotifs=[], _reqActs=[];
+// Status line under the "⚡ Action needed" message — the requester ticks it off on their page
+const reqIsBuyerMsg=(m,me)=>m.author===me||reqBuyers.some(b=>b.email===m.author);
+function deleteReqMsg(msgId){
+  const act=_reqActs.find(a=>a.message_id===msgId&&a.status==='open');
+  confirmAction('Remove this message?',`It disappears from both sides of the chat${_reqFiles.some(f=>f.message_id===msgId)?' along with its attachments (copies already saved in SharePoint stay there)':''}.${act?' The action it asked for is cancelled too.':''}`,async()=>{
+    try{
+      if(act) await SB.patch(`request_actions?id=eq.${act.id}`,{status:'cancelled'});
+      await SB.delete(`request_messages?id=eq.${msgId}`);
+      if(act) await loadRequests();
+      await refreshReqModal(); toast('Message removed');
+    }catch(e){ toast('Could not remove: '+e.message,'error'); }
+  });
+}
+function reqActStatusHTML(m){
+  const a=_reqActs.find(x=>x.message_id===m.id); if(!a) return '';
+  const st=a.status==='done'?`<span style="color:var(--green)">☑ Actioned by ${esc(reqName(a.done_by||''))}${a.done_at?' · '+fmtEntryDate(a.done_at.slice(0,10),false)+' '+a.done_at.slice(11,16):''}</span>`
+    :a.status==='cancelled'?'<span style="color:var(--text3)">✕ Cancelled</span>':'<span>☐ Not actioned yet</span>';
+  return `<div style="font-size:.78rem;font-weight:600;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border2)">${st}</div>`;
+}
 let reqData=[], reqLinks=[], reqOpenId=null, _reqConvert=null, _reqAvailable=true;
 let _lastKnownReqTs=null, _reqKnownIds=null, _reqFiles=[], _reqMsgs=[], _reqBlobs={}, _reqDeclining=false;
 
@@ -6171,11 +6288,12 @@ async function loadRequests(silent=false){
       const ts=(await newestUpdatedAt('requests'))||'';
       if(ts===_lastKnownReqTs) return; // nothing changed
     }
-    const [rows,links]=await Promise.all([
+    const [rows,links,acts]=await Promise.all([
       SB.get('requests?select=*&order=created_at.desc&limit=1000'),
-      SB.get('request_items?select=request_id,item_id,created_at&order=created_at.asc')
+      SB.get('request_items?select=request_id,item_id,created_at&order=created_at.asc'),
+      SB.get('request_actions?status=eq.open&select=*&order=created_at.desc').catch(()=>[])
     ]);
-    reqData=rows||[]; reqLinks=links||[];
+    reqData=rows||[]; reqLinks=links||[]; reqOpenActions=acts||[];
     _lastKnownReqTs=reqData.reduce((m,r)=>r.updated_at>m?r.updated_at:m,'');
     // Toast for anything new that arrived while the tracker was open
     if(_reqKnownIds){
@@ -6210,7 +6328,11 @@ function itemReqButtons(itemId){
 }
 function reqDisplayRef(r,items){ const it=(items||[]).find(i=>i.refCode); return it?it.refCode:r.ref; }
 // Status shown for a ticket: Complete, else the linked item card status(es), else In Progress
+const reqOpenAction=id=>reqOpenActions.find(a=>a.request_id===id&&a.status==='open');
 function reqStatusHTML(r,items){
+  return reqStatusBase(r,items);
+}
+function reqStatusBase(r,items){
   if(r.status==='Complete') return `<span class="rq-pill rq-Complete">Complete</span>`;
   if(items&&items.length) return [...new Set(items.map(i=>i.stage))].map(stageBadge).join(' ');
   return `<span class="rq-pill rq-In-Progress">In Progress</span>`;
@@ -6230,6 +6352,9 @@ function reqLastActionedHTML(r,items){
 function updateReqBadge(){
   const open=reqData.filter(r=>REQ_OPEN.has(r.status));
   const attention=open.filter(r=>r.status==='New'||r.buyer_unread).length;
+  // Number on the installed app's taskbar icon + the browser tab, like Teams
+  try{ if(navigator.setAppBadge){ attention?navigator.setAppBadge(attention):navigator.clearAppBadge(); } }catch(e){}
+  document.title=(attention?`(${attention}) `:'')+'Buying Tracker';
   const b=$('reqNotifBadge');
   if(b){ b.textContent=attention; b.classList.toggle('show',attention>0); }
   const fresh=open.filter(r=>r.status==='New');
@@ -6247,9 +6372,17 @@ function updateReqBadge(){
   bn.innerHTML=`<span>📥 ${parts.join(' · ')}</span><div class="spacer"></div><button class="btn btn-sm" onclick="showPage('requests')">View requests</button>`;
 }
 
+// Team buttons: click Sales / Customer Service to filter, click again to show both
+let _reqDept='', _reqStatus='open';
+function setReqSeg(kind,v){
+  if(kind==='dept') _reqDept=_reqDept===v?'':v; else _reqStatus=v;
+  document.querySelectorAll('#reqDeptSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===_reqDept));
+  document.querySelectorAll('#reqStatusSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===_reqStatus));
+  renderRequestsPage();
+}
 function renderRequestsPage(){
   const q=($('reqSearch')?.value||'').trim().toLowerCase();
-  const f=$('reqFilterSel')?.value||'open';
+  const f=_reqStatus;
   const meEmail=(getStoredSession()?.user?.email||'').toLowerCase();
   let rows=reqData.filter(r=>{
     const open=REQ_OPEN.has(r.status);
@@ -6259,6 +6392,7 @@ function renderRequestsPage(){
     if(f==='unassigned') return open&&!r.assigned_to;
     return open;
   });
+  if(_reqDept) rows=rows.filter(r=>(r.department||'Sales')===_reqDept);
   if(q) rows=rows.filter(r=>[r.ref,reqDisplayRef(r,reqItemsFor(r.id)),r.department,r.customer,r.title,r.cs_ticket,r.requested_by,r.request_type,r.description,r.assigned_to,reqName(r.assigned_to)].some(v=>(v||'').toLowerCase().includes(q)));
   rows.sort((a,b)=>{
     if(f!=='closed'){
@@ -6402,10 +6536,15 @@ async function refreshReqModal(noFetch){
   const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r){ closeReqModal(); return; }
   if(!noFetch){
     try{
-      [_reqFiles,_reqMsgs]=await Promise.all([
+      let acts;
+      [_reqFiles,_reqMsgs,acts,_reqNotifs]=await Promise.all([
         SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
-        SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`)
+        SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`),
+        SB.get(`request_actions?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[]),
+        SB.get(`request_notifications?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[])
       ]);
+      _reqActs=acts||[];
+      reqOpenActions=reqOpenActions.filter(a=>a.request_id!==id).concat(_reqActs.filter(a=>a.status==='open'));
     }catch(e){ toast('Could not load request: '+e.message,'error'); }
     if(reqOpenId!==id) return;
   }
@@ -6414,8 +6553,8 @@ async function refreshReqModal(noFetch){
   const items=reqItemsFor(id), open=REQ_OPEN.has(r.status);
   const me=(getStoredSession()?.user?.email||'').toLowerCase();
   const all=_reqFiles.map((f,i)=>[f,i]);
-  const repFiles=all.filter(([f])=>!f.is_completion&&!f.shared_by_buyer);
-  const sharedFiles=all.filter(([f])=>f.shared_by_buyer||f.is_completion);
+  const repFiles=all.filter(([f])=>!f.is_completion&&!f.shared_by_buyer&&!f.message_id);
+  const sharedFiles=all.filter(([f])=>(f.shared_by_buyer||f.is_completion)&&!f.message_id);
   const itemFileCount=items.reduce((n,i)=>n+(i.files||[]).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
   const rep=esc(reqName(r.requested_by));
 
@@ -6437,16 +6576,14 @@ async function refreshReqModal(noFetch){
   const tab=(k,label,n)=>`<button class="tab-btn${_reqTab===k?' active':''}" onclick="setReqTab('${k}')">${label}${n?`<span class="cnt">${n}</span>`:''}</button>`;
   const isMediaName=n=>isImageFile(n)||isVideo(n)||/\.(mov|webm)$/i.test(n||'');
   const isMediaRF=f=>f.is_image||isMediaName(f.name);
-  const nFiles=all.filter(([f])=>!isMediaRF(f)).length+items.reduce((n,i)=>n+(i.files||[]).filter(f=>!isMediaName(f.name)).length+(i.fileLinks||[]).length,0);
-  const nMedia=all.filter(([f])=>isMediaRF(f)).length+items.reduce((n,i)=>n+(i.images||[]).length,0);
-  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('files','📁 Files',nFiles)+tab('media','🖼️ Media',nMedia)+tab('messages','💬 Messages',_reqMsgs.length);
+  if(!['details','messages','files'].includes(_reqTab)) _reqTab='details';
+  const nAll=all.length+items.reduce((n,i)=>n+(i.files||[]).filter(f=>!isMediaName(f.name)).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
+  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('messages','💬 Messages'+(all.some(([f])=>f.message_id)?' 📎':''),_reqMsgs.length)+tab('files','📁 Files & Media',nAll);
 
   let html='';
-  if(_reqTab==='files'||_reqTab==='media'){
-    const media=_reqTab==='media';
+  if(_reqTab==='files'){
     const unmoved=repFiles.filter(([f])=>!f.sp_path);
-    const pick=list=>list.filter(([f])=>isMediaRF(f)===media);
-    const shared=pick(sharedFiles), mine=pick(repFiles);
+    const chatFiles=all.filter(([f])=>f.message_id);
     const KIND_LABEL={margin:'Margin sheet',spec:'Spec form',quote:'Quotation',request:'Sales request file'};
     // one file row: name opens in the browser, Office files also get "Open in Excel/Word/PowerPoint"
     const fileRow=(name,url,kindLabel,isSp)=>{
@@ -6457,43 +6594,47 @@ async function refreshReqModal(noFetch){
     };
     const mediaThumb=m=>`<div class="rq-thumb" onclick="window.open('${esc(m.url)}','_blank')" title="${esc(m.name)}">
         <span><span class="rq-ic">${isVideo(m.name)?'🎬':'🖼️'}</span>${esc(m.name)}</span>${isVideo(m.name)?'':`<img src="${esc(m.spPath?spThumbUrl(m.url):m.url)}" alt="" onerror="this.remove()">`}</div>`;
+    const cnt=n=>` <span style="text-transform:none;letter-spacing:0;font-weight:400">(${n})</span>`;
     const cardSecs=items.map(it=>{
-      if(media){
-        const imgs=it.images||[];
-        return `<div class="rq-sec"><div class="section-title">Media · ${esc(it.name)}${it.refCode?' · '+esc(it.refCode):''} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${imgs.length})</span></div>
-          ${imgs.length?`<div class="rq-thumbs">${imgs.map(mediaThumb).join('')}</div>`:'<div style="font-size:.84rem;color:var(--text3)">No images or videos on this card.</div>'}</div>`;
-      }
-      const files=(it.files||[]).filter(f=>!isMediaName(f.name)), links=it.fileLinks||[];
-      return `<div class="rq-sec"><div class="section-title">Files · ${esc(it.name)}${it.refCode?' · '+esc(it.refCode):''} <span style="text-transform:none;letter-spacing:0;font-weight:400">(${files.length+links.length})</span></div>
+      const files=(it.files||[]).filter(f=>!isMediaName(f.name)), links=it.fileLinks||[], imgs=it.images||[];
+      return `<div class="rq-sec"><div class="section-title">Item card · ${esc(it.name)}${it.refCode?' · '+esc(it.refCode):''}${cnt(files.length+links.length+imgs.length)}</div>
         ${files.map(f=>fileRow(f.name,f.url,KIND_LABEL[f.kind]||'File',!!f.spPath||/sharepoint\.com/i.test(f.url||''))).join('')}
         ${links.map(l=>fileRow(l.name||l.url,l.url,'Link',/sharepoint\.com/i.test(l.url||''))).join('')}
-        ${!files.length&&!links.length?'<div style="font-size:.84rem;color:var(--text3)">No files on this card.</div>':''}</div>`;
+        ${imgs.length?`<div class="rq-thumbs"${files.length||links.length?' style="margin-top:8px"':''}>${imgs.map(mediaThumb).join('')}</div>`:''}
+        ${!files.length&&!links.length&&!imgs.length?'<div style="font-size:.84rem;color:var(--text3)">No files or images on this card.</div>':''}</div>`;
     }).join('');
     html=`
-    <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">Shared with ${rep} (${shared.length})
-        <span style="margin-left:auto;display:flex;gap:8px;text-transform:none;letter-spacing:0;font-weight:500;font-size:.72rem">
-          <span id="spStatus-${media?'media':'request'}"></span></span></div>
-      <div class="rq-sub">Saved to SharePoint and shown on ${rep}'s request page. ${media?'Photos &amp; MP4 → Images For Buying Tracker.':'Files → Buying Tracker Quotations.'}</div>
-      <div class="rq-drop" id="rqShareDrop" onclick="$('rqShareInput').click()">${media?'📷 Drop photos or videos to share':'📎 Drop files to share'}, or click to choose
-        <input type="file" id="rqShareInput" multiple class="hidden"${media?' accept="image/*,video/mp4"':''} onchange="reqShareFiles(this.files);this.value=''"></div>
-      ${shared.length?`<div class="rq-thumbs" style="margin-top:10px">${shared.map(([f,i])=>reqThumbHTML(f,i,true)).join('')}</div>`:''}
-    </div>
-    ${cardSecs}
-    <div class="rq-sec">
-      <div class="section-title" style="display:flex;align-items:center;gap:8px">${media?'Images':'Attachments'} from ${rep} (${mine.length})
-        ${!media&&unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
+    ${repFiles.length?`<div class="rq-sec">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px">Sent with the request by ${rep}${cnt(repFiles.length)}
+        ${unmoved.length&&items.length?`<span style="margin-left:auto;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500">
           ${items.length>1?`<select id="rqSpTarget" style="font-size:.75rem;padding:4px 24px 4px 8px">${items.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('')}</select>`:''}
           <button class="btn btn-sm" onclick="copyRequestFilesToSp('${id}',$('rqSpTarget')?.value||'${items[0].id}')">📁 Copy ${unmoved.length} to SharePoint</button></span>`:''}
       </div>
-      ${mine.length?`<div class="rq-thumbs" id="rqThumbs">${mine.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>`
-        :`<div style="font-size:.84rem;color:var(--text3)">${media?'No images from the requester.':'No attachments.'}</div>`}
-      ${!media&&unmoved.length&&items.length?'<div class="rq-sub" style="margin-top:6px">Copy to SharePoint moves all their attachments (files and images) onto the item card.</div>':''}
-    </div>`;
+      <div class="rq-thumbs" id="rqThumbs">${repFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div>
+      ${unmoved.length&&items.length?'<div class="rq-sub" style="margin-top:6px">Copy to SharePoint moves these onto the item card.</div>':''}
+    </div>`:''}
+    ${chatFiles.length?`<div class="rq-sec"><div class="section-title">Shared in Messages${cnt(chatFiles.length)}</div>
+      <div class="rq-thumbs">${chatFiles.map(([f,i])=>reqThumbHTML(f,i)).join('')}</div></div>`:''}
+    ${sharedFiles.length?`<div class="rq-sec"><div class="section-title">Shared with ${rep} earlier${cnt(sharedFiles.length)}</div>
+      <div class="rq-thumbs">${sharedFiles.map(([f,i])=>reqThumbHTML(f,i,true)).join('')}</div></div>`:''}
+    ${cardSecs}
+    ${!nAll?`<div style="font-size:.84rem;color:var(--text3)">No files or images yet. Anything sent with the request, shared in 💬 Messages or added to a linked item card shows here.</div>`:''}`;
   }else if(_reqTab==='messages'){
+    const oa=reqOpenAction(id);
     html=`<div class="rq-sec" style="margin-bottom:0">
-      <div class="rq-msgs" id="rqMsgs" style="max-height:52vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}">${esc(m.body)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
-      <div class="rq-reply"><textarea id="rqMsgText" placeholder="Reply to ${rep}…"></textarea><button class="btn" onclick="sendReqMsg('${id}')">Send</button></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;font-size:.72rem;margin-bottom:10px"><span id="spStatus-request"></span><span id="spStatus-media"></span></div>
+      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${reqIsBuyerMsg(m,me)?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
+      <div class="rq-reply" id="rqReplyBox">
+        <button class="rq-attach" title="Attach files (or paste / drag them in) — saved to SharePoint" onclick="$('rqMsgFiles').click()">📎</button>
+        <input type="file" id="rqMsgFiles" multiple class="hidden" onchange="reqMsgAdd(this.files);this.value=''">
+        <textarea id="rqMsgText" placeholder="Reply to ${rep}… (paste or drop files here · Ctrl+Enter to send)"></textarea>
+        <button class="btn" id="rqSendBtn" onclick="sendReqMsg('${id}')">Send</button></div>
+      <div class="rq-pend" id="rqPend">${reqPendChips()}</div>
+      ${open?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+        <div class="spacer" style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm" onclick="openReqNotify()" title="Email ${rep} about an update">🔔 Notify ${rep}</button>
+        ${oa?'':`<button class="btn btn-ghost btn-sm" onclick="openReqAct()" title="Ask ${rep} to do something before this can progress">⚡ Request action</button>`}
+      </div>`:''}
     </div>`;
   }else{
     const doneFiles=all.filter(([f])=>f.is_completion);
@@ -6523,7 +6664,8 @@ async function refreshReqModal(noFetch){
         </span></div>
       ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span>${stageBadge(i.stage)}${daysBadge(daysInactive(i),i.stage)}<button class="rq-unlink" title="Unlink from this request (the item card itself is kept)" onclick="event.stopPropagation();unlinkReqItem('${id}','${i.id}')">✕</button></div>`).join('')}</div>`
         :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), link existing ones, or be completed without one.</div>`}
-    </div>`;
+    </div>
+    ${_reqNotifs.length?`<div class="rq-notes" style="margin-top:14px">${notifyHistoryHTML()}</div>`:''}`;
   }
   $('rqBody').innerHTML=html;
   if(_reqTab==='messages'){
@@ -6531,15 +6673,7 @@ async function refreshReqModal(noFetch){
     const m=$('rqMsgs'); if(m) m.scrollTop=m.scrollHeight;
     if(focusId==='rqMsgText'){ const el=$('rqMsgText'); el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
   }
-  if(_reqTab==='files'||_reqTab==='media'){
-    const z=$('rqShareDrop');
-    if(z){
-      z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
-      z.addEventListener('dragleave',()=>z.classList.remove('over'));
-      z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');reqShareFiles(e.dataTransfer.files);});
-    }
-    refreshSpStatus(_reqTab==='media'?'media':'request');
-  }
+  if(_reqTab==='messages'){ wireReqMsgBox(); refreshSpStatus('request'); refreshSpStatus('media'); }
   $('rqFooter').innerHTML=open?`
       ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
@@ -6601,7 +6735,7 @@ async function reqBlobUrl(f){
 function reqHydrateThumbs(){
   _reqFiles.forEach((f,i)=>{
     if(!f.storage_path||!reqIsImg(f)||f.size>8*1048576) return; // SharePoint-shared files use their own preview
-    reqBlobUrl(f).then(u=>{ const el=document.querySelector(`#rqBody .rq-thumb[data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('afterbegin',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
+    reqBlobUrl(f).then(u=>{ const el=document.querySelector(`#rqBody .rq-thumb[data-i="${i}"],#rqBody .rq-msg-img[data-i="${i}"]`); if(el&&!el.querySelector('img')) el.insertAdjacentHTML('afterbegin',`<img src="${u}" alt="" onerror="this.remove()">`); }).catch(()=>{});
   });
 }
 async function openReqFile(i){
@@ -6706,10 +6840,144 @@ function deleteRequest(id){
     }catch(e){ toast('Delete failed: '+e.message,'error'); }
   });
 }
+// ── Chat with files: buyer attachments are saved to SharePoint and linked to the message ──
+let _reqPending=[];
+function reqPendChips(){ return _reqPending.map((f,i)=>`<span>${fileIconByName(f.name)} ${esc(f.name)} <button onclick="_reqPending.splice(${i},1);$('rqPend').innerHTML=reqPendChips()">✕</button></span>`).join(''); }
+function reqMsgAdd(list){
+  [...list].forEach(f=>{ if(f.size>50*1048576){ toast(f.name+' is over 50 MB','error'); return; } _reqPending.push(f); });
+  if($('rqPend')) $('rqPend').innerHTML=reqPendChips();
+}
+function wireReqMsgBox(){
+  const box=$('rqReplyBox'), ta=$('rqMsgText'); if(!box||box.dataset.wired) return; box.dataset.wired=1;
+  box.addEventListener('dragover',e=>{e.preventDefault();box.classList.add('over');});
+  box.addEventListener('dragleave',()=>box.classList.remove('over'));
+  box.addEventListener('drop',e=>{e.preventDefault();box.classList.remove('over');if(e.dataTransfer.files.length) reqMsgAdd(e.dataTransfer.files);});
+  ta.addEventListener('paste',e=>{
+    const files=[...(e.clipboardData?.items||[])].filter(it=>it.kind==='file').map(it=>it.getAsFile()).filter(Boolean)
+      .map((f,i)=>f.name&&f.name!=='image.png'?f:new File([f],`Pasted image ${new Date().toTimeString().slice(0,8).replace(/:/g,'.')}${i?'-'+i:''}.png`,{type:f.type||'image/png'}));
+    if(files.length){ e.preventDefault(); reqMsgAdd(files); }
+  });
+  ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)) sendReqMsg(reqOpenId); });
+}
+// Saves files to SharePoint (photos/MP4 → Media folder, others → Quotations) and links them to a message
+async function reqSaveFilesToSp(r,files,messageId){
+  const me=(getStoredSession()?.user?.email||'').toLowerCase();
+  const target={refCode:reqDisplayRef(r,reqItemsFor(r.id)), name:reqTitleText(r), category:''};
+  let ok=0;
+  for(const f of files){
+    const kind=REQ_MEDIA_EXTS.has((f.name.split('.').pop()||'').toLowerCase())?'media':'request';
+    const saved=await saveFileToSp(f,kind,target); if(!saved) continue;
+    try{
+      await SB.post('request_files',{request_id:r.id,name:saved.finalName,storage_path:'',mime:f.type||'',size:f.size,uploaded_by:me,
+        sp_path:saved.spPath,sp_url:saved.url,is_image:kind==='media',shared_by_buyer:true,message_id:messageId});
+      ok++;
+    }catch(e){ toast('Saved to SharePoint, but linking it failed: '+e.message,'error'); }
+  }
+  return ok;
+}
+// Ask for SharePoint folder access up front (needs the click) so uploads don't fail halfway
+async function reqSpReady(files){
+  if(!files.length) return true;
+  if(!('showDirectoryPicker' in window)){ toast('Sending files needs desktop Chrome or Edge','error'); return false; }
+  const needMedia=files.some(f=>REQ_MEDIA_EXTS.has((f.name.split('.').pop()||'').toLowerCase()));
+  const needOther=files.some(f=>!REQ_MEDIA_EXTS.has((f.name.split('.').pop()||'').toLowerCase()));
+  if(needMedia&&!(await getSpRoot('media'))){ toast('Connect the Media folder first (link under the message box)','error'); refreshSpStatus('media'); return false; }
+  if(needOther&&!(await getSpRoot('request'))){ toast('Connect the Quotations folder first (link under the message box)','error'); refreshSpStatus('request'); return false; }
+  return true;
+}
 async function sendReqMsg(id){
-  const t=($('rqMsgText')?.value||'').trim(); if(!t) return;
-  try{ await SB.post('request_messages',{request_id:id,body:t}); $('rqMsgText').value=''; await refreshReqModal(); }
-  catch(e){ toast('Message failed: '+e.message,'error'); }
+  const r=reqData.find(x=>x.id===id); if(!r) return;
+  const t=($('rqMsgText')?.value||'').trim(); if(!t&&!_reqPending.length) return;
+  const files=[..._reqPending];
+  if(!(await reqSpReady(files))) return;
+  const btn=$('rqSendBtn'); if(btn){ btn.disabled=true; btn.textContent=files.length?'Saving…':'Sending…'; }
+  try{
+    const [m]=await SB.post('request_messages',{request_id:id,body:t});
+    if(files.length){ const ok=await reqSaveFilesToSp(r,files,m.id); if(ok<files.length) toast(`${files.length-ok} file(s) didn't save`,'error'); }
+    _reqPending=[]; if($('rqMsgText')) $('rqMsgText').value='';
+    await refreshReqModal();
+    toast(files.length?`Sent with ${files.length} file${files.length>1?'s':''} — use 🔔 Notify to email ${reqName(r.requested_by)}`:'Message sent');
+  }catch(e){ toast('Message failed: '+e.message,'error'); }
+  if(btn){ btn.disabled=false; btn.textContent='Send'; }
+}
+function reqMsgFilesHTML(m){
+  const fs=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>f.message_id===m.id); if(!fs.length) return '';
+  return `<div class="rq-msg-files">${fs.map(([f,i])=>{
+    const img=(f.is_image||reqIsImg(f))&&!reqIsVid(f);
+    if(img) return `<div class="rq-msg-img" data-i="${i}" onclick="openReqFile(${i})" title="${esc(f.name)}">🖼️${f.sp_url?`<img src="${esc(spThumbUrl(f.sp_url))}" alt="" onerror="this.remove()">`:''}</div>`;
+    const desk=f.sp_url?officeDesktopUrl(f.sp_url,f.name):null;
+    return `<span class="rq-msg-file" onclick="openReqFile(${i})" title="${esc(f.name)}">${fileIconByName(f.name)}<span class="nm">${esc(f.name)}</span>${desk?`<a href="${esc(desk.href)}" onclick="event.stopPropagation()">🖥 ${desk.label}</a>`:''}</span>`;
+  }).join('')}</div>`;
+}
+
+// ── 🔔 Email the requester an update ──
+const NOTIFY_LABEL={message:'New message',timeline:'Timeline update',file:'New file uploaded',action:'Action needed'};
+function notifyHistoryHTML(){
+  if(!_reqNotifs.length) return '';
+  return '<b style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Emails sent</b>'+_reqNotifs.slice(0,8).map(n=>
+    `<span>📧 ${esc(NOTIFY_LABEL[n.type]||n.type)} · ${fmtEntryDate(n.created_at.slice(0,10),true)} ${n.created_at.slice(11,16)} · by ${esc(reqName(n.sent_by))}${n.status==='not_configured'?' · <span style="color:var(--red)">not sent — email not set up yet</span>':''}</span>`).join('');
+}
+function openReqNotify(){
+  const r=reqData.find(x=>x.id===reqOpenId); if(!r) return;
+  $('rnfTitle').textContent=`🔔 Email ${reqName(r.requested_by)} an update`;
+  $('rnfSub').textContent=`Sent from your Outlook to ${r.requested_by}, with a link straight to ${reqDisplayRef(r,reqItemsFor(r.id))}.`;
+  $('rnfNote').value=''; document.querySelector('input[name="rnfType"][value="message"]').checked=true;
+  $('rnfHistory').innerHTML=notifyHistoryHTML();
+  $('rnfSendBtn').disabled=false; $('rnfSendBtn').textContent='📧 Send email';
+  $('reqNotifyOverlay').classList.remove('hidden');
+}
+function closeReqNotify(){ $('reqNotifyOverlay')?.classList.add('hidden'); }
+async function sendReqNotify(){
+  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r) return;
+  const type=document.querySelector('input[name="rnfType"]:checked')?.value||'message';
+  const btn=$('rnfSendBtn'); btn.disabled=true; btn.textContent='Sending…';
+  try{
+    const [n]=await SB.post('request_notifications',{request_id:id,type,note:$('rnfNote').value.trim()});
+    closeReqNotify(); await refreshReqModal();
+    if(n&&n.status==='not_configured') toast('Saved, but email isn\'t set up yet — finish the Power Automate steps','error');
+    else toast(`📧 ${NOTIFY_LABEL[type]} emailed to ${reqName(r.requested_by)}`);
+  }catch(e){ btn.disabled=false; btn.textContent='📧 Send email'; toast('Email failed: '+e.message,'error'); }
+}
+
+// ── ⚡ Request an action from the requester ──
+let _raPending=[];
+function raChips(){ return _raPending.map((f,i)=>`<span>${fileIconByName(f.name)} ${esc(f.name)} <button onclick="_raPending.splice(${i},1);$('raPend').innerHTML=raChips()">✕</button></span>`).join(''); }
+function raAdd(list){ [...list].forEach(f=>{ if(f.size>50*1048576){ toast(f.name+' is over 50 MB','error'); return; } _raPending.push(f); }); $('raPend').innerHTML=raChips(); }
+function openReqAct(){
+  const r=reqData.find(x=>x.id===reqOpenId); if(!r) return;
+  if(reqOpenAction(r.id)){ toast(`There's already an open action — cancel it first`,'error'); return; }
+  _raPending=[]; $('raPend').innerHTML=''; $('raIns').value='';
+  $('raSub').textContent=`For ${reqName(r.requested_by)} on ${reqDisplayRef(r,reqItemsFor(r.id))} · ${reqTitleText(r)}`;
+  $('raEmailNote').innerHTML=`📧 ${esc(reqName(r.requested_by))} is emailed automatically and sees <b>⚡ Action needed</b> at the top of the ticket until they mark it done.`;
+  $('raSaveBtn').disabled=false; $('raSaveBtn').textContent='⚡ Send action';
+  $('reqActOverlay').classList.remove('hidden');
+  setTimeout(()=>$('raIns').focus(),50);
+}
+function closeReqAct(){ $('reqActOverlay')?.classList.add('hidden'); }
+async function saveReqAct(){
+  const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r) return;
+  const ins=$('raIns').value.trim(); if(!ins){ toast('Say what they need to do','error'); return; }
+  const due=null, files=[..._raPending];
+  if(!(await reqSpReady(files))) return;
+  const btn=$('raSaveBtn'); btn.disabled=true; btn.textContent=files.length?'Saving files…':'Sending…';
+  try{
+    // 1) post it in the chat (with any files), 2) create the action → the database emails them
+    const [m]=await SB.post('request_messages',{request_id:id,body:`⚡ Action needed: ${ins}${due?`\nDue by ${fmtEntryDate(due,true)}`:''}`});
+    if(files.length) await reqSaveFilesToSp(r,files,m.id);
+    await SB.post('request_actions',{request_id:id,instruction:ins,due_date:due,message_id:m.id});
+    closeReqAct(); await loadRequests(); await refreshReqModal();
+    toast(`⚡ Action sent — ${reqName(r.requested_by)} has been emailed`);
+  }catch(e){ btn.disabled=false; btn.textContent='⚡ Send action'; toast('Could not send action: '+e.message,'error'); }
+}
+function cancelReqAct(actionId){
+  confirmAction('Cancel this action?','It disappears from the requester\'s page. No email is sent.',async()=>{
+    try{ await SB.patch(`request_actions?id=eq.${actionId}`,{status:'cancelled'}); await loadRequests(); await refreshReqModal(); toast('Action cancelled'); }
+    catch(e){ toast('Failed: '+e.message,'error'); }
+  });
+}
+async function markReqActDone(actionId){
+  try{ await SB.req('POST','rpc/complete_request_action',{p_action:actionId,p_note:'Marked done by the buying team'}); await loadRequests(); await refreshReqModal(); toast('Marked done'); }
+  catch(e){ toast('Failed: '+e.message,'error'); }
 }
 
 // ── Convert: reuse the normal Add Item modal, pre-filled ──
