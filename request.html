@@ -77,7 +77,7 @@ button,input,select,textarea{font-family:inherit}
 .req-meta{font-size:.8rem;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap}
 .cs-meta{gap:0}
 .cs-meta>span+span::before{content:'•';margin:0 8px;color:var(--text3)}
-.req-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px}
+.req-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:6px}
 .side-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap}
 .side-row .mini-item{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .req-flags{display:flex;gap:10px;margin-top:4px}
@@ -827,7 +827,8 @@ function renderList(){
       <div class="req-side">
         ${items.length&&r.status!=='Complete'
           ? items.map(i=>`<div class="side-row"><span class="mini-item" title="${esc(i.name)}">${esc(i.name)}</span>${stagePill(i.stage)}${daysBadge(i)}</div>`).join('')
-          : `<div class="side-row">${items.length?items.map(i=>`<span class="mini-item" title="${esc(i.name)}">${esc(i.name)}</span>`).join(''):''}${statusHTML(r)}</div>`}
+          : `<div class="side-row">${items.length?items.map(i=>`<span class="mini-item" title="${esc(i.name)}">${esc(i.name)}</span>`).join(''):''}${statusHTML(r)}</div>
+             ${!items.length&&lastActionedBadge(r)?`<div class="side-row">${lastActionedBadge(r)}</div>`:''}`}
       </div>
     </div>`;
   }).join('');
@@ -851,6 +852,15 @@ function daysBadge(p){
   if(n<=DAYS_CFG.green)   return `<span class="days-badge days-green" title="${t}">${n}d</span>`;
   if(n<=DAYS_CFG.amberHi) return `<span class="days-badge days-amber" title="${t}">${n}d</span>`;
   return `<span class="days-badge days-red" title="${t}">⚠ ${n}d</span>`;
+}
+// Days since the buying team last actioned the ticket — same colours as the tracker (green ≤3d, amber ≤6d, red 7d+)
+function lastActionedBadge(r){
+  if(!OPEN_ST.has(r.status)) return '';
+  const at=r.last_actioned_at||r.created_at; if(!at) return '';
+  const n=Math.max(0,Math.floor((new Date(todayISO()+'T00:00:00')-new Date(at.slice(0,10)+'T00:00:00'))/86400000));
+  const t=`Last actioned by buying ${fmtDate(at)}${r.last_actioned_at?'':' (not yet — counting from when it was sent)'}`;
+  const cls=n<=DAYS_CFG.green?'days-green':n<=DAYS_CFG.amberHi?'days-amber':'days-red';
+  return `<span class="days-badge ${cls}" title="${t}">${n>DAYS_CFG.amberHi?'⚠ ':''}${n}d</span>`;
 }
 const stagePill=s=>`<span class="stg ${STAGE_CLASS[s]||'stg-hold'}">${esc(s||'—')}</span>`;
 function progressHTML(p){
@@ -950,7 +960,7 @@ function infoViewHTML(r){
         <div><b>Request type</b><span>${esc(r.request_type)}</span></div>
         <div><b>Date sent</b><span>${fmtDate(r.created_at)}${r.requested_by!==me?' · '+esc(nameOf(r.requested_by)):''}</span></div>
         <div><b>Worked on by</b><span>${r.assigned_to?esc(nameOf(r.assigned_to)):'Not assigned yet'}</span></div>
-        ${isCS(r)?`<div><b>Last actioned</b><span>${r.last_actioned_at?fmtWhen(r.last_actioned_at):'Not yet'}</span></div>`:''}
+        ${isCS(r)?`<div><b>Last actioned</b><span style="display:flex;align-items:center;gap:8px">${lastActionedBadge(r)||'—'}<small style="color:var(--text3);font-size:.76rem">${r.last_actioned_at?fmtDate(r.last_actioned_at):'Not yet'}</small></span></div>`:''}
         ${r.target_price?`<div><b>Target price</b><span>${esc(r.target_price)}</span></div>`:''}
       </div>
     </div>

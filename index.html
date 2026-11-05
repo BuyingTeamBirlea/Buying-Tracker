@@ -1355,8 +1355,8 @@ body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
 <div class="overlay hidden" id="reqNewOverlay">
   <div class="modal" style="max-width:620px">
     <div class="modal-header">
-      <div><div class="modal-title">New request</div>
-        <div style="font-size:.8rem;color:var(--text3);margin-top:3px">Raised on someone's behalf. It appears on their request page straight away.</div></div>
+      <div><div class="modal-title" id="rnHead">New request</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="rnHeadSub">Raised on someone's behalf. It appears on their request page straight away.</div></div>
       <button class="modal-close" onclick="closeReqNew()">✕</button>
     </div>
     <div class="modal-body">
@@ -1378,10 +1378,10 @@ body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
       </div>
       <div class="form-row">
         <div class="field" id="rnPriceField"><label>Target price (optional)</label><input type="text" id="rnPrice"></div>
-        <div class="field"><label>Status</label><select id="rnStatus">
+        <div class="field" id="rnStatusField"><label>Status</label><select id="rnStatus">
           <option>In Progress</option><option>New</option><option>Acknowledged</option><option>Complete</option></select></div>
       </div>
-      <div class="form-row">
+      <div class="form-row" id="rnAssignRow">
         <div class="field"><label>Worked on by</label><select id="rnAssign"></select></div>
         <div class="field"></div>
       </div>
@@ -6523,8 +6523,26 @@ async function openReqNew(){
   ['rnTitle','rnCs','rnDesc','rnPrice'].forEach(k=>$(k).value='');
   $('rnCustomer').value=''; $('rnType').value='New Product Development'; $('rnStatus').value='In Progress';
   reqNewTypeChanged();
+  _rnEditId=null; rnMode(false);
   $('rnSaveBtn').disabled=false; $('rnSaveBtn').textContent='Create request';
   $('reqNewOverlay').classList.remove('hidden');
+}
+// ── Edit a request that wasn't filled in right (same form, pre-filled) ──
+let _rnEditId=null;
+function rnMode(edit){
+  $('rnHead').textContent=edit?'Edit request':'New request';
+  $('rnHeadSub').textContent=edit?'Fix anything that was entered wrong. The requester sees the change on their page.':"Raised on someone's behalf. It appears on their request page straight away.";
+  $('rnStatusField').style.display=edit?'none':''; $('rnAssignRow').style.display=edit?'none':'';
+}
+async function openReqEdit(id){
+  const r=reqData.find(x=>x.id===id); if(!r) return;
+  await openReqNew(); if($('reqNewOverlay').classList.contains('hidden')) return;
+  _rnEditId=id; rnMode(true);
+  const setSel=(el,v)=>{ if(v&&![...el.options].some(o=>o.value===v)) el.add(new Option(v,v)); el.value=v||''; };
+  setSel($('rnWho'),r.requested_by); setSel($('rnType'),r.request_type); setSel($('rnCustomer'),r.customer);
+  $('rnTitle').value=r.title||''; $('rnCs').value=r.cs_ticket||''; $('rnDesc').value=r.description||''; $('rnPrice').value=r.target_price||'';
+  reqNewTypeChanged();
+  $('rnSaveBtn').textContent='Save changes';
 }
 function closeReqNew(){ $('reqNewOverlay')?.classList.add('hidden'); }
 function reqNewTypeChanged(){
@@ -6541,6 +6559,19 @@ async function saveReqNew(){
   const miss=[!who&&'requested by',!title&&(cs?'SKU':'title'),npd&&!cust&&'customer',cs&&!csNo&&'CS ticket'].filter(Boolean);
   if(miss.length){ toast('Please add: '+miss.join(', '),'error'); return; }
   const u=_rnRequesters.find(x=>x.email===who)||{};
+  if(_rnEditId){
+    const id=_rnEditId, r=reqData.find(x=>x.id===id)||{};
+    const btn=$('rnSaveBtn'); btn.disabled=true; btn.textContent='Saving…';
+    try{
+      await SB.patch(`requests?id=eq.${id}`,{
+        requested_by:who, department:u.department??r.department??'', request_type:t, customer:cust, title, cs_ticket:csNo,
+        description:$('rnDesc').value.trim(), target_price:npd?$('rnPrice').value.trim():''
+      });
+      closeReqNew(); await loadRequests(); if(reqOpenId===id) await refreshReqModal();
+      toast('Request updated ✓');
+    }catch(e){ btn.disabled=false; btn.textContent='Save changes'; toast('Save failed: '+e.message,'error'); }
+    return;
+  }
   const btn=$('rnSaveBtn'); btn.disabled=true; btn.textContent='Creating…';
   try{
     const [row]=await SB.post('requests',{
@@ -6699,10 +6730,12 @@ async function refreshReqModal(noFetch){
   if(_reqTab==='messages'){ wireReqMsgBox(); refreshSpStatus('request'); refreshSpStatus('media'); }
   $('rqFooter').innerHTML=open?`
       ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
+      <button class="btn btn-ghost" onclick="openReqEdit('${id}')" title="Fix the details on this request">✏️ Edit</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
       <div class="spacer"></div>
       <button class="btn" onclick="completeRequest('${id}')" title="Removes it from the open list">✔ Mark complete</button>`
     :`<button class="btn btn-ghost" onclick="setReqStatus('${id}','In Progress')">↺ Reopen</button>
+      <button class="btn btn-ghost" onclick="openReqEdit('${id}')" title="Fix the details on this request">✏️ Edit</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
       <div class="spacer"></div><button class="btn btn-ghost" onclick="closeReqModal()">Close</button>`;
   reqHydrateThumbs();
