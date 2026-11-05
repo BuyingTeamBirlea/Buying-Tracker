@@ -71,6 +71,13 @@ button,input,select,textarea{font-family:inherit}
 .req-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:6px 14px;transition:border-color .15s;position:relative}
 .req-card:hover{border-color:var(--border2)}
 .req-card.unread{border-left:3px solid var(--accent)}
+/* left edge: click to put the blue "Update" ribbon back (or take it off) */
+.req-card .rib{position:absolute;left:-1px;top:-1px;bottom:-1px;width:16px;cursor:pointer;z-index:1;border-radius:var(--radius) 0 0 var(--radius)}
+.req-card .rib::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:0;border-radius:var(--radius) 0 0 var(--radius);transition:opacity .15s}
+.req-card:hover .rib::before{opacity:.3}
+.req-card .rib:hover::before{opacity:1}
+.req-card.unread .rib::before{opacity:0}
+.req-card.unread .rib:hover::before{opacity:1;background:var(--text3)}
 .req-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ref{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text3)}
 .req-title{font-weight:600;font-size:.95rem}
@@ -816,6 +823,7 @@ function renderList(){
   $('reqList').innerHTML=list.map(r=>{
     const items=progress.filter(p=>p.request_id===r.id);
     return `<div class="req-card${r.rep_unread?' unread':''}" onclick="openDetail('${r.id}')">
+      <div class="rib" title="${r.rep_unread?'Mark as read':'Mark as unread — keeps the Update ribbon so you can come back to it'}" onclick="event.stopPropagation();toggleUnread('${r.id}')"></div>
       <div>
         <div class="req-top"><span class="ref">${esc(displayRef(r))}</span></div>
         <div class="req-title">${reqTitle(r)}${openAction(r.id)?`<span class="act-tag" title="${esc(openAction(r.id).instruction)}">⚡ ${esc(firstName(r.requested_by))} - Action Needed</span>`:''}</div>
@@ -1213,6 +1221,13 @@ function actionCheckHTML(m){
   const a=msgAction(m); if(!a) return '';
   const done=a.status==='done';
   return `<label class="act-check${done?' done':''}" onclick="event.stopPropagation()"><input type="checkbox"${done?' checked':''} onchange="toggleAction('${a.id}',this.checked,this)">${done?`Actioned <small>· ${esc(a.done_by===me?'you':nameOf(a.done_by||''))}${a.done_at?' · '+fmtWhen(a.done_at):''}</small>`:'Tick when actioned'}</label>`;
+}
+// Put the blue "Update" ribbon back on a card (or take it off) to come back to it later
+async function toggleUnread(id){
+  const r=requests.find(x=>x.id===id); if(!r) return;
+  const to=!r.rep_unread; r.rep_unread=to; renderList(); if(typeof updateTitleBadge==='function') updateTitleBadge();
+  try{ await SB.rpc(to?'mark_request_unread':'mark_request_read',{p_id:id}); }
+  catch(e){ r.rep_unread=!to; renderList(); toast('Could not update: '+e.message,'error'); }
 }
 // Customer Service users close (or reopen) their own tickets — button sits under the query / message box
 function closeTicketHTML(r){
