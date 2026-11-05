@@ -89,6 +89,8 @@ button,input,select,textarea{font-family:inherit}
 .side-row .mini-item{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .req-flags{display:flex;gap:10px;margin-top:4px}
 .new-dot{font-size:.7rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.new-dot .upd-d{text-transform:none;letter-spacing:0;font-size:.76rem}
+.dtab .cnt.new{background:var(--accent);color:#fff}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:.74rem;font-weight:500;white-space:nowrap}
 .st-New{background:rgba(79,110,247,.15);color:#8aa0fb}
 .st-Acknowledged{background:rgba(245,158,11,.15);color:#fbbf24}
@@ -654,6 +656,22 @@ let me='', myDept='', myRole=null, requests=[], progress=[], filter='open', open
 const OPEN_ST=new Set(['New','Acknowledged','In Progress']);
 const isCS=r=>r&&r.request_type==='Customer Service';
 const isCSUser=()=>myDept==='Customer Service';
+// Unseen updates per ticket, for you: {timeline, messages, actions, files}
+let unseen={}, detailUnseen=null, detailCleared={};
+const unseenOf=r=>unseen[r.id]||{timeline:0,messages:0,actions:0,files:0};
+const unseenTotal=r=>{ const u=unseenOf(r); return u.timeline+u.messages+u.actions+u.files; };
+const hasUpdate=r=>!!(r.rep_unread||unseenTotal(r)>0);
+function updateLabel(r){
+  const u=unseenOf(r), pl=(n,w)=>`${n} ${w}${n>1?'s':''}`;
+  const bits=[u.timeline&&`${u.timeline} Timeline`,u.messages&&pl(u.messages,'Message'),u.actions&&pl(u.actions,'Action'),u.files&&pl(u.files,'File')].filter(Boolean);
+  return 'Update'+(bits.length?`<span class="upd-d">: ${bits.join(', ')}</span>`:'');
+}
+const SECTION_OF={timeline:'timeline',messages:'messages',files:'files'};
+function markSeen(id,tab){
+  const sec=SECTION_OF[tab]; if(!sec||myRole==='buyer'||myRole==='viewer') return;
+  const u=unseen[id]; if(u){ if(sec==='messages'){ u.messages=0; u.actions=0; } else u[sec]=0; }
+  SB.rpc('mark_request_seen',{p_id:id,p_section:sec}).catch(()=>{});
+}
 let lastMsgAt={};   // request id → newest message time (drives "last update" for Customer Service tickets)
 
 async function boot(){
@@ -674,12 +692,15 @@ async function boot(){
 
 async function loadAll(){
   try{
-    const [reqs,prog,acts,msgTimes]=await Promise.all([
+    const [reqs,prog,acts,msgTimes,uns]=await Promise.all([
       SB.get(`requests?select=*&order=created_at.desc`),          // RLS: own + same department
       SB.rpc('request_progress'),
       SB.get(`request_actions?select=*&order=created_at.desc`).catch(()=>[]),
-      SB.get(`request_messages?select=request_id,created_at&order=created_at.desc&limit=5000`).catch(()=>[])
+      SB.get(`request_messages?select=request_id,created_at&order=created_at.desc&limit=5000`).catch(()=>[]),
+      SB.rpc('request_unseen').catch(()=>[])
     ]);
+    unseen={}; (uns||[]).forEach(u=>unseen[u.request_id]=u);
+    if(openId&&unseen[openId]&&unseenTotal({id:openId})) markSeen(openId,detailTab);   // you're looking at it
     requests=reqs||[]; progress=prog||[]; actions=acts||[];
     lastMsgAt={}; (msgTimes||[]).forEach(m=>{ if(!lastMsgAt[m.request_id]) lastMsgAt[m.request_id]=m.created_at; });
     updateTitleBadge();
@@ -704,7 +725,7 @@ function openDeepLink(){
 // Count on the browser tab (and app icon, if installed): updates for you + actions waiting
 function updateTitleBadge(){
   const mineIds=new Set(requests.filter(r=>r.requested_by===me).map(r=>r.id));
-  const n=requests.filter(r=>mineIds.has(r.id)&&r.rep_unread).length
+  const n=requests.filter(r=>mineIds.has(r.id)&&hasUpdate(r)).length
         +actions.filter(a=>a.status==='open'&&mineIds.has(a.request_id)).length;
   document.title=(n?`(${n}) `:'')+'Buying Requests';
   try{ if(navigator.setAppBadge){ n?navigator.setAppBadge(n):navigator.clearAppBadge(); } }catch(e){}
@@ -822,15 +843,15 @@ function renderList(){
   }
   $('reqList').innerHTML=list.map(r=>{
     const items=progress.filter(p=>p.request_id===r.id);
-    return `<div class="req-card${r.rep_unread?' unread':''}" onclick="openDetail('${r.id}')">
-      <div class="rib" title="${r.rep_unread?'Mark as read':'Mark as unread — keeps the Update ribbon so you can come back to it'}" onclick="event.stopPropagation();toggleUnread('${r.id}')"></div>
+    return `<div class="req-card${hasUpdate(r)?' unread':''}" onclick="openDetail('${r.id}')">
+      <div class="rib" title="${hasUpdate(r)?'Mark as read':'Mark as unread — keeps the Update ribbon so you can come back to it'}" onclick="event.stopPropagation();toggleUnread('${r.id}')"></div>
       <div>
         <div class="req-top"><span class="ref">${esc(displayRef(r))}</span></div>
         <div class="req-title">${reqTitle(r)}${openAction(r.id)?`<span class="act-tag" title="${esc(openAction(r.id).instruction)}">⚡ ${esc(firstName(r.requested_by))} - Action Needed</span>`:''}</div>
         ${r.request_type==='Customer Service'
           ?`<div class="req-meta cs-meta"><span>Customer Service</span><span>${r.requested_by===me?'You':esc(nameOf(r.requested_by))}</span><span>Sent ${fmtDate(r.created_at)}</span>${assigneeHTML(r)||`<span>${esc(r.status)}</span>`}</div>`
           :`<div class="req-meta">${r.customer?`<span>${esc(r.customer)}</span>`:''}<span>${esc(r.request_type)}</span><span>Sent ${fmtDate(r.created_at)}${r.requested_by!==me?' by '+esc(nameOf(r.requested_by)):''}</span>${assigneeHTML(r)}</div>`}
-        ${r.rep_unread||(r.status==='Complete'&&r.completion_notes)?`<div class="req-flags">${r.rep_unread?'<span class="new-dot">● Update</span>':''}${r.status==='Complete'&&r.completion_notes?'<span class="done-tag">📄 Details ready</span>':''}</div>`:''}
+        ${hasUpdate(r)||(r.status==='Complete'&&r.completion_notes)?`<div class="req-flags">${hasUpdate(r)?`<span class="new-dot">● ${updateLabel(r)}</span>`:''}${r.status==='Complete'&&r.completion_notes?'<span class="done-tag">📄 Details ready</span>':''}</div>`:''}
       </div>
       <div class="req-side">
         ${items.length&&r.status!=='Complete'
@@ -888,15 +909,20 @@ function progressHTML(p){
 let detailFiles=[], detailMsgs=[], detailTimeline=[], detailItemFiles=[], blobCache={}, detailTab='timeline';
 async function openDetail(id){
   openId=id; detailTab='timeline'; msgPending=[]; $('detailOv').classList.remove('hidden');
+  { const r0=requests.find(x=>x.id===id); detailUnseen=r0?{...unseenOf(r0)}:null; detailCleared={}; }   // tab numbers = what was new when you opened it
   $('dTabs').innerHTML=''; $('dBody').innerHTML='<div class="hint">Loading…</div>';
   await renderDetail(id,false);
   const r=requests.find(x=>x.id===id);
-  if(r&&r.rep_unread){ r.rep_unread=false; renderList(); SB.rpc('mark_request_read',{p_id:id}).catch(()=>{}); }
+  if(r&&r.rep_unread){ r.rep_unread=false; SB.rpc('mark_request_read',{p_id:id}).catch(()=>{}); }
+  markSeen(id,detailTab); renderList(); updateTitleBadge();
 }
 function closeDetail(){ openId=null; $('detailOv').classList.add('hidden'); $('spBar')?.classList.add('hidden'); }
 $('detailOv').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeDetail(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeLightbox(); closeDetail(); closePwModal(); } });
-function setDetailTab(t){ detailTab=t; renderDetailView(); if(t==='messages') setTimeout(()=>{ const m=$('dMsgs'); if(m) m.scrollTop=m.scrollHeight; },0); }
+function setDetailTab(t){
+  if(detailTab&&detailTab!==t) detailCleared[detailTab]=true;   // its number goes once you've looked and moved on
+  detailTab=t; if(openId){ markSeen(openId,t); renderList(); updateTitleBadge(); }
+  renderDetailView(); if(t==='messages') setTimeout(()=>{ const m=$('dMsgs'); if(m) m.scrollTop=m.scrollHeight; },0); }
 
 async function renderDetail(id,quiet){
   const r=requests.find(x=>x.id===id); if(!r){ closeDetail(); return; }
@@ -926,10 +952,12 @@ function renderDetailView(){
   $('dTitle').innerHTML=reqTitle(r);
   const tlCount=detailTimeline.length;
   const tab=(k,label,extra)=>`<button class="dtab${detailTab===k?' active':''}" onclick="setDetailTab('${k}')">${label}${extra||''}</button>`;
+  // numbers on tabs = unseen updates only
+  const du=detailUnseen||{timeline:0,messages:0,actions:0,files:0};
+  const newCnt=(k,n)=>n&&!detailCleared[k]?`<span class="cnt new">${n}</span>`:'';
   if(isCS(r)){
     if(detailTab!=='messages') detailTab='timeline';
-    const nMsg=msgList(r).length;
-    $('dTabs').innerHTML=tab('timeline','📋 Request')+tab('messages','💬 Messages'+(detailFiles.length?' 📎':''),nMsg?`<span class="cnt">${nMsg}</span>`:'');
+    $('dTabs').innerHTML=tab('timeline','📋 Request')+tab('messages','💬 Messages'+(detailFiles.length?' 📎':''),newCnt('messages',du.messages+du.actions));
     const body=$('dBody');
     body.innerHTML=(detailTab==='messages'?messagesViewHTML(r):infoViewHTML(r))+closeTicketHTML(r);
     if(draft&&$('msgText')) $('msgText').value=draft;
@@ -939,9 +967,9 @@ function renderDetailView(){
   }
   if(!['timeline','messages','files'].includes(detailTab)) detailTab='timeline';
   $('dTabs').innerHTML=
-    tab('timeline','🕒 Timeline',items.length&&tlCount?`<span class="cnt">${tlCount}</span>`:'')+
-    tab('messages','💬 Messages'+(detailMsgs.some(m=>detailFiles.some(f=>f.message_id===m.id))?' 📎':''),detailMsgs.length?`<span class="cnt">${detailMsgs.length}</span>`:'')+
-    tab('files','📁 Files & Media',(()=>{ const n=filesForView().length; return n?`<span class="cnt">${n}</span>`:''; })());
+    tab('timeline','🕒 Timeline',newCnt('timeline',du.timeline))+
+    tab('messages','💬 Messages'+(detailMsgs.some(m=>detailFiles.some(f=>f.message_id===m.id))?' 📎':''),newCnt('messages',du.messages+du.actions))+
+    tab('files','📁 Files & Media',newCnt('files',du.files));
   const body=$('dBody');
   if(detailTab==='files') body.innerHTML=filesViewHTML(r);
   else if(detailTab==='messages') body.innerHTML=messagesViewHTML(r);
@@ -1225,9 +1253,15 @@ function actionCheckHTML(m){
 // Put the blue "Update" ribbon back on a card (or take it off) to come back to it later
 async function toggleUnread(id){
   const r=requests.find(x=>x.id===id); if(!r) return;
-  const to=!r.rep_unread; r.rep_unread=to; renderList(); if(typeof updateTitleBadge==='function') updateTitleBadge();
-  try{ await SB.rpc(to?'mark_request_unread':'mark_request_read',{p_id:id}); }
-  catch(e){ r.rep_unread=!to; renderList(); toast('Could not update: '+e.message,'error'); }
+  const to=!hasUpdate(r); const was={...unseenOf(r)}, wasFlag=r.rep_unread;
+  r.rep_unread=to; if(!to) unseen[id]={timeline:0,messages:0,actions:0,files:0};
+  renderList(); updateTitleBadge();
+  try{
+    if(to) await SB.rpc('mark_request_unread',{p_id:id});
+    else await Promise.all([SB.rpc('mark_request_read',{p_id:id}),SB.rpc('mark_request_seen',{p_id:id,p_section:'all'})]);
+  }
+  catch(e){ r.rep_unread=wasFlag; unseen[id]=was; renderList(); toast('Could not update: '+e.message,'error'); return; }
+
 }
 // Customer Service users close (or reopen) their own tickets — button sits under the query / message box
 function closeTicketHTML(r){
