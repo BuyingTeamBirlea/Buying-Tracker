@@ -262,7 +262,8 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
 .act-check input{width:17px;height:17px;accent-color:#16a34a;cursor:pointer}
 .act-check.done{color:#16a34a;border-top-color:rgba(22,163,74,.35)}
 .act-check small{font-weight:400;color:var(--text3);font-size:.74rem}
-.close-tk{margin-left:8px;background:var(--green);color:#fff;border:none;border-radius:100px;padding:4px 12px;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit;vertical-align:middle}
+.close-row{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--text3)}
+.close-tk{background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm,8px);padding:8px 14px;font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;vertical-align:middle}
 .close-tk:hover{filter:brightness(1.08)}
 .close-tk.re{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
 .q-lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:3px}
@@ -903,9 +904,7 @@ function renderDetailView(){
     </div>`:'';
   const items=progress.filter(p=>p.request_id===id);
   $('dRef').textContent=displayRef(r);
-  $('dPills').innerHTML=statusHTML(r)+(isCS(r)&&r.requested_by===me&&myRole!=='buyer'&&myRole!=='viewer'
-    ?(OPEN_ST.has(r.status)?`<button class="close-tk" onclick="closeTicket('${r.id}')">✔ Close ticket</button>`
-                           :`<button class="close-tk re" onclick="reopenTicket('${r.id}')">↺ Reopen</button>`):'');
+  $('dPills').innerHTML=statusHTML(r);
   $('dTitle').innerHTML=reqTitle(r);
   const tlCount=detailTimeline.length;
   const tab=(k,label,extra)=>`<button class="dtab${detailTab===k?' active':''}" onclick="setDetailTab('${k}')">${label}${extra||''}</button>`;
@@ -914,7 +913,7 @@ function renderDetailView(){
     const nMsg=msgList(r).length;
     $('dTabs').innerHTML=tab('timeline','📋 Request')+tab('messages','💬 Messages'+(detailFiles.length?' 📎':''),nMsg?`<span class="cnt">${nMsg}</span>`:'');
     const body=$('dBody');
-    body.innerHTML=detailTab==='messages'?messagesViewHTML(r):infoViewHTML(r);
+    body.innerHTML=(detailTab==='messages'?messagesViewHTML(r):infoViewHTML(r))+closeTicketHTML(r);
     if(draft&&$('msgText')) $('msgText').value=draft;
     hydrateThumbs();
     if(detailTab==='messages'){ wireMsgBox(); const m=$('dMsgs'); if(m) m.scrollTop=m.scrollHeight; }
@@ -1205,7 +1204,13 @@ function actionCheckHTML(m){
   const done=a.status==='done';
   return `<label class="act-check${done?' done':''}" onclick="event.stopPropagation()"><input type="checkbox"${done?' checked':''} onchange="toggleAction('${a.id}',this.checked,this)">${done?`Actioned <small>· ${esc(a.done_by===me?'you':nameOf(a.done_by||''))}${a.done_at?' · '+fmtWhen(a.done_at):''}</small>`:'Tick when actioned'}</label>`;
 }
-// Customer Service users close (or reopen) their own tickets
+// Customer Service users close (or reopen) their own tickets — button sits under the query / message box
+function closeTicketHTML(r){
+  if(!(isCS(r)&&r.requested_by===me&&myRole!=='buyer'&&myRole!=='viewer')) return '';
+  return `<div class="close-row">${OPEN_ST.has(r.status)
+    ?`<button class="close-tk" onclick="closeTicket('${r.id}')">✔ Close ticket</button><span>Sorted? Close it so it moves to Closed.</span>`
+    :`<button class="close-tk re" onclick="reopenTicket('${r.id}')">↺ Reopen ticket</button><span>Closed${r.completed_at?' '+fmtDate(r.completed_at):''}.</span>`}</div>`;
+}
 async function closeTicket(id){
   if(!confirm('Close this ticket? It moves to Closed and the buying team are told.')) return;
   try{ await SB.rpc('close_request',{p_id:id}); toast('Ticket closed ✓'); await loadAll(); }
