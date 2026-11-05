@@ -1206,7 +1206,7 @@ function actionCheckHTML(m){
 }
 // Customer Service users close (or reopen) their own tickets — button sits under the query / message box
 function closeTicketHTML(r){
-  if(!(isCS(r)&&r.requested_by===me&&myRole!=='buyer'&&myRole!=='viewer')) return '';
+  if(!(isCS(r)&&isCSUser()&&myRole!=='buyer'&&myRole!=='viewer')) return '';
   return `<div class="close-row">${OPEN_ST.has(r.status)
     ?`<button class="close-tk" onclick="closeTicket('${r.id}')">✔ Close ticket</button><span>Sorted? Close it so it moves to Closed.</span>`
     :`<button class="close-tk re" onclick="reopenTicket('${r.id}')">↺ Reopen ticket</button><span>Closed${r.completed_at?' '+fmtDate(r.completed_at):''}.</span>`}</div>`;
