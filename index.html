@@ -6599,9 +6599,9 @@ async function refreshReqModal(noFetch){
   const tab=(k,label,n)=>`<button class="tab-btn${_reqTab===k?' active':''}" onclick="setReqTab('${k}')">${label}${n?`<span class="cnt">${n}</span>`:''}</button>`;
   const isMediaName=n=>isImageFile(n)||isVideo(n)||/\.(mov|webm)$/i.test(n||'');
   const isMediaRF=f=>f.is_image||isMediaName(f.name);
-  if(!['details','messages','files'].includes(_reqTab)) _reqTab='details';
+  if(!['details','messages','files'].includes(_reqTab)||(reqIsCS(r)&&_reqTab==='files')) _reqTab='details';
   const nAll=all.length+items.reduce((n,i)=>n+(i.files||[]).filter(f=>!isMediaName(f.name)).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
-  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('messages','💬 Messages'+(all.some(([f])=>f.message_id)?' 📎':''),_reqMsgs.length)+tab('files','📁 Files & Media',nAll);
+  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('messages','💬 Messages'+(all.length&&(reqIsCS(r)||all.some(([f])=>f.message_id))?' 📎':''),reqMsgList(r).length)+(reqIsCS(r)?'':tab('files','📁 Files & Media',nAll));
 
   let html='';
   if(_reqTab==='files'){
@@ -6646,7 +6646,7 @@ async function refreshReqModal(noFetch){
     const oa=reqOpenAction(id);
     html=`<div class="rq-sec" style="margin-bottom:0">
       <div style="display:flex;gap:10px;justify-content:flex-end;font-size:.72rem;margin-bottom:10px"><span id="spStatus-request"></span><span id="spStatus-media"></span></div>
-      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${reqIsBuyerMsg(m,me)?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
+      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${(msgs=>msgs.length?msgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)&&!m._initial?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${reqIsBuyerMsg(m,me)&&!m._initial?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m._initial?'<b style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:3px">Query</b>':''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`)(reqMsgList(r))}</div>
       <div class="rq-reply" id="rqReplyBox">
         <button class="rq-attach" title="Attach files (or paste / drag them in) — saved to SharePoint" onclick="$('rqMsgFiles').click()">📎</button>
         <input type="file" id="rqMsgFiles" multiple class="hidden" onchange="reqMsgAdd(this.files);this.value=''">
@@ -6679,15 +6679,15 @@ async function refreshReqModal(noFetch){
       ${items.length===1&&items[0].name!==reqTitleText(r)?`<div><b>Request title</b><span>${esc(reqTitleText(r))}</span></div>`:''}
     </div>
     ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
-    <div class="rq-sec" style="margin-bottom:0">
+    ${reqIsCS(r)&&!items.length?'':`<div class="rq-sec" style="margin-bottom:0">
       <div class="section-title" style="display:flex;align-items:center;gap:8px">Item cards (${items.length})
         <span style="margin-left:auto;display:flex;gap:6px;text-transform:none;letter-spacing:0">
-          <button class="btn btn-ghost btn-sm" onclick="openReqLink('${id}')" title="Attach an item card you've already been working on">🔗 Link existing</button>
-          ${open?`<button class="btn btn-sm" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}
+          ${reqIsCS(r)?'':`<button class="btn btn-ghost btn-sm" onclick="openReqLink('${id}')" title="Attach an item card you've already been working on">🔗 Link existing</button>
+          ${open?`<button class="btn btn-sm" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}`}
         </span></div>
       ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span>${stageBadge(i.stage)}${daysBadge(daysInactive(i),i.stage)}<button class="rq-unlink" title="Unlink from this request (the item card itself is kept)" onclick="event.stopPropagation();unlinkReqItem('${id}','${i.id}')">✕</button></div>`).join('')}</div>`
         :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), link existing ones, or be completed without one.</div>`}
-    </div>
+    </div>`}
     ${_reqNotifs.length?`<div class="rq-notes" style="margin-top:14px">${notifyHistoryHTML()}</div>`:''}`;
   }
   $('rqBody').innerHTML=html;
@@ -6923,8 +6923,14 @@ async function sendReqMsg(id){
   }catch(e){ toast('Message failed: '+e.message,'error'); }
   if(btn){ btn.disabled=false; btn.textContent='Send'; }
 }
+// Customer Service: the original query (and its attachments) is the first message, so replies have context
+const reqIsCS=r=>r&&r.request_type==='Customer Service';
+function reqMsgList(r){
+  if(!reqIsCS(r)||!r.description) return _reqMsgs;
+  return [{id:'_q',_initial:true,author:r.requested_by,body:r.description,created_at:r.created_at},..._reqMsgs];
+}
 function reqMsgFilesHTML(m){
-  const fs=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>f.message_id===m.id); if(!fs.length) return '';
+  const fs=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>m._initial?(!f.message_id&&!f.shared_by_buyer&&!f.is_completion):f.message_id===m.id); if(!fs.length) return '';
   return `<div class="rq-msg-files">${fs.map(([f,i])=>{
     const img=(f.is_image||reqIsImg(f))&&!reqIsVid(f);
     if(img) return `<div class="rq-msg-img" data-i="${i}" onclick="openReqFile(${i})" title="${esc(f.name)}">🖼️${f.sp_url?`<img src="${esc(spThumbUrl(f.sp_url))}" alt="" onerror="this.remove()">`:''}</div>`;
