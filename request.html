@@ -317,6 +317,37 @@ body.light-mode .dl-over{color:#b91c1c}body.light-mode .dl-done{color:#3730a3}
   .side-row{justify-content:flex-start;flex-wrap:wrap}
   .main{padding:16px 14px 50px}
 }
+/* 😊 emojis + reactions */
+.emo-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:1.05rem;padding:0 10px;line-height:1}
+.emo-btn:hover{border-color:var(--accent)}
+.emo-pick{position:fixed;z-index:10000;width:316px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:8px;font-family:inherit}
+.emo-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px}
+.emo-tabs button{flex:1;background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.05rem;padding:4px 0;opacity:.6}
+.emo-tabs button:hover{background:var(--bg3);opacity:1}
+.emo-tabs button.on{background:var(--bg3);opacity:1;box-shadow:inset 0 -2px 0 var(--accent)}
+.emo-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:2px 4px 4px}
+.emo-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:200px;overflow-y:auto}
+.emo-grid button{background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.3rem;line-height:1;padding:5px 0}
+.emo-grid button:hover{background:var(--bg3);transform:scale(1.15)}
+.msgs,.rq-msgs{padding-top:26px}
+.msg,.rq-msg{position:relative}
+.rx-bar{position:absolute;top:-25px;left:8px;display:none;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:2px 5px;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;z-index:3}
+.mine>.rx-bar{left:auto;right:8px}
+.msg:hover>.rx-bar,.rq-msg:hover>.rx-bar,.rx-bar:focus-within{display:flex}
+.rx-bar button{background:none;border:none;cursor:pointer;font-size:1.05rem;line-height:1;padding:3px 4px;border-radius:50%;transition:transform .1s;font-family:inherit;color:var(--text2)}
+.rx-bar button:hover{transform:scale(1.3);background:var(--bg3)}
+.rx-bar .rx-more{font-size:.95rem;border-radius:8px}
+.rx-bar .rx-more b{font-size:.7rem;vertical-align:top}
+.rx-bar .rx-act{font-size:.78rem;font-weight:600;border-radius:100px;padding:3px 8px;margin-left:3px;border-left:1px solid var(--border);color:#dc2626}
+.rx-bar .rx-act:hover{transform:none;background:rgba(239,68,68,.1)}
+.rx-row{display:flex;flex-wrap:wrap;gap:4px;white-space:normal}
+.rx-row:not(:empty){margin-top:6px}
+.rx-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:1px 8px;font-size:.88rem;cursor:pointer;line-height:1.5;font-family:inherit;color:var(--text)}
+.rx-chip b{font-size:.72rem;font-weight:600;color:var(--text2)}
+.rx-chip:hover{border-color:var(--accent)}
+.rx-chip.mine{background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.55)}
+body.view-only .rx-bar,body.view-only .emo-btn{display:none!important}
+body.view-only .rx-chip{pointer-events:none}
 </style>
 </head>
 <body class="light-mode">
@@ -712,6 +743,7 @@ async function loadAll(){
 }
 const firstName=email=>(nameOf(email)||'').split(' ')[0];
 const openAction=reqId=>actions.find(a=>a.request_id===reqId&&a.status==='open');
+const openActions=reqId=>actions.filter(a=>a.request_id===reqId&&a.status==='open');
 // Email links open straight onto the ticket: request.html?req=<id>
 let _deepLinkDone=false;
 function openDeepLink(){
@@ -847,7 +879,7 @@ function renderList(){
       <div class="rib" title="${hasUpdate(r)?'Mark as read':'Mark as unread — keeps the Update ribbon so you can come back to it'}" onclick="event.stopPropagation();toggleUnread('${r.id}')"></div>
       <div>
         <div class="req-top"><span class="ref">${esc(displayRef(r))}</span></div>
-        <div class="req-title">${reqTitle(r)}${openAction(r.id)?`<span class="act-tag" title="${esc(openAction(r.id).instruction)}">⚡ ${esc(firstName(r.requested_by))} - Action Needed</span>`:''}</div>
+        <div class="req-title">${reqTitle(r)}${(oa=>oa.length?`<span class="act-tag" title="${esc(oa.map(a=>'• '+a.instruction).join('\n'))}">⚡ ${esc(firstName(r.requested_by))} - ${oa.length>1?oa.length+' Actions Needed':'Action Needed'}</span>`:'')(openActions(r.id))}</div>
         ${r.request_type==='Customer Service'
           ?`<div class="req-meta cs-meta"><span>Customer Service</span><span>${r.requested_by===me?'You':esc(nameOf(r.requested_by))}</span><span>Sent ${fmtDate(r.created_at)}</span>${assigneeHTML(r)||`<span>${esc(r.status)}</span>`}</div>`
           :`<div class="req-meta">${r.customer?`<span>${esc(r.customer)}</span>`:''}<span>${esc(r.request_type)}</span><span>Sent ${fmtDate(r.created_at)}${r.requested_by!==me?' by '+esc(nameOf(r.requested_by)):''}</span>${assigneeHTML(r)}</div>`}
@@ -931,7 +963,8 @@ async function renderDetail(id,quiet){
       SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
       SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`),
       SB.rpc('request_timeline',{p_id:id}).catch(()=>[]),
-      SB.rpc('request_item_files',{p_id:id}).catch(()=>[])
+      SB.rpc('request_item_files',{p_id:id}).catch(()=>[]),
+      emoLoad(id).then(x=>{ emoReacts=x||[]; })
     ]);
   }catch(e){ if(!quiet) toast('Could not load details: '+e.message,'error'); }
   if(openId!==id) return;
@@ -941,10 +974,11 @@ async function renderDetail(id,quiet){
 function renderDetailView(){
   const id=openId; const r=requests.find(x=>x.id===id); if(!r) return;
   const draft=$('msgText')?.value||'';
-  const a=openAction(id);
-  $('dAction').innerHTML=a?`<div class="act-box" onclick="setDetailTab('messages')" title="${esc(a.instruction)}">
-      <h4>⚡ ${esc(firstName(r.requested_by))} - Action needed${a.created_by?' · from '+esc(nameOf(a.created_by)):''}</h4>
-      ${detailTab!=='messages'?'<span class="go">Tick it off in Messages →</span>':''}
+  const oas=openActions(id), a=oas[0];
+  const froms=[...new Set(oas.map(x=>x.created_by).filter(Boolean))].map(nameOf).join(', ');
+  $('dAction').innerHTML=a?`<div class="act-box" onclick="setDetailTab('messages')" title="${esc(oas.map(x=>'• '+x.instruction).join('\n'))}">
+      <h4>⚡ ${esc(firstName(r.requested_by))} - ${oas.length>1?oas.length+' actions needed':'Action needed'}${froms?' · from '+esc(froms):''}</h4>
+      ${detailTab!=='messages'?`<span class="go">Tick ${oas.length>1?'them':'it'} off in Messages →</span>`:''}
     </div>`:'';
   const items=progress.filter(p=>p.request_id===id);
   $('dRef').textContent=displayRef(r);
@@ -1133,6 +1167,96 @@ function filesViewHTML(r){
   }).join('')+(list.some(x=>x.sp)?'<div class="sp-note">Files open in SharePoint — you\'ll need to be signed in with your Birlea Microsoft account.</div>':'');
 }
 
+// ═══════════════════════════════════════
+// 😊 EMOJIS — picker for the message box + Teams-style reactions on messages
+// Same block lives in index.html and request.html · table: request_message_reactions
+// ═══════════════════════════════════════
+const EMO_QUICK=['👍','❤️','😆','😮','😢','🙏'];
+const EMO_SETS=[
+  ['😊','Smileys',['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😋','😛','😜','🤪','😝','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😮‍💨','😌','😔','😪','😴','😷','🤒','🤯','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','💀','🤡','👀']],
+  ['👍','Gestures',['👍','👎','👌','🤌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','👋','🤝','🙏','👏','🙌','👐','🤲','💪','✍️','🫡','🤷','🤦','🙋','🙇','💁','🙆','🙅']],
+  ['❤️','Hearts',['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝']],
+  ['🎉','Celebrate',['🎉','🎊','🥳','🎈','🎁','🏆','🥇','🥈','🥉','🏅','⭐','🌟','✨','💫','🔥','💯','🚀','👑','🍾','🥂','☕','🍰','🍕']],
+  ['📦','Work',['📦','🚚','🚢','✈️','🏭','🛏️','🛋️','🪑','🚪','🪞','🛒','🏷️','💷','💰','📈','📉','📊','🧾','📋','📝','✏️','📎','📌','📍','📁','📂','🗂️','📅','🗓️','⏰','⏳','📞','📧','💻','🖨️','🔍','🔧','🔨','📏','🧵','🎨','📸']],
+  ['✅','Symbols',['✅','☑️','✔️','❌','❎','⚠️','⛔','🚫','❗','❓','‼️','⁉️','💡','🔔','🔕','📣','💬','🗨️','💭','➕','➖','➡️','⬅️','⬆️','⬇️','🔄','🔁','🆕','🆗','🆙','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','⚡','🎯']]
+];
+let emoReacts=[];              // reactions on the open ticket's messages
+let _emoPickCb=null, _emoPickTab=0;
+const emoRecent=()=>{ try{ return JSON.parse(localStorage.getItem('emoRecent')||'[]'); }catch(e){ return []; } };
+function emoRemember(e){ try{ localStorage.setItem('emoRecent',JSON.stringify([e,...emoRecent().filter(x=>x!==e)].slice(0,16))); }catch(err){} }
+
+// ── The picker: one floating panel, opened next to whatever button was clicked ──
+function openEmoPicker(anchor,cb){
+  closeEmoPicker();
+  _emoPickCb=cb;
+  const el=document.createElement('div'); el.id='emoPick'; el.className='emo-pick';
+  el.addEventListener('mousedown',e=>e.stopPropagation());
+  el.addEventListener('click',e=>e.stopPropagation());
+  document.body.appendChild(el); emoPaintPicker();
+  const a=anchor.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
+  let top=a.top-h-6; if(top<8) top=Math.min(a.bottom+6,window.innerHeight-h-8);
+  let left=Math.min(Math.max(8,a.right-w),window.innerWidth-w-8);
+  el.style.top=Math.max(8,top)+'px'; el.style.left=left+'px';
+  setTimeout(()=>document.addEventListener('mousedown',closeEmoPicker,{once:true}),0);
+}
+function emoPaintPicker(){
+  const el=$('emoPick'); if(!el) return;
+  const rec=emoRecent();
+  const tabs=[...(rec.length?[['🕘','Recent',rec]]:[]),...EMO_SETS];
+  if(_emoPickTab>=tabs.length) _emoPickTab=0;
+  const [,label,list]=tabs[_emoPickTab];
+  el.innerHTML=`<div class="emo-tabs">${tabs.map(([ic,lb],i)=>`<button class="${i===_emoPickTab?'on':''}" title="${lb}" onclick="_emoPickTab=${i};emoPaintPicker()">${ic}</button>`).join('')}</div>`+
+    `<div class="emo-lbl">${label}</div><div class="emo-grid">${list.map(e=>`<button onclick="emoPick('${e}')">${e}</button>`).join('')}</div>`;
+}
+function emoPick(e){ const cb=_emoPickCb; emoRemember(e); closeEmoPicker(); if(cb) cb(e); }
+function closeEmoPicker(){ $('emoPick')?.remove(); _emoPickCb=null; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('emoPick')){ e.stopPropagation(); closeEmoPicker(); } },true);
+
+// ── Message box: drop the emoji in where the cursor is ──
+function emoInsert(taId,e){
+  const ta=$(taId); if(!ta) return;
+  const s=ta.selectionStart??ta.value.length, en=ta.selectionEnd??s;
+  ta.value=ta.value.slice(0,s)+e+ta.value.slice(en);
+  ta.focus(); const p=s+e.length; ta.setSelectionRange(p,p);
+}
+const emoBtnHTML=taId=>`<button class="emo-btn" type="button" title="Add an emoji" onclick="openEmoPicker(this,e=>emoInsert('${taId}',e))">😊</button>`;
+
+// ── Reactions ──
+// Hover bar on a message: quick reactions, ☺+ for the full set, plus any extra buttons (e.g. ⚡ make it an action)
+function emoBarHTML(m,extra){
+  if(!m||m._initial||String(m.id).startsWith('_')) return '';
+  return `<div class="rx-bar" onclick="event.stopPropagation()">${EMO_QUICK.map(e=>`<button title="React with ${e}" onclick="emoToggle('${m.id}','${e}')">${e}</button>`).join('')}<button class="rx-more" title="More reactions" onclick="openEmoPicker(this,e=>emoToggle('${m.id}',e))">☺<b>+</b></button>${extra||''}</div>`;
+}
+// Chips under a message: 👍 2 — highlighted if you reacted, hover for who
+function emoRxHTML(m){
+  if(!m||m._initial||String(m.id).startsWith('_')) return '';
+  const me=EMO.me(), rs=emoReacts.filter(x=>x.message_id===m.id), order=[];
+  rs.forEach(x=>{ if(!order.includes(x.emoji)) order.push(x.emoji); });
+  return `<div class="rx-row" id="rx-${m.id}">${order.map(e=>{
+    const who=rs.filter(x=>x.emoji===e), mine=who.some(x=>x.author===me);
+    const names=who.map(x=>x.author===me?'You':EMO.name(x.author)).join(', ');
+    return `<button class="rx-chip${mine?' mine':''}" title="${esc(names)}${mine?' · click to remove yours':''}" onclick="event.stopPropagation();emoToggle('${m.id}','${e}')">${e}<b>${who.length}</b></button>`;
+  }).join('')}</div>`;
+}
+function emoPaint(msgId){ const el=$('rx-'+msgId); if(el) el.outerHTML=emoRxHTML({id:msgId}); }
+async function emoToggle(msgId,e){
+  const me=EMO.me(), reqId=EMO.reqId(); if(!me||!reqId) return;
+  const mine=emoReacts.find(x=>x.message_id===msgId&&x.emoji===e&&x.author===me);
+  if(mine){
+    if(String(mine.id).startsWith('tmp')) return;   // still saving
+    emoReacts=emoReacts.filter(x=>x!==mine); emoPaint(msgId);
+    try{ await EMO.del(`request_message_reactions?id=eq.${mine.id}`); }
+    catch(err){ emoReacts.push(mine); emoPaint(msgId); toast('Could not remove reaction: '+err.message,'error'); }
+  }else{
+    const tmp={id:'tmp'+Date.now(),message_id:msgId,request_id:reqId,emoji:e,author:me,created_at:new Date().toISOString()};
+    emoReacts.push(tmp); emoPaint(msgId); emoRemember(e);
+    try{ const [row]=await EMO.post('request_message_reactions',{message_id:msgId,request_id:reqId,emoji:e}); if(row) Object.assign(tmp,row); }
+    catch(err){ emoReacts=emoReacts.filter(x=>x!==tmp); emoPaint(msgId); toast('Could not react: '+err.message,'error'); }
+  }
+}
+const emoLoad=reqId=>SB.get(`request_message_reactions?request_id=eq.${reqId}&select=*&order=created_at.asc`).catch(()=>[]);
+const EMO={me:()=>me,name:e=>nameOf(e),reqId:()=>openId,post:(p,b)=>SB.post(p,b),del:p=>SB.del(p)};
+
 // 3 ── Messages: between the requester and the buying team
 function msgFilesHTML(m){
   const fs=detailFiles.map((f,i)=>[f,i]).filter(([f])=>m._initial?(!f.message_id&&!f.shared_by_buyer&&!f.is_completion):f.message_id===m.id); if(!fs.length) return '';
@@ -1152,10 +1276,11 @@ function msgList(r){
 function messagesViewHTML(r){
   const msgs=msgList(r);
   return `<div>
-      <div class="msgs" id="dMsgs" style="max-height:calc(100vh - 380px);overflow-y:auto">${msgs.length?msgs.map(m=>`<div class="msg ${m.author===me?'mine':''}${m.author===me&&!m._initial?' del':''}${(a=>a?(a.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(msgAction(m))}">${m.author===me&&!m._initial?`<button class="msg-x" title="Remove this message" onclick="deleteMsg('${m.id}')">✕</button>`:''}${m._initial?'<b class="q-lbl">Query</b>':''}${m.body?esc(m.body):''}${msgFilesHTML(m)}${actionCheckHTML(m)}<small>${m.author===me?'You':esc(nameOf(m.author))} · ${fmtWhen(m.created_at)}</small></div>`).join(''):'<div class="hint">No messages yet. Use this instead of email so nothing gets lost.</div>'}</div>
+      <div class="msgs" id="dMsgs" style="max-height:calc(100vh - 380px);overflow-y:auto">${msgs.length?msgs.map(m=>`<div class="msg ${m.author===me?'mine':''}${m.author===me&&!m._initial?' del':''}${(a=>a?(a.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(msgAction(m))}">${emoBarHTML(m)}${m.author===me&&!m._initial?`<button class="msg-x" title="Remove this message" onclick="deleteMsg('${m.id}')">✕</button>`:''}${m._initial?'<b class="q-lbl">Query</b>':''}${m.body?esc(m.body):''}${msgFilesHTML(m)}${actionCheckHTML(m)}${emoRxHTML(m)}<small>${m.author===me?'You':esc(nameOf(m.author))} · ${fmtWhen(m.created_at)}</small></div>`).join(''):'<div class="hint">No messages yet. Use this instead of email so nothing gets lost.</div>'}</div>
       <div class="msg-box" id="msgBox">
         <button class="msg-attach" title="Attach files or images (you can also paste or drag them in)" onclick="$('msgFiles').click()">📎</button>
         <input type="file" id="msgFiles" multiple class="hidden" onchange="addMsgFiles(this.files);this.value=''">
+        ${emoBtnHTML('msgText')}
         <textarea id="msgText" placeholder="Message ${r.assigned_to?esc(nameOf(r.assigned_to)):'the buying team'}… (paste or drop files here)"></textarea>
         <button class="btn" id="msgSendBtn" onclick="sendMsg('${r.id}')">Send</button></div>
       <div class="msg-pending" id="msgPending">${pendingChips()}</div>

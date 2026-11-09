@@ -732,6 +732,37 @@ body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
 .rq-file-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rq-decline{display:flex;gap:8px;margin-top:8px}
 .rq-decline input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius-sm);font-family:inherit;font-size:.86rem;outline:none}
+/* 😊 emojis + reactions */
+.emo-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:1.05rem;padding:0 10px;line-height:1}
+.emo-btn:hover{border-color:var(--accent)}
+.emo-pick{position:fixed;z-index:10000;width:316px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:8px;font-family:inherit}
+.emo-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px}
+.emo-tabs button{flex:1;background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.05rem;padding:4px 0;opacity:.6}
+.emo-tabs button:hover{background:var(--bg3);opacity:1}
+.emo-tabs button.on{background:var(--bg3);opacity:1;box-shadow:inset 0 -2px 0 var(--accent)}
+.emo-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:2px 4px 4px}
+.emo-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:200px;overflow-y:auto}
+.emo-grid button{background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.3rem;line-height:1;padding:5px 0}
+.emo-grid button:hover{background:var(--bg3);transform:scale(1.15)}
+.msgs,.rq-msgs{padding-top:26px}
+.msg,.rq-msg{position:relative}
+.rx-bar{position:absolute;top:-25px;left:8px;display:none;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:2px 5px;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;z-index:3}
+.mine>.rx-bar{left:auto;right:8px}
+.msg:hover>.rx-bar,.rq-msg:hover>.rx-bar,.rx-bar:focus-within{display:flex}
+.rx-bar button{background:none;border:none;cursor:pointer;font-size:1.05rem;line-height:1;padding:3px 4px;border-radius:50%;transition:transform .1s;font-family:inherit;color:var(--text2)}
+.rx-bar button:hover{transform:scale(1.3);background:var(--bg3)}
+.rx-bar .rx-more{font-size:.95rem;border-radius:8px}
+.rx-bar .rx-more b{font-size:.7rem;vertical-align:top}
+.rx-bar .rx-act{font-size:.78rem;font-weight:600;border-radius:100px;padding:3px 8px;margin-left:3px;border-left:1px solid var(--border);color:#dc2626}
+.rx-bar .rx-act:hover{transform:none;background:rgba(239,68,68,.1)}
+.rx-row{display:flex;flex-wrap:wrap;gap:4px;white-space:normal}
+.rx-row:not(:empty){margin-top:6px}
+.rx-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:1px 8px;font-size:.88rem;cursor:pointer;line-height:1.5;font-family:inherit;color:var(--text)}
+.rx-chip b{font-size:.72rem;font-weight:600;color:var(--text2)}
+.rx-chip:hover{border-color:var(--accent)}
+.rx-chip.mine{background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.55)}
+body.view-only .rx-bar,body.view-only .emo-btn{display:none!important}
+body.view-only .rx-chip{pointer-events:none}
 </style>
 </head>
 <body>
@@ -1423,12 +1454,12 @@ body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
 <div class="overlay hidden" id="reqActOverlay">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div><div class="modal-title">⚡ Request action</div>
+      <div><div class="modal-title" id="raTitle">⚡ Request action</div>
         <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="raSub"></div></div>
       <button class="modal-close" onclick="closeReqAct()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="field" style="margin-bottom:12px"><label>What do they need to do? *</label>
+      <div class="field" style="margin-bottom:12px"><label style="display:flex;align-items:center;gap:8px">What do they need to do? *<span style="margin-left:auto"><button class="emo-btn" type="button" style="padding:3px 8px" title="Add an emoji" onclick="openEmoPicker(this,e=>emoInsert('raIns',e))">😊</button></span></label>
         <textarea id="raIns" style="min-height:90px" placeholder="e.g. Review the attached margin sheet and confirm the RRP"></textarea></div>
       <div class="field"><label>Files (optional) — saved to SharePoint, shown in the chat</label>
         <div class="rq-drop" id="raDrop" onclick="$('raFiles').click()">📎 Drop files here or click to choose</div>
@@ -6595,7 +6626,8 @@ async function refreshReqModal(noFetch){
         SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
         SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`),
         SB.get(`request_actions?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[]),
-        SB.get(`request_notifications?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[])
+        SB.get(`request_notifications?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[]),
+        emoLoad(id).then(x=>{ emoReacts=x||[]; })
       ]);
       _reqActs=acts||[];
       reqOpenActions=reqOpenActions.filter(a=>a.request_id!==id).concat(_reqActs.filter(a=>a.status==='open'));
@@ -6677,17 +6709,18 @@ async function refreshReqModal(noFetch){
     const oa=reqOpenAction(id);
     html=`<div class="rq-sec" style="margin-bottom:0">
       <div style="display:flex;gap:10px;justify-content:flex-end;font-size:.72rem;margin-bottom:10px"><span id="spStatus-request"></span><span id="spStatus-media"></span></div>
-      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${(msgs=>msgs.length?msgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)&&!m._initial?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${reqIsBuyerMsg(m,me)&&!m._initial?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m._initial?'<b style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:3px">Query</b>':''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`)(reqMsgList(r))}</div>
+      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${(msgs=>msgs.length?msgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)&&!m._initial?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${emoBarHTML(m,REQ_OPEN.has(r.status)?reqMsgActBtn(m,me):'')}${reqIsBuyerMsg(m,me)&&!m._initial?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m._initial?'<b style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:3px">Query</b>':''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}${emoRxHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`)(reqMsgList(r))}</div>
       <div class="rq-reply" id="rqReplyBox">
         <button class="rq-attach" title="Attach files (or paste / drag them in) — saved to SharePoint" onclick="$('rqMsgFiles').click()">📎</button>
         <input type="file" id="rqMsgFiles" multiple class="hidden" onchange="reqMsgAdd(this.files);this.value=''">
+        ${emoBtnHTML('rqMsgText')}
         <textarea id="rqMsgText" placeholder="Reply to ${rep}… (paste or drop files here · Ctrl+Enter to send)"></textarea>
         <button class="btn" id="rqSendBtn" onclick="sendReqMsg('${id}')">Send</button></div>
       <div class="rq-pend" id="rqPend">${reqPendChips()}</div>
       ${open?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
         <div class="spacer" style="flex:1"></div>
         <button class="btn btn-ghost btn-sm" onclick="openReqNotify()" title="Email ${rep} about an update">🔔 Notify ${rep}</button>
-        ${oa?'':`<button class="btn btn-ghost btn-sm" onclick="openReqAct()" title="Ask ${rep} to do something before this can progress">⚡ Request action</button>`}
+        <button class="btn btn-ghost btn-sm" onclick="openReqAct()" title="Ask ${rep} to do something before this can progress${oa?' — you can have several open at once':''}">⚡ Request ${oa?'another ':''}action</button>
       </div>`:''}
     </div>`;
   }else{
@@ -6972,6 +7005,99 @@ function reqMsgFilesHTML(m){
   }).join('')}</div>`;
 }
 
+// ═══════════════════════════════════════
+// 😊 EMOJIS — picker for the message box + Teams-style reactions on messages
+// Same block lives in index.html and request.html · table: request_message_reactions
+// ═══════════════════════════════════════
+const EMO_QUICK=['👍','❤️','😆','😮','😢','🙏'];
+const EMO_SETS=[
+  ['😊','Smileys',['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😋','😛','😜','🤪','😝','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😮‍💨','😌','😔','😪','😴','😷','🤒','🤯','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','💀','🤡','👀']],
+  ['👍','Gestures',['👍','👎','👌','🤌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','👋','🤝','🙏','👏','🙌','👐','🤲','💪','✍️','🫡','🤷','🤦','🙋','🙇','💁','🙆','🙅']],
+  ['❤️','Hearts',['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝']],
+  ['🎉','Celebrate',['🎉','🎊','🥳','🎈','🎁','🏆','🥇','🥈','🥉','🏅','⭐','🌟','✨','💫','🔥','💯','🚀','👑','🍾','🥂','☕','🍰','🍕']],
+  ['📦','Work',['📦','🚚','🚢','✈️','🏭','🛏️','🛋️','🪑','🚪','🪞','🛒','🏷️','💷','💰','📈','📉','📊','🧾','📋','📝','✏️','📎','📌','📍','📁','📂','🗂️','📅','🗓️','⏰','⏳','📞','📧','💻','🖨️','🔍','🔧','🔨','📏','🧵','🎨','📸']],
+  ['✅','Symbols',['✅','☑️','✔️','❌','❎','⚠️','⛔','🚫','❗','❓','‼️','⁉️','💡','🔔','🔕','📣','💬','🗨️','💭','➕','➖','➡️','⬅️','⬆️','⬇️','🔄','🔁','🆕','🆗','🆙','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','⚡','🎯']]
+];
+let emoReacts=[];              // reactions on the open ticket's messages
+let _emoPickCb=null, _emoPickTab=0;
+const emoRecent=()=>{ try{ return JSON.parse(localStorage.getItem('emoRecent')||'[]'); }catch(e){ return []; } };
+function emoRemember(e){ try{ localStorage.setItem('emoRecent',JSON.stringify([e,...emoRecent().filter(x=>x!==e)].slice(0,16))); }catch(err){} }
+
+// ── The picker: one floating panel, opened next to whatever button was clicked ──
+function openEmoPicker(anchor,cb){
+  closeEmoPicker();
+  _emoPickCb=cb;
+  const el=document.createElement('div'); el.id='emoPick'; el.className='emo-pick';
+  el.addEventListener('mousedown',e=>e.stopPropagation());
+  el.addEventListener('click',e=>e.stopPropagation());
+  document.body.appendChild(el); emoPaintPicker();
+  const a=anchor.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
+  let top=a.top-h-6; if(top<8) top=Math.min(a.bottom+6,window.innerHeight-h-8);
+  let left=Math.min(Math.max(8,a.right-w),window.innerWidth-w-8);
+  el.style.top=Math.max(8,top)+'px'; el.style.left=left+'px';
+  setTimeout(()=>document.addEventListener('mousedown',closeEmoPicker,{once:true}),0);
+}
+function emoPaintPicker(){
+  const el=$('emoPick'); if(!el) return;
+  const rec=emoRecent();
+  const tabs=[...(rec.length?[['🕘','Recent',rec]]:[]),...EMO_SETS];
+  if(_emoPickTab>=tabs.length) _emoPickTab=0;
+  const [,label,list]=tabs[_emoPickTab];
+  el.innerHTML=`<div class="emo-tabs">${tabs.map(([ic,lb],i)=>`<button class="${i===_emoPickTab?'on':''}" title="${lb}" onclick="_emoPickTab=${i};emoPaintPicker()">${ic}</button>`).join('')}</div>`+
+    `<div class="emo-lbl">${label}</div><div class="emo-grid">${list.map(e=>`<button onclick="emoPick('${e}')">${e}</button>`).join('')}</div>`;
+}
+function emoPick(e){ const cb=_emoPickCb; emoRemember(e); closeEmoPicker(); if(cb) cb(e); }
+function closeEmoPicker(){ $('emoPick')?.remove(); _emoPickCb=null; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('emoPick')){ e.stopPropagation(); closeEmoPicker(); } },true);
+
+// ── Message box: drop the emoji in where the cursor is ──
+function emoInsert(taId,e){
+  const ta=$(taId); if(!ta) return;
+  const s=ta.selectionStart??ta.value.length, en=ta.selectionEnd??s;
+  ta.value=ta.value.slice(0,s)+e+ta.value.slice(en);
+  ta.focus(); const p=s+e.length; ta.setSelectionRange(p,p);
+}
+const emoBtnHTML=taId=>`<button class="emo-btn" type="button" title="Add an emoji" onclick="openEmoPicker(this,e=>emoInsert('${taId}',e))">😊</button>`;
+
+// ── Reactions ──
+// Hover bar on a message: quick reactions, ☺+ for the full set, plus any extra buttons (e.g. ⚡ make it an action)
+function emoBarHTML(m,extra){
+  if(!m||m._initial||String(m.id).startsWith('_')) return '';
+  return `<div class="rx-bar" onclick="event.stopPropagation()">${EMO_QUICK.map(e=>`<button title="React with ${e}" onclick="emoToggle('${m.id}','${e}')">${e}</button>`).join('')}<button class="rx-more" title="More reactions" onclick="openEmoPicker(this,e=>emoToggle('${m.id}',e))">☺<b>+</b></button>${extra||''}</div>`;
+}
+// Chips under a message: 👍 2 — highlighted if you reacted, hover for who
+function emoRxHTML(m){
+  if(!m||m._initial||String(m.id).startsWith('_')) return '';
+  const me=EMO.me(), rs=emoReacts.filter(x=>x.message_id===m.id), order=[];
+  rs.forEach(x=>{ if(!order.includes(x.emoji)) order.push(x.emoji); });
+  return `<div class="rx-row" id="rx-${m.id}">${order.map(e=>{
+    const who=rs.filter(x=>x.emoji===e), mine=who.some(x=>x.author===me);
+    const names=who.map(x=>x.author===me?'You':EMO.name(x.author)).join(', ');
+    return `<button class="rx-chip${mine?' mine':''}" title="${esc(names)}${mine?' · click to remove yours':''}" onclick="event.stopPropagation();emoToggle('${m.id}','${e}')">${e}<b>${who.length}</b></button>`;
+  }).join('')}</div>`;
+}
+function emoPaint(msgId){ const el=$('rx-'+msgId); if(el) el.outerHTML=emoRxHTML({id:msgId}); }
+async function emoToggle(msgId,e){
+  const me=EMO.me(), reqId=EMO.reqId(); if(!me||!reqId) return;
+  const mine=emoReacts.find(x=>x.message_id===msgId&&x.emoji===e&&x.author===me);
+  if(mine){
+    if(String(mine.id).startsWith('tmp')) return;   // still saving
+    emoReacts=emoReacts.filter(x=>x!==mine); emoPaint(msgId);
+    try{ await EMO.del(`request_message_reactions?id=eq.${mine.id}`); }
+    catch(err){ emoReacts.push(mine); emoPaint(msgId); toast('Could not remove reaction: '+err.message,'error'); }
+  }else{
+    const tmp={id:'tmp'+Date.now(),message_id:msgId,request_id:reqId,emoji:e,author:me,created_at:new Date().toISOString()};
+    emoReacts.push(tmp); emoPaint(msgId); emoRemember(e);
+    try{ const [row]=await EMO.post('request_message_reactions',{message_id:msgId,request_id:reqId,emoji:e}); if(row) Object.assign(tmp,row); }
+    catch(err){ emoReacts=emoReacts.filter(x=>x!==tmp); emoPaint(msgId); toast('Could not react: '+err.message,'error'); }
+  }
+}
+const emoLoad=reqId=>SB.get(`request_message_reactions?request_id=eq.${reqId}&select=*&order=created_at.asc`).catch(()=>[]);
+const EMO={me:()=>(getStoredSession()?.user?.email||'').toLowerCase(),name:e=>reqName(e),reqId:()=>reqOpenId,post:(p,b)=>SB.post(p,b),del:p=>SB.delete(p)};
+// ⚡ on a message you've already sent → turn it into an action (only if it isn't one already)
+const reqMsgActBtn=(m,me)=>!m._initial&&reqIsBuyerMsg(m,me)&&!_reqActs.some(a=>a.message_id===m.id&&a.status!=='cancelled')
+  ?`<button class="rx-act" title="Turn this message into an action for the requester" onclick="openReqAct('${m.id}')">⚡ Action</button>`:'';
+
 // ── 🔔 Email the requester an update ──
 const NOTIFY_LABEL={message:'New message',timeline:'Timeline update',file:'New file uploaded',action:'Action needed'};
 function notifyHistoryHTML(){
@@ -7002,34 +7128,42 @@ async function sendReqNotify(){
 }
 
 // ── ⚡ Request an action from the requester ──
-let _raPending=[];
+let _raPending=[], _raFromMsg=null;
 function raChips(){ return _raPending.map((f,i)=>`<span>${fileIconByName(f.name)} ${esc(f.name)} <button onclick="_raPending.splice(${i},1);$('raPend').innerHTML=raChips()">✕</button></span>`).join(''); }
 function raAdd(list){ [...list].forEach(f=>{ if(f.size>50*1048576){ toast(f.name+' is over 50 MB','error'); return; } _raPending.push(f); }); $('raPend').innerHTML=raChips(); }
-function openReqAct(){
+function openReqAct(fromMsgId){
   const r=reqData.find(x=>x.id===reqOpenId); if(!r) return;
-  if(reqOpenAction(r.id)){ toast(`There's already an open action — cancel it first`,'error'); return; }
-  _raPending=[]; $('raPend').innerHTML=''; $('raIns').value='';
+  const src=fromMsgId?_reqMsgs.find(m=>m.id===fromMsgId):null;
+  if(fromMsgId&&!src){ toast('Message not found — refresh and try again','error'); return; }
+  if(src&&_reqActs.some(a=>a.message_id===src.id&&a.status!=='cancelled')){ toast('That message is already an action','error'); return; }
+  _raFromMsg=src?src.id:null;
+  _raPending=[]; $('raPend').innerHTML=''; $('raIns').value=src?(src.body||'').replace(/^⚡ Action needed:\s*/,''):'';
+  $('raTitle').textContent=src?'⚡ Turn message into an action':'⚡ Request action';
   $('raSub').textContent=`For ${reqName(r.requested_by)} on ${reqDisplayRef(r,reqItemsFor(r.id))} · ${reqTitleText(r)}`;
   $('raEmailNote').innerHTML=`📧 ${esc(reqName(r.requested_by))} is emailed automatically and sees <b>⚡ Action needed</b> at the top of the ticket until they mark it done.`;
-  $('raSaveBtn').disabled=false; $('raSaveBtn').textContent='⚡ Send action';
+  const nOpen=reqOpenActions.filter(a=>a.request_id===r.id&&a.status==='open').length;
+  if(nOpen) $('raEmailNote').innerHTML+=`<br>ℹ️ ${nOpen} action${nOpen>1?'s are':' is'} already open on this ticket — this one is added alongside.`;
+  if(src) $('raEmailNote').innerHTML+=`<br>💬 The message stays where it is in the chat and gets the tick box — nothing new is posted.`;
+  $('raSaveBtn').disabled=false; $('raSaveBtn').textContent=src?'⚡ Make it an action':'⚡ Send action';
   $('reqActOverlay').classList.remove('hidden');
   setTimeout(()=>$('raIns').focus(),50);
 }
-function closeReqAct(){ $('reqActOverlay')?.classList.add('hidden'); }
+function closeReqAct(){ $('reqActOverlay')?.classList.add('hidden'); _raFromMsg=null; }
 async function saveReqAct(){
   const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r) return;
   const ins=$('raIns').value.trim(); if(!ins){ toast('Say what they need to do','error'); return; }
   const due=null, files=[..._raPending];
   if(!(await reqSpReady(files))) return;
-  const btn=$('raSaveBtn'); btn.disabled=true; btn.textContent=files.length?'Saving files…':'Sending…';
+  const btn=$('raSaveBtn'), fromMsg=_raFromMsg, idle=fromMsg?'⚡ Make it an action':'⚡ Send action';
+  btn.disabled=true; btn.textContent=files.length?'Saving files…':'Sending…';
   try{
-    // 1) post it in the chat (with any files), 2) create the action → the database emails them
-    const [m]=await SB.post('request_messages',{request_id:id,body:`⚡ Action needed: ${ins}${due?`\nDue by ${fmtEntryDate(due,true)}`:''}`});
+    // 1) post it in the chat (with any files) — or reuse the message it came from, 2) create the action → the database emails them
+    const [m]=fromMsg?[{id:fromMsg}]:await SB.post('request_messages',{request_id:id,body:`⚡ Action needed: ${ins}${due?`\nDue by ${fmtEntryDate(due,true)}`:''}`});
     if(files.length) await reqSaveFilesToSp(r,files,m.id);
     await SB.post('request_actions',{request_id:id,instruction:ins,due_date:due,message_id:m.id});
     closeReqAct(); await loadRequests(); await refreshReqModal();
     toast(`⚡ Action sent — ${reqName(r.requested_by)} has been emailed`);
-  }catch(e){ btn.disabled=false; btn.textContent='⚡ Send action'; toast('Could not send action: '+e.message,'error'); }
+  }catch(e){ btn.disabled=false; btn.textContent=idle; toast('Could not send action: '+e.message,'error'); }
 }
 function cancelReqAct(actionId){
   confirmAction('Cancel this action?','It disappears from the requester\'s page. No email is sent.',async()=>{
