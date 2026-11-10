@@ -619,6 +619,42 @@ body.light-mode .cp-event{color:#475569}
 .req-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(79,110,247,.1);border:1px solid rgba(79,110,247,.4);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:.88rem}
 .req-banner.urgent{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.45)}
 .req-banner b{font-weight:600}
+.em-chip{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:100px;background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.4);color:var(--accent2);cursor:pointer;vertical-align:1px}
+.em-chip:hover{background:var(--accent);color:#fff}
+.em-group{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.em-group.unmatched{border-style:dashed}
+.em-ghead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}
+.em-gtitle{font-weight:600;font-size:.9rem;color:var(--text)}
+.em-gsub{font-size:.76rem;color:var(--text3);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.em-ref{font-family:'DM Mono',monospace;font-size:.72rem;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;color:var(--accent2)}
+.em-row{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;border-bottom:1px solid var(--border);font-size:.84rem}
+.em-row:last-child{border-bottom:none}
+.em-row.done{opacity:.55}
+.em-row input[type=checkbox]{margin-top:3px;accent-color:var(--accent)}
+.em-main{flex:1;min-width:0;cursor:pointer}
+.em-line1{display:flex;gap:8px;align-items:baseline}
+.em-subj{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.em-when{font-size:.72rem;color:var(--text3);white-space:nowrap;font-family:'DM Mono',monospace}
+.em-from{font-size:.74rem;color:var(--text3)}
+.em-prev{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.em-body{white-space:pre-wrap;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;margin-top:6px;font-size:.82rem;max-height:320px;overflow:auto}
+.em-acts{display:flex;gap:6px;flex-shrink:0}
+.em-status{font-size:.68rem;padding:1px 6px;border-radius:100px;border:1px solid var(--border2);color:var(--text3);white-space:nowrap}
+.em-comp{padding:10px 14px;background:var(--bg3);border-top:1px solid var(--border)}
+.em-comp textarea{width:100%;min-height:64px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:8px 10px;font-family:inherit;font-size:.86rem;resize:vertical;outline:none}
+.em-comp textarea:focus{border-color:var(--accent)}
+.em-comp .em-crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.em-comp input[type=date]{background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:4px 8px;font-family:inherit;font-size:.8rem}
+.em-hint{font-size:.76rem;color:var(--text3)}
+.em-sugg{padding:10px 14px;background:rgba(79,110,247,.07);border-bottom:1px solid var(--border)}
+.em-sugg-lbl{font-size:.76rem;font-weight:600;color:var(--accent2);margin-bottom:4px}
+.em-sugg-txt{font-size:.9rem;color:var(--text);line-height:1.5;white-space:pre-wrap}
+.em-sugg .em-crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.em-sline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;padding:5px 8px;background:rgba(79,110,247,.08);border:1px solid rgba(79,110,247,.25);border-radius:var(--radius-sm);font-size:.84rem;cursor:default}
+.em-sline.muted{background:none;border-style:dashed}
+.em-stxt{color:var(--text);flex:1;min-width:0}
+.em-sedit{flex:1;min-width:200px;background:var(--bg4);border:1px solid var(--accent);color:var(--text);border-radius:4px;padding:4px 8px;font-family:inherit;font-size:.84rem;outline:none}
+.em-assign{background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:3px 6px;font-family:inherit;font-size:.78rem;max-width:260px}
 .rq-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:.74rem;font-weight:500;white-space:nowrap}
 .rq-New{background:rgba(79,110,247,.15);color:#8aa0fb}
 .rq-Acknowledged{background:rgba(245,158,11,.15);color:#fbbf24}
@@ -732,37 +768,6 @@ body.light-mode .rq-wait,body.light-mode .rq-act b.h{color:#dc2626}
 .rq-file-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rq-decline{display:flex;gap:8px;margin-top:8px}
 .rq-decline input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius-sm);font-family:inherit;font-size:.86rem;outline:none}
-/* 😊 emojis + reactions */
-.emo-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:1.05rem;padding:0 10px;line-height:1}
-.emo-btn:hover{border-color:var(--accent)}
-.emo-pick{position:fixed;z-index:10000;width:316px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:8px;font-family:inherit}
-.emo-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px}
-.emo-tabs button{flex:1;background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.05rem;padding:4px 0;opacity:.6}
-.emo-tabs button:hover{background:var(--bg3);opacity:1}
-.emo-tabs button.on{background:var(--bg3);opacity:1;box-shadow:inset 0 -2px 0 var(--accent)}
-.emo-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:2px 4px 4px}
-.emo-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:200px;overflow-y:auto}
-.emo-grid button{background:none;border:none;border-radius:6px;cursor:pointer;font-size:1.3rem;line-height:1;padding:5px 0}
-.emo-grid button:hover{background:var(--bg3);transform:scale(1.15)}
-.msgs,.rq-msgs{padding-top:26px}
-.msg,.rq-msg{position:relative}
-.rx-bar{position:absolute;top:-25px;left:8px;display:none;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:2px 5px;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;z-index:3}
-.mine>.rx-bar{left:auto;right:8px}
-.msg:hover>.rx-bar,.rq-msg:hover>.rx-bar,.rx-bar:focus-within{display:flex}
-.rx-bar button{background:none;border:none;cursor:pointer;font-size:1.05rem;line-height:1;padding:3px 4px;border-radius:50%;transition:transform .1s;font-family:inherit;color:var(--text2)}
-.rx-bar button:hover{transform:scale(1.3);background:var(--bg3)}
-.rx-bar .rx-more{font-size:.95rem;border-radius:8px}
-.rx-bar .rx-more b{font-size:.7rem;vertical-align:top}
-.rx-bar .rx-act{font-size:.78rem;font-weight:600;border-radius:100px;padding:3px 8px;margin-left:3px;border-left:1px solid var(--border);color:#dc2626}
-.rx-bar .rx-act:hover{transform:none;background:rgba(239,68,68,.1)}
-.rx-row{display:flex;flex-wrap:wrap;gap:4px;white-space:normal}
-.rx-row:not(:empty){margin-top:6px}
-.rx-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:1px 8px;font-size:.88rem;cursor:pointer;line-height:1.5;font-family:inherit;color:var(--text)}
-.rx-chip b{font-size:.72rem;font-weight:600;color:var(--text2)}
-.rx-chip:hover{border-color:var(--accent)}
-.rx-chip.mine{background:rgba(79,110,247,.14);border-color:rgba(79,110,247,.55)}
-body.view-only .rx-bar,body.view-only .emo-btn{display:none!important}
-body.view-only .rx-chip{pointer-events:none}
 </style>
 </head>
 <body>
@@ -811,6 +816,7 @@ body.view-only .rx-chip{pointer-events:none}
   <div class="header-right">
     <span class="refresh-countdown" id="loggedInAs" style="margin-right:4px" title="Signed in"></span>
     <button class="btn btn-ghost btn-sm hidden" onclick="showPage('requests')" id="reqPageBtn" style="position:relative" title="Requests from sales">📥 Requests<span class="todo-notif-badge" id="reqNotifBadge"></span></button>
+    <button class="btn btn-ghost btn-sm hidden" onclick="showPage('emails')" id="emailPageBtn" style="position:relative" title="Supplier email updates">✉️ Emails<span class="todo-notif-badge" id="emailNotifBadge"></span></button>
     <button class="btn btn-ghost btn-sm" onclick="refreshData()" title="Refresh data from server">↻ Refresh</button>
     <span class="refresh-countdown" id="refreshCountdown" title="Auto-refreshes every 60 seconds">60s</span>
     <!-- THEME TOGGLE -->
@@ -871,6 +877,7 @@ body.view-only .rx-chip{pointer-events:none}
     <button class="btn btn-ghost btn-sm" onclick="toggleArchiveView()">← Back to active</button>
   </div>
   <div id="reqBanner" class="req-banner hidden"></div>
+  <div id="emailBanner" class="req-banner hidden"></div>
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
@@ -949,6 +956,30 @@ body.view-only .rx-chip{pointer-events:none}
       </table>
       <div id="reqEmpty" class="empty-state hidden"><h3>No requests</h3><p>Requests from the Request page appear here</p></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ EMAIL UPDATES PAGE ═══ -->
+<div id="pageEmails" class="page">
+  <div class="page-header">
+    <button class="page-back" onclick="showPage('main')">← Back to Buying Tracker</button>
+    <div class="page-title">✉️ Email updates</div>
+    <div class="page-sub" id="emailPageSub"></div>
+  </div>
+  <div class="main">
+    <div class="logi-toolbar">
+      <div class="search-wrap" style="max-width:280px">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="emailSearch" placeholder="Search ref, item, sender, subject…" oninput="renderEmailsPage()">
+      </div>
+      <div class="rq-seg" id="emailStatusSeg">
+        <button data-v="new" class="on" onclick="setEmailView(this.dataset.v)">New</button>
+        <button data-v="handled" onclick="setEmailView(this.dataset.v)">Handled</button>
+      </div>
+      <span class="em-hint" style="margin-left:auto">Emails whose subject contains a tracker ref code (e.g. BIR-123456) land here automatically.</span>
+    </div>
+    <div id="emailList"></div>
+    <div id="emailEmpty" class="empty-state hidden"><h3>All caught up</h3><p>New supplier emails on tracked threads will appear here.</p></div>
   </div>
 </div>
 
@@ -1172,6 +1203,7 @@ body.view-only .rx-chip{pointer-events:none}
       <button class="tab-btn" id="tabNotes" onclick="switchTab('notes')">Notes</button>
       <button class="tab-btn" id="tabFiles" onclick="switchTab('files')">Files</button>
       <button class="tab-btn" id="tabImages" onclick="switchTab('images')">Media</button>
+      <button class="tab-btn" id="tabEmails" onclick="switchTab('emails')">✉️ Emails</button>
       <button class="tab-btn hidden" id="tabAirmail" onclick="switchTab('airmail')">✈️ Airmail</button>
     </div>
     <div class="modal-body" id="detailBody"></div>
@@ -1386,8 +1418,8 @@ body.view-only .rx-chip{pointer-events:none}
 <div class="overlay hidden" id="reqNewOverlay">
   <div class="modal" style="max-width:620px">
     <div class="modal-header">
-      <div><div class="modal-title" id="rnHead">New request</div>
-        <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="rnHeadSub">Raised on someone's behalf. It appears on their request page straight away.</div></div>
+      <div><div class="modal-title">New request</div>
+        <div style="font-size:.8rem;color:var(--text3);margin-top:3px">Raised on someone's behalf. It appears on their request page straight away.</div></div>
       <button class="modal-close" onclick="closeReqNew()">✕</button>
     </div>
     <div class="modal-body">
@@ -1409,10 +1441,10 @@ body.view-only .rx-chip{pointer-events:none}
       </div>
       <div class="form-row">
         <div class="field" id="rnPriceField"><label>Target price (optional)</label><input type="text" id="rnPrice"></div>
-        <div class="field" id="rnStatusField"><label>Status</label><select id="rnStatus">
+        <div class="field"><label>Status</label><select id="rnStatus">
           <option>In Progress</option><option>New</option><option>Acknowledged</option><option>Complete</option></select></div>
       </div>
-      <div class="form-row" id="rnAssignRow">
+      <div class="form-row">
         <div class="field"><label>Worked on by</label><select id="rnAssign"></select></div>
         <div class="field"></div>
       </div>
@@ -1454,12 +1486,12 @@ body.view-only .rx-chip{pointer-events:none}
 <div class="overlay hidden" id="reqActOverlay">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div><div class="modal-title" id="raTitle">⚡ Request action</div>
+      <div><div class="modal-title">⚡ Request action</div>
         <div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="raSub"></div></div>
       <button class="modal-close" onclick="closeReqAct()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="field" style="margin-bottom:12px"><label style="display:flex;align-items:center;gap:8px">What do they need to do? *<span style="margin-left:auto"><button class="emo-btn" type="button" style="padding:3px 8px" title="Add an emoji" onclick="openEmoPicker(this,e=>emoInsert('raIns',e))">😊</button></span></label>
+      <div class="field" style="margin-bottom:12px"><label>What do they need to do? *</label>
         <textarea id="raIns" style="min-height:90px" placeholder="e.g. Review the attached margin sheet and confirm the RRP"></textarea></div>
       <div class="field"><label>Files (optional) — saved to SharePoint, shown in the chat</label>
         <div class="rq-drop" id="raDrop" onclick="$('raFiles').click()">📎 Drop files here or click to choose</div>
@@ -2311,7 +2343,7 @@ function renderTable(){
     rows.push(`<tr class="${isChase(item)?'chase-row':''}${item.archived?' archived-row':''}" data-id="${item.id}">
       <td class="td-req">${itemReqButtons(item.id)}</td>
       <td class="td-cat">${catCellHTML(item.category)}</td>
-      <td class="td-name"><span title="${esc(item.name)}">${esc(item.name)}</span>${item.archived?'<br><span class="badge badge-archived">Archived</span>':''}</td>
+      <td class="td-name"><span title="${esc(item.name)}">${esc(item.name)}</span>${emailChip(item.id)}${item.archived?'<br><span class="badge badge-archived">Archived</span>':''}</td>
       <td class="td-supplier"><span title="${esc(item.supplier||'')}">${esc(item.supplier||'—')}</span></td>
       <td>${stageBadge(item.stage)}</td>
       <td class="td-date">${fmtShort(lu)}</td>
@@ -2340,7 +2372,7 @@ function toggleArchiveView(){
 // ═══════════════════════════════════════
 // DETAIL MODAL
 // ═══════════════════════════════════════
-function openDetail(id){
+function openDetail(id,startTab){
   if(!airmailData.length) loadAirmail().then(()=>refreshAirmailTab(id));
   else refreshAirmailTab(id);
   currentItemId=id; tlOrder='oldest'; _tlScrollItemId=null;
@@ -2350,6 +2382,7 @@ function openDetail(id){
     if(item.stage==='Loaded / Shipped' && currentPage==='logistics') defaultTab='logistics';
     else if(item.stage==='QC' && currentPage==='qc') defaultTab='qc';
   }
+  if(startTab) defaultTab=startTab;
   currentTab=defaultTab;
   $('detailOverlay').classList.remove('hidden');
   refreshDetailHeader(); switchTab(defaultTab,true);
@@ -2367,11 +2400,13 @@ function refreshDetailHeader(){
 
 function switchTab(tab,force){
   if(!force) currentTab=tab;
-  ['logistics','qc','timeline','edit','notes','files','images','airmail'].forEach(t=>{
+  ['logistics','qc','timeline','edit','notes','files','images','airmail','emails'].forEach(t=>{
     const el=$('tab'+t[0].toUpperCase()+t.slice(1));
     if(el) el.classList.toggle('active',t===tab);
   });
   const item=data.find(i=>i.id===currentItemId); if(!item) return;
+  const emTabEl=$('tabEmails');
+  if(emTabEl){ const n=emailNewCount(item.id); emTabEl.textContent=n?`✉️ Emails (${n})`:'✉️ Emails'; emTabEl.classList.toggle('hidden',!_emailAvailable); }
   // Logistics tab: visible for Loaded/Shipped items
   const logiTabEl=$('tabLogistics');
   if(logiTabEl) logiTabEl.classList.toggle('hidden', item.stage!=='Loaded / Shipped');
@@ -2391,6 +2426,7 @@ function switchTab(tab,force){
     else if(tab==='notes')      renderNotesTab(item);
     else if(tab==='files')      renderFilesTab(item);
     else if(tab==='airmail')    renderAirmailTab(item);
+    else if(tab==='emails')     renderEmailsTab(item);
     else                        renderImagesTab(item);
   }catch(err){
     console.error('Tab render error ('+tab+'):', err);
@@ -5227,6 +5263,8 @@ function showPage(page){
   $('pageQC').classList.toggle('active',page==='qc');
   $('pageCalendar').classList.toggle('active',page==='calendar');
   $('pageRequests').classList.toggle('active',page==='requests');
+  $('pageEmails').classList.toggle('active',page==='emails');
+  if(page==='emails'){ renderEmailsPage(); loadEmails(); }
   if(page==='requests'){ renderRequestsPage(); loadRequests(true); }
   if(page==='logistics'){ loadAirmail().then(()=>renderLogisticsPage()); }
   if(page==='qc'){ renderQCPage(); }
@@ -5752,6 +5790,7 @@ function startAutoRefresh(){
         await loadData(true);
         loadQarmaData(true); // independent poll — not gated on items changing
         loadRequests(true);  // sales requests — tiny updated_at check, full fetch only on change
+        if((++_emailTick)%12===0) loadEmails(true); // supplier emails — ~60s, tiny updated_at check
         if(currentPage==='logistics'){ await loadAirmail(true); renderLogisticsPage(); }
         if(todoPanelOpen){
           await Promise.all([loadTodo(true), loadReports(true)]);
@@ -6380,34 +6419,11 @@ function reqLastActionedHTML(r,items){
   return `<span title="Last actioned by buying ${fmtEntryDate((r.last_actioned_at||r.created_at).slice(0,10),true)}">${daysBadge(Math.max(0,n),'')}</span>`;
 }
 
-// Teams-style red badge with a white number on the tab / window icon
-let _favImg=null, _favLast=-1;
-function setFaviconBadge(n){
-  if(n===_favLast) return; _favLast=n;
-  const link=document.querySelector('link[rel="icon"]'); if(!link) return;
-  const draw=()=>{
-    const S=64, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d');
-    x.drawImage(_favImg,0,0,S,S);
-    if(n>0){
-      const t=n>99?'99+':String(n), r=S*0.15, cx=S-r, cy=r;   // circle ≈ 30% of the icon, tucked into the top-right like Teams
-      x.fillStyle='#e5383b'; x.beginPath();
-      if(t.length>1){ const w=r*(t.length>2?1.1:0.55); x.moveTo(cx-w,cy-r); x.arc(cx-w,cy,r,-Math.PI/2,Math.PI/2,true); x.arc(cx,cy,r,Math.PI/2,-Math.PI/2,true); x.closePath(); }
-      else x.arc(cx,cy,r,0,Math.PI*2);
-      x.fill();
-      x.fillStyle='#fff'; x.font=`600 ${Math.round(r*1.35)}px "Segoe UI",Arial,sans-serif`; x.textAlign='center'; x.textBaseline='middle';
-      x.fillText(t,t.length>1?cx-r*(t.length>2?0.55:0.28):cx,cy+r*0.06);
-    }
-    link.href=c.toDataURL('image/png');
-  };
-  if(_favImg&&_favImg.complete) return draw();
-  _favImg=new Image(); _favImg.onload=draw; _favImg.src='icon-192.png';
-}
 function updateReqBadge(){
   const open=reqData.filter(r=>REQ_OPEN.has(r.status));
   const attention=open.filter(r=>r.status==='New'||r.buyer_unread).length;
   // Number on the installed app's taskbar icon + the browser tab, like Teams
   try{ if(navigator.setAppBadge){ attention?navigator.setAppBadge(attention):navigator.clearAppBadge(); } }catch(e){}
-  setFaviconBadge(attention);
   document.title=(attention?`(${attention}) `:'')+'Buying Tracker';
   const b=$('reqNotifBadge');
   if(b){ b.textContent=attention; b.classList.toggle('show',attention>0); }
@@ -6554,26 +6570,8 @@ async function openReqNew(){
   ['rnTitle','rnCs','rnDesc','rnPrice'].forEach(k=>$(k).value='');
   $('rnCustomer').value=''; $('rnType').value='New Product Development'; $('rnStatus').value='In Progress';
   reqNewTypeChanged();
-  _rnEditId=null; rnMode(false);
   $('rnSaveBtn').disabled=false; $('rnSaveBtn').textContent='Create request';
   $('reqNewOverlay').classList.remove('hidden');
-}
-// ── Edit a request that wasn't filled in right (same form, pre-filled) ──
-let _rnEditId=null;
-function rnMode(edit){
-  $('rnHead').textContent=edit?'Edit request':'New request';
-  $('rnHeadSub').textContent=edit?'Fix anything that was entered wrong. The requester sees the change on their page.':"Raised on someone's behalf. It appears on their request page straight away.";
-  $('rnStatusField').style.display=edit?'none':''; $('rnAssignRow').style.display=edit?'none':'';
-}
-async function openReqEdit(id){
-  const r=reqData.find(x=>x.id===id); if(!r) return;
-  await openReqNew(); if($('reqNewOverlay').classList.contains('hidden')) return;
-  _rnEditId=id; rnMode(true);
-  const setSel=(el,v)=>{ if(v&&![...el.options].some(o=>o.value===v)) el.add(new Option(v,v)); el.value=v||''; };
-  setSel($('rnWho'),r.requested_by); setSel($('rnType'),r.request_type); setSel($('rnCustomer'),r.customer);
-  $('rnTitle').value=r.title||''; $('rnCs').value=r.cs_ticket||''; $('rnDesc').value=r.description||''; $('rnPrice').value=r.target_price||'';
-  reqNewTypeChanged();
-  $('rnSaveBtn').textContent='Save changes';
 }
 function closeReqNew(){ $('reqNewOverlay')?.classList.add('hidden'); }
 function reqNewTypeChanged(){
@@ -6590,19 +6588,6 @@ async function saveReqNew(){
   const miss=[!who&&'requested by',!title&&(cs?'SKU':'title'),npd&&!cust&&'customer',cs&&!csNo&&'CS ticket'].filter(Boolean);
   if(miss.length){ toast('Please add: '+miss.join(', '),'error'); return; }
   const u=_rnRequesters.find(x=>x.email===who)||{};
-  if(_rnEditId){
-    const id=_rnEditId, r=reqData.find(x=>x.id===id)||{};
-    const btn=$('rnSaveBtn'); btn.disabled=true; btn.textContent='Saving…';
-    try{
-      await SB.patch(`requests?id=eq.${id}`,{
-        requested_by:who, department:u.department??r.department??'', request_type:t, customer:cust, title, cs_ticket:csNo,
-        description:$('rnDesc').value.trim(), target_price:npd?$('rnPrice').value.trim():''
-      });
-      closeReqNew(); await loadRequests(); if(reqOpenId===id) await refreshReqModal();
-      toast('Request updated ✓');
-    }catch(e){ btn.disabled=false; btn.textContent='Save changes'; toast('Save failed: '+e.message,'error'); }
-    return;
-  }
   const btn=$('rnSaveBtn'); btn.disabled=true; btn.textContent='Creating…';
   try{
     const [row]=await SB.post('requests',{
@@ -6626,8 +6611,7 @@ async function refreshReqModal(noFetch){
         SB.get(`request_files?request_id=eq.${id}&select=*&order=created_at.asc`),
         SB.get(`request_messages?request_id=eq.${id}&select=*&order=created_at.asc`),
         SB.get(`request_actions?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[]),
-        SB.get(`request_notifications?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[]),
-        emoLoad(id).then(x=>{ emoReacts=x||[]; })
+        SB.get(`request_notifications?request_id=eq.${id}&select=*&order=created_at.desc`).catch(()=>[])
       ]);
       _reqActs=acts||[];
       reqOpenActions=reqOpenActions.filter(a=>a.request_id!==id).concat(_reqActs.filter(a=>a.status==='open'));
@@ -6662,9 +6646,9 @@ async function refreshReqModal(noFetch){
   const tab=(k,label,n)=>`<button class="tab-btn${_reqTab===k?' active':''}" onclick="setReqTab('${k}')">${label}${n?`<span class="cnt">${n}</span>`:''}</button>`;
   const isMediaName=n=>isImageFile(n)||isVideo(n)||/\.(mov|webm)$/i.test(n||'');
   const isMediaRF=f=>f.is_image||isMediaName(f.name);
-  if(!['details','messages','files'].includes(_reqTab)||(reqIsCS(r)&&_reqTab==='files')) _reqTab='details';
+  if(!['details','messages','files'].includes(_reqTab)) _reqTab='details';
   const nAll=all.length+items.reduce((n,i)=>n+(i.files||[]).filter(f=>!isMediaName(f.name)).length+(i.fileLinks||[]).length+(i.images||[]).length,0);
-  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('messages','💬 Messages'+(all.length&&(reqIsCS(r)||all.some(([f])=>f.message_id))?' 📎':''),reqMsgList(r).length)+(reqIsCS(r)?'':tab('files','📁 Files & Media',nAll));
+  $('rqTabs').innerHTML=tab('details','📋 Details')+tab('messages','💬 Messages'+(all.some(([f])=>f.message_id)?' 📎':''),_reqMsgs.length)+tab('files','📁 Files & Media',nAll);
 
   let html='';
   if(_reqTab==='files'){
@@ -6709,18 +6693,17 @@ async function refreshReqModal(noFetch){
     const oa=reqOpenAction(id);
     html=`<div class="rq-sec" style="margin-bottom:0">
       <div style="display:flex;gap:10px;justify-content:flex-end;font-size:.72rem;margin-bottom:10px"><span id="spStatus-request"></span><span id="spStatus-media"></span></div>
-      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${(msgs=>msgs.length?msgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)&&!m._initial?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${emoBarHTML(m,REQ_OPEN.has(r.status)?reqMsgActBtn(m,me):'')}${reqIsBuyerMsg(m,me)&&!m._initial?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m._initial?'<b style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:3px">Query</b>':''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}${emoRxHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`)(reqMsgList(r))}</div>
+      <div class="rq-msgs" id="rqMsgs" style="max-height:48vh">${_reqMsgs.length?_reqMsgs.map(m=>`<div class="rq-msg${m.author===me?' mine':''}${reqIsBuyerMsg(m,me)?' del':''}${(x=>x?(x.status==='done'?' action-done':' action-msg'):/^⚡ Action needed/.test(m.body||'')?' action-msg':'')(_reqActs.find(x=>x.message_id===m.id&&x.status!=='cancelled'))}">${reqIsBuyerMsg(m,me)?`<button class="rq-msg-x" title="Remove this message${_reqActs.some(a=>a.message_id===m.id&&a.status==='open')?' (also cancels the action)':''}" onclick="deleteReqMsg('${m.id}')">✕</button>`:''}${m.body?esc(m.body):''}${reqMsgFilesHTML(m)}${reqActStatusHTML(m)}<small>${m.author===me?'You':esc(reqName(m.author))} · ${fmtEntryDate(m.created_at.slice(0,10),false)} ${m.created_at.slice(11,16)}</small></div>`).join(''):`<div style="font-size:.84rem;color:var(--text3)">No messages. Anything you post here shows on ${rep}'s request page.</div>`}</div>
       <div class="rq-reply" id="rqReplyBox">
         <button class="rq-attach" title="Attach files (or paste / drag them in) — saved to SharePoint" onclick="$('rqMsgFiles').click()">📎</button>
         <input type="file" id="rqMsgFiles" multiple class="hidden" onchange="reqMsgAdd(this.files);this.value=''">
-        ${emoBtnHTML('rqMsgText')}
         <textarea id="rqMsgText" placeholder="Reply to ${rep}… (paste or drop files here · Ctrl+Enter to send)"></textarea>
         <button class="btn" id="rqSendBtn" onclick="sendReqMsg('${id}')">Send</button></div>
       <div class="rq-pend" id="rqPend">${reqPendChips()}</div>
       ${open?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
         <div class="spacer" style="flex:1"></div>
         <button class="btn btn-ghost btn-sm" onclick="openReqNotify()" title="Email ${rep} about an update">🔔 Notify ${rep}</button>
-        <button class="btn btn-ghost btn-sm" onclick="openReqAct()" title="Ask ${rep} to do something before this can progress${oa?' — you can have several open at once':''}">⚡ Request ${oa?'another ':''}action</button>
+        ${oa?'':`<button class="btn btn-ghost btn-sm" onclick="openReqAct()" title="Ask ${rep} to do something before this can progress">⚡ Request action</button>`}
       </div>`:''}
     </div>`;
   }else{
@@ -6743,15 +6726,15 @@ async function refreshReqModal(noFetch){
       ${items.length===1&&items[0].name!==reqTitleText(r)?`<div><b>Request title</b><span>${esc(reqTitleText(r))}</span></div>`:''}
     </div>
     ${r.description?`<div class="rq-desc">${r.request_type==='Customer Service'?'<b>Query</b>\n':''}${esc(r.description)}</div>`:''}
-    ${reqIsCS(r)&&!items.length?'':`<div class="rq-sec" style="margin-bottom:0">
+    <div class="rq-sec" style="margin-bottom:0">
       <div class="section-title" style="display:flex;align-items:center;gap:8px">Item cards (${items.length})
         <span style="margin-left:auto;display:flex;gap:6px;text-transform:none;letter-spacing:0">
-          ${reqIsCS(r)?'':`<button class="btn btn-ghost btn-sm" onclick="openReqLink('${id}')" title="Attach an item card you've already been working on">🔗 Link existing</button>
-          ${open?`<button class="btn btn-sm" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}`}
+          <button class="btn btn-ghost btn-sm" onclick="openReqLink('${id}')" title="Attach an item card you've already been working on">🔗 Link existing</button>
+          ${open?`<button class="btn btn-sm" onclick="createItemFromRequest('${id}')">➕ Create item card</button>`:''}
         </span></div>
       ${items.length?`<div class="rq-links">${items.map(i=>`<div class="rq-link" onclick="closeReqModal();openDetail('${i.id}')"><span class="rq-ref">${esc(i.refCode||'')}</span><span style="flex:1">${esc(i.name)}</span>${stageBadge(i.stage)}${daysBadge(daysInactive(i),i.stage)}<button class="rq-unlink" title="Unlink from this request (the item card itself is kept)" onclick="event.stopPropagation();unlinkReqItem('${id}','${i.id}')">✕</button></div>`).join('')}</div>`
         :`<div style="font-size:.84rem;color:var(--text3)">None yet. A ticket can create several cards (e.g. one per bed), link existing ones, or be completed without one.</div>`}
-    </div>`}
+    </div>
     ${_reqNotifs.length?`<div class="rq-notes" style="margin-top:14px">${notifyHistoryHTML()}</div>`:''}`;
   }
   $('rqBody').innerHTML=html;
@@ -6763,12 +6746,10 @@ async function refreshReqModal(noFetch){
   if(_reqTab==='messages'){ wireReqMsgBox(); refreshSpStatus('request'); refreshSpStatus('media'); }
   $('rqFooter').innerHTML=open?`
       ${r.status==='New'?`<button class="btn btn-ghost" onclick="setReqStatus('${id}','Acknowledged'${r.assigned_to?'':`,{assigned_to:'${esc(me)}'}`})" title="Lets the rep know you've seen it${r.assigned_to?'':' and assigns it to you'}">✓ Acknowledge${r.assigned_to?'':' & take it'}</button>`:''}
-      <button class="btn btn-ghost" onclick="openReqEdit('${id}')" title="Fix the details on this request">✏️ Edit</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
       <div class="spacer"></div>
       <button class="btn" onclick="completeRequest('${id}')" title="Removes it from the open list">✔ Mark complete</button>`
     :`<button class="btn btn-ghost" onclick="setReqStatus('${id}','In Progress')">↺ Reopen</button>
-      <button class="btn btn-ghost" onclick="openReqEdit('${id}')" title="Fix the details on this request">✏️ Edit</button>
       <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRequest('${id}')" title="Permanently delete this request">🗑 Delete</button>
       <div class="spacer"></div><button class="btn btn-ghost" onclick="closeReqModal()">Close</button>`;
   reqHydrateThumbs();
@@ -6989,14 +6970,8 @@ async function sendReqMsg(id){
   }catch(e){ toast('Message failed: '+e.message,'error'); }
   if(btn){ btn.disabled=false; btn.textContent='Send'; }
 }
-// Customer Service: the original query (and its attachments) is the first message, so replies have context
-const reqIsCS=r=>r&&r.request_type==='Customer Service';
-function reqMsgList(r){
-  if(!reqIsCS(r)||!r.description) return _reqMsgs;
-  return [{id:'_q',_initial:true,author:r.requested_by,body:r.description,created_at:r.created_at},..._reqMsgs];
-}
 function reqMsgFilesHTML(m){
-  const fs=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>m._initial?(!f.message_id&&!f.shared_by_buyer&&!f.is_completion):f.message_id===m.id); if(!fs.length) return '';
+  const fs=_reqFiles.map((f,i)=>[f,i]).filter(([f])=>f.message_id===m.id); if(!fs.length) return '';
   return `<div class="rq-msg-files">${fs.map(([f,i])=>{
     const img=(f.is_image||reqIsImg(f))&&!reqIsVid(f);
     if(img) return `<div class="rq-msg-img" data-i="${i}" onclick="openReqFile(${i})" title="${esc(f.name)}">🖼️${f.sp_url?`<img src="${esc(spThumbUrl(f.sp_url))}" alt="" onerror="this.remove()">`:''}</div>`;
@@ -7004,99 +6979,6 @@ function reqMsgFilesHTML(m){
     return `<span class="rq-msg-file" onclick="openReqFile(${i})" title="${esc(f.name)}">${fileIconByName(f.name)}<span class="nm">${esc(f.name)}</span>${desk?`<a href="${esc(desk.href)}" onclick="event.stopPropagation()">🖥 ${desk.label}</a>`:''}</span>`;
   }).join('')}</div>`;
 }
-
-// ═══════════════════════════════════════
-// 😊 EMOJIS — picker for the message box + Teams-style reactions on messages
-// Same block lives in index.html and request.html · table: request_message_reactions
-// ═══════════════════════════════════════
-const EMO_QUICK=['👍','❤️','😆','😮','😢','🙏'];
-const EMO_SETS=[
-  ['😊','Smileys',['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😋','😛','😜','🤪','😝','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😮‍💨','😌','😔','😪','😴','😷','🤒','🤯','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','💀','🤡','👀']],
-  ['👍','Gestures',['👍','👎','👌','🤌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','👋','🤝','🙏','👏','🙌','👐','🤲','💪','✍️','🫡','🤷','🤦','🙋','🙇','💁','🙆','🙅']],
-  ['❤️','Hearts',['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝']],
-  ['🎉','Celebrate',['🎉','🎊','🥳','🎈','🎁','🏆','🥇','🥈','🥉','🏅','⭐','🌟','✨','💫','🔥','💯','🚀','👑','🍾','🥂','☕','🍰','🍕']],
-  ['📦','Work',['📦','🚚','🚢','✈️','🏭','🛏️','🛋️','🪑','🚪','🪞','🛒','🏷️','💷','💰','📈','📉','📊','🧾','📋','📝','✏️','📎','📌','📍','📁','📂','🗂️','📅','🗓️','⏰','⏳','📞','📧','💻','🖨️','🔍','🔧','🔨','📏','🧵','🎨','📸']],
-  ['✅','Symbols',['✅','☑️','✔️','❌','❎','⚠️','⛔','🚫','❗','❓','‼️','⁉️','💡','🔔','🔕','📣','💬','🗨️','💭','➕','➖','➡️','⬅️','⬆️','⬇️','🔄','🔁','🆕','🆗','🆙','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','⚡','🎯']]
-];
-let emoReacts=[];              // reactions on the open ticket's messages
-let _emoPickCb=null, _emoPickTab=0;
-const emoRecent=()=>{ try{ return JSON.parse(localStorage.getItem('emoRecent')||'[]'); }catch(e){ return []; } };
-function emoRemember(e){ try{ localStorage.setItem('emoRecent',JSON.stringify([e,...emoRecent().filter(x=>x!==e)].slice(0,16))); }catch(err){} }
-
-// ── The picker: one floating panel, opened next to whatever button was clicked ──
-function openEmoPicker(anchor,cb){
-  closeEmoPicker();
-  _emoPickCb=cb;
-  const el=document.createElement('div'); el.id='emoPick'; el.className='emo-pick';
-  el.addEventListener('mousedown',e=>e.stopPropagation());
-  el.addEventListener('click',e=>e.stopPropagation());
-  document.body.appendChild(el); emoPaintPicker();
-  const a=anchor.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight;
-  let top=a.top-h-6; if(top<8) top=Math.min(a.bottom+6,window.innerHeight-h-8);
-  let left=Math.min(Math.max(8,a.right-w),window.innerWidth-w-8);
-  el.style.top=Math.max(8,top)+'px'; el.style.left=left+'px';
-  setTimeout(()=>document.addEventListener('mousedown',closeEmoPicker,{once:true}),0);
-}
-function emoPaintPicker(){
-  const el=$('emoPick'); if(!el) return;
-  const rec=emoRecent();
-  const tabs=[...(rec.length?[['🕘','Recent',rec]]:[]),...EMO_SETS];
-  if(_emoPickTab>=tabs.length) _emoPickTab=0;
-  const [,label,list]=tabs[_emoPickTab];
-  el.innerHTML=`<div class="emo-tabs">${tabs.map(([ic,lb],i)=>`<button class="${i===_emoPickTab?'on':''}" title="${lb}" onclick="_emoPickTab=${i};emoPaintPicker()">${ic}</button>`).join('')}</div>`+
-    `<div class="emo-lbl">${label}</div><div class="emo-grid">${list.map(e=>`<button onclick="emoPick('${e}')">${e}</button>`).join('')}</div>`;
-}
-function emoPick(e){ const cb=_emoPickCb; emoRemember(e); closeEmoPicker(); if(cb) cb(e); }
-function closeEmoPicker(){ $('emoPick')?.remove(); _emoPickCb=null; }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('emoPick')){ e.stopPropagation(); closeEmoPicker(); } },true);
-
-// ── Message box: drop the emoji in where the cursor is ──
-function emoInsert(taId,e){
-  const ta=$(taId); if(!ta) return;
-  const s=ta.selectionStart??ta.value.length, en=ta.selectionEnd??s;
-  ta.value=ta.value.slice(0,s)+e+ta.value.slice(en);
-  ta.focus(); const p=s+e.length; ta.setSelectionRange(p,p);
-}
-const emoBtnHTML=taId=>`<button class="emo-btn" type="button" title="Add an emoji" onclick="openEmoPicker(this,e=>emoInsert('${taId}',e))">😊</button>`;
-
-// ── Reactions ──
-// Hover bar on a message: quick reactions, ☺+ for the full set, plus any extra buttons (e.g. ⚡ make it an action)
-function emoBarHTML(m,extra){
-  if(!m||m._initial||String(m.id).startsWith('_')) return '';
-  return `<div class="rx-bar" onclick="event.stopPropagation()">${EMO_QUICK.map(e=>`<button title="React with ${e}" onclick="emoToggle('${m.id}','${e}')">${e}</button>`).join('')}<button class="rx-more" title="More reactions" onclick="openEmoPicker(this,e=>emoToggle('${m.id}',e))">☺<b>+</b></button>${extra||''}</div>`;
-}
-// Chips under a message: 👍 2 — highlighted if you reacted, hover for who
-function emoRxHTML(m){
-  if(!m||m._initial||String(m.id).startsWith('_')) return '';
-  const me=EMO.me(), rs=emoReacts.filter(x=>x.message_id===m.id), order=[];
-  rs.forEach(x=>{ if(!order.includes(x.emoji)) order.push(x.emoji); });
-  return `<div class="rx-row" id="rx-${m.id}">${order.map(e=>{
-    const who=rs.filter(x=>x.emoji===e), mine=who.some(x=>x.author===me);
-    const names=who.map(x=>x.author===me?'You':EMO.name(x.author)).join(', ');
-    return `<button class="rx-chip${mine?' mine':''}" title="${esc(names)}${mine?' · click to remove yours':''}" onclick="event.stopPropagation();emoToggle('${m.id}','${e}')">${e}<b>${who.length}</b></button>`;
-  }).join('')}</div>`;
-}
-function emoPaint(msgId){ const el=$('rx-'+msgId); if(el) el.outerHTML=emoRxHTML({id:msgId}); }
-async function emoToggle(msgId,e){
-  const me=EMO.me(), reqId=EMO.reqId(); if(!me||!reqId) return;
-  const mine=emoReacts.find(x=>x.message_id===msgId&&x.emoji===e&&x.author===me);
-  if(mine){
-    if(String(mine.id).startsWith('tmp')) return;   // still saving
-    emoReacts=emoReacts.filter(x=>x!==mine); emoPaint(msgId);
-    try{ await EMO.del(`request_message_reactions?id=eq.${mine.id}`); }
-    catch(err){ emoReacts.push(mine); emoPaint(msgId); toast('Could not remove reaction: '+err.message,'error'); }
-  }else{
-    const tmp={id:'tmp'+Date.now(),message_id:msgId,request_id:reqId,emoji:e,author:me,created_at:new Date().toISOString()};
-    emoReacts.push(tmp); emoPaint(msgId); emoRemember(e);
-    try{ const [row]=await EMO.post('request_message_reactions',{message_id:msgId,request_id:reqId,emoji:e}); if(row) Object.assign(tmp,row); }
-    catch(err){ emoReacts=emoReacts.filter(x=>x!==tmp); emoPaint(msgId); toast('Could not react: '+err.message,'error'); }
-  }
-}
-const emoLoad=reqId=>SB.get(`request_message_reactions?request_id=eq.${reqId}&select=*&order=created_at.asc`).catch(()=>[]);
-const EMO={me:()=>(getStoredSession()?.user?.email||'').toLowerCase(),name:e=>reqName(e),reqId:()=>reqOpenId,post:(p,b)=>SB.post(p,b),del:p=>SB.delete(p)};
-// ⚡ on a message you've already sent → turn it into an action (only if it isn't one already)
-const reqMsgActBtn=(m,me)=>!m._initial&&reqIsBuyerMsg(m,me)&&!_reqActs.some(a=>a.message_id===m.id&&a.status!=='cancelled')
-  ?`<button class="rx-act" title="Turn this message into an action for the requester" onclick="openReqAct('${m.id}')">⚡ Action</button>`:'';
 
 // ── 🔔 Email the requester an update ──
 const NOTIFY_LABEL={message:'New message',timeline:'Timeline update',file:'New file uploaded',action:'Action needed'};
@@ -7128,42 +7010,34 @@ async function sendReqNotify(){
 }
 
 // ── ⚡ Request an action from the requester ──
-let _raPending=[], _raFromMsg=null;
+let _raPending=[];
 function raChips(){ return _raPending.map((f,i)=>`<span>${fileIconByName(f.name)} ${esc(f.name)} <button onclick="_raPending.splice(${i},1);$('raPend').innerHTML=raChips()">✕</button></span>`).join(''); }
 function raAdd(list){ [...list].forEach(f=>{ if(f.size>50*1048576){ toast(f.name+' is over 50 MB','error'); return; } _raPending.push(f); }); $('raPend').innerHTML=raChips(); }
-function openReqAct(fromMsgId){
+function openReqAct(){
   const r=reqData.find(x=>x.id===reqOpenId); if(!r) return;
-  const src=fromMsgId?_reqMsgs.find(m=>m.id===fromMsgId):null;
-  if(fromMsgId&&!src){ toast('Message not found — refresh and try again','error'); return; }
-  if(src&&_reqActs.some(a=>a.message_id===src.id&&a.status!=='cancelled')){ toast('That message is already an action','error'); return; }
-  _raFromMsg=src?src.id:null;
-  _raPending=[]; $('raPend').innerHTML=''; $('raIns').value=src?(src.body||'').replace(/^⚡ Action needed:\s*/,''):'';
-  $('raTitle').textContent=src?'⚡ Turn message into an action':'⚡ Request action';
+  if(reqOpenAction(r.id)){ toast(`There's already an open action — cancel it first`,'error'); return; }
+  _raPending=[]; $('raPend').innerHTML=''; $('raIns').value='';
   $('raSub').textContent=`For ${reqName(r.requested_by)} on ${reqDisplayRef(r,reqItemsFor(r.id))} · ${reqTitleText(r)}`;
   $('raEmailNote').innerHTML=`📧 ${esc(reqName(r.requested_by))} is emailed automatically and sees <b>⚡ Action needed</b> at the top of the ticket until they mark it done.`;
-  const nOpen=reqOpenActions.filter(a=>a.request_id===r.id&&a.status==='open').length;
-  if(nOpen) $('raEmailNote').innerHTML+=`<br>ℹ️ ${nOpen} action${nOpen>1?'s are':' is'} already open on this ticket — this one is added alongside.`;
-  if(src) $('raEmailNote').innerHTML+=`<br>💬 The message stays where it is in the chat and gets the tick box — nothing new is posted.`;
-  $('raSaveBtn').disabled=false; $('raSaveBtn').textContent=src?'⚡ Make it an action':'⚡ Send action';
+  $('raSaveBtn').disabled=false; $('raSaveBtn').textContent='⚡ Send action';
   $('reqActOverlay').classList.remove('hidden');
   setTimeout(()=>$('raIns').focus(),50);
 }
-function closeReqAct(){ $('reqActOverlay')?.classList.add('hidden'); _raFromMsg=null; }
+function closeReqAct(){ $('reqActOverlay')?.classList.add('hidden'); }
 async function saveReqAct(){
   const id=reqOpenId; const r=reqData.find(x=>x.id===id); if(!r) return;
   const ins=$('raIns').value.trim(); if(!ins){ toast('Say what they need to do','error'); return; }
   const due=null, files=[..._raPending];
   if(!(await reqSpReady(files))) return;
-  const btn=$('raSaveBtn'), fromMsg=_raFromMsg, idle=fromMsg?'⚡ Make it an action':'⚡ Send action';
-  btn.disabled=true; btn.textContent=files.length?'Saving files…':'Sending…';
+  const btn=$('raSaveBtn'); btn.disabled=true; btn.textContent=files.length?'Saving files…':'Sending…';
   try{
-    // 1) post it in the chat (with any files) — or reuse the message it came from, 2) create the action → the database emails them
-    const [m]=fromMsg?[{id:fromMsg}]:await SB.post('request_messages',{request_id:id,body:`⚡ Action needed: ${ins}${due?`\nDue by ${fmtEntryDate(due,true)}`:''}`});
+    // 1) post it in the chat (with any files), 2) create the action → the database emails them
+    const [m]=await SB.post('request_messages',{request_id:id,body:`⚡ Action needed: ${ins}${due?`\nDue by ${fmtEntryDate(due,true)}`:''}`});
     if(files.length) await reqSaveFilesToSp(r,files,m.id);
     await SB.post('request_actions',{request_id:id,instruction:ins,due_date:due,message_id:m.id});
     closeReqAct(); await loadRequests(); await refreshReqModal();
     toast(`⚡ Action sent — ${reqName(r.requested_by)} has been emailed`);
-  }catch(e){ btn.disabled=false; btn.textContent=idle; toast('Could not send action: '+e.message,'error'); }
+  }catch(e){ btn.disabled=false; btn.textContent='⚡ Send action'; toast('Could not send action: '+e.message,'error'); }
 }
 function cancelReqAct(actionId){
   confirmAction('Cancel this action?','It disappears from the requester\'s page. No email is sent.',async()=>{
@@ -7257,6 +7131,402 @@ function startBCBackgroundSync(){
   setInterval(runBCBackgroundSync, 5 * 60 * 1000);
 }
 
+// ═══════════════════════════════════════
+// EMAIL UPDATES — supplier emails on threads whose subject carries a tracker ref code.
+// Power Automate posts each email to rpc/ingest_email; the database strips quoted history,
+// builds a short preview and links it to the item. Lists only ever load previews (egress);
+// full bodies are fetched on demand when you expand or summarise.
+// ═══════════════════════════════════════
+const COPILOT_URL='https://m365.cloud.microsoft/chat';
+const EMAIL_LIST_COLS='id,item_id,ref_code,status,direction,subject,from_name,from_email,to_emails,received_at,preview,conversation_id,has_attachments,match_method,processed_at,processed_by,suggested_summary,suggestion_dismissed';
+let emailNew=[], emailHandled=null, _emailAvailable=true, _lastKnownEmailTs=null, _emailTick=0, _emailKnownIds=null;
+let _emailView='new', emailSugg=[];
+const _emSel={}, _emBodies={}, _emOpen=new Set(), _emComp={};
+let _emItemCache={}; // itemId → all emails for that item (item tab)
+
+async function loadEmails(silent=false){
+  if(!_emailAvailable) return;
+  try{
+    if(silent && _lastKnownEmailTs!==null){
+      const ts=(await newestUpdatedAt('email_updates'))||'';
+      if(ts===_lastKnownEmailTs) return; // nothing changed
+    }
+    const rows=await SB.get(`email_updates?select=${EMAIL_LIST_COLS},updated_at&status=eq.new&order=received_at.asc&limit=1000`);
+    emailNew=rows||[];
+    _lastKnownEmailTs=(await newestUpdatedAt('email_updates'))||'';
+    if(_emailKnownIds){
+      const fresh=emailNew.filter(e=>!_emailKnownIds.has(e.id)&&e.direction==='in');
+      if(fresh.length===1){ const e=fresh[0]; toast(`✉️ ${e.ref_code?e.ref_code+' · ':''}${e.from_name||e.from_email||'New email'}: ${e.subject||''}`); }
+      else if(fresh.length>1) toast(`✉️ ${fresh.length} new supplier emails`);
+    }
+    _emailKnownIds=new Set(emailNew.map(e=>e.id));
+    emailNew.forEach(e=>{ if(_emSel[e.id]===undefined) _emSel[e.id]=true; });
+    _emItemCache={};
+    emailHandled=null;
+    $('emailPageBtn')?.classList.remove('hidden');
+    updateEmailBadge();
+    if(typeof currentPage==='undefined'||currentPage==='main') renderTable();
+    if(currentPage==='emails') renderEmailsPage();
+    if(currentItemId && currentTab==='emails' && !$('detailOverlay').classList.contains('hidden')){
+      const it=data.find(i=>i.id===currentItemId); if(it) renderEmailsTab(it);
+    }
+  }catch(e){
+    if(/PGRST20[25]|does not exist|42P01|404/.test(e.message)){ _emailAvailable=false; $('emailPageBtn')?.classList.add('hidden'); }
+    else console.warn('loadEmails:',e.message);
+  }
+}
+
+const emailNewCount=itemId=>emailNew.filter(e=>e.item_id===itemId).length;
+function emailChip(itemId){
+  const n=emailNewCount(itemId); if(!n) return '';
+  return `<span class="em-chip" title="${n} new supplier email${n>1?'s':''} — click to review" onclick="event.stopPropagation();openDetail('${itemId}','emails')">✉️ ${n}</span>`;
+}
+
+function updateEmailBadge(){
+  const n=emailNew.length;
+  const b=$('emailNotifBadge'); if(b){ b.textContent=n; b.classList.toggle('show',n>0); }
+  const bn=$('emailBanner'); if(!bn) return;
+  if(!n){ bn.classList.add('hidden'); return; }
+  const items=new Set(emailNew.filter(e=>e.item_id).map(e=>e.item_id)).size;
+  const unmatched=emailNew.filter(e=>!e.item_id).length;
+  const oldest=emailNew.reduce((m,e)=>e.received_at<m?e.received_at:m,emailNew[0].received_at);
+  const stale=reqDays(oldest)>=3;
+  const parts=[`<b>${n} new supplier email${n>1?'s':''}</b>${items?` across ${items} item${items>1?'s':''}`:''}`];
+  const nSug=emailNew.filter(emailHasSugg).length;
+  if(nSug) parts.push(`<b>✨ ${nSug} suggested update${nSug>1?'s':''} ready</b>`);
+  if(unmatched) parts.push(`${unmatched} unmatched`);
+  if(stale) parts.push(`<b style="color:var(--red)">oldest ${reqDays(oldest)} days</b>`);
+  bn.className='req-banner';
+  bn.innerHTML=`<span>✉️ ${parts.join(' · ')}</span><div class="spacer"></div><button class="btn btn-sm" onclick="showPage('emails')">View emails</button>`;
+}
+
+function setEmailView(v){
+  _emailView=v;
+  document.querySelectorAll('#emailStatusSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  if(v==='handled' && emailHandled===null){
+    $('emailList').innerHTML='<div class="em-hint" style="padding:20px">Loading…</div>';
+    SB.get(`email_updates?select=${EMAIL_LIST_COLS}&status=neq.new&order=received_at.desc&limit=150`)
+      .then(r=>{ emailHandled=r||[]; renderEmailsPage(); })
+      .catch(e=>{ emailHandled=[]; toast('Could not load handled emails: '+e.message,'error'); renderEmailsPage(); });
+    return;
+  }
+  renderEmailsPage();
+}
+
+function emailWhen(iso){
+  if(!iso) return '';
+  const d=new Date(iso), now=new Date();
+  const time=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  if(d.toDateString()===now.toDateString()) return time;
+  const days=Math.round((now-d)/86400000);
+  if(days<7) return d.toLocaleDateString([], {weekday:'short'})+' '+time;
+  return d.toLocaleDateString([], {day:'2-digit',month:'short'});
+}
+
+function emailMatches(e,q){
+  if(!q) return true;
+  const it=e.item_id?data.find(i=>i.id===e.item_id):null;
+  return [e.ref_code,e.subject,e.from_name,e.from_email,e.preview,it?.name,it?.supplier].some(v=>(v||'').toLowerCase().includes(q));
+}
+
+function groupEmails(list){
+  const groups={};
+  list.forEach(e=>{ const k=e.item_id||'unmatched'; (groups[k]=groups[k]||[]).push(e); });
+  return groups;
+}
+
+function renderEmailsPage(){
+  const wrap=$('emailList'); if(!wrap) return;
+  const q=($('emailSearch')?.value||'').trim().toLowerCase();
+  const handled=_emailView==='handled';
+  if(handled && emailHandled===null){ setEmailView('handled'); return; }
+  const list=(handled?emailHandled:emailNew).filter(e=>emailMatches(e,q));
+  const groups=groupEmails(list);
+  const keys=Object.keys(groups).filter(k=>k!=='unmatched');
+  // newest activity first
+  keys.sort((a,b)=>{ const la=groups[a][groups[a].length-1].received_at, lb=groups[b][groups[b].length-1].received_at; return lb.localeCompare(la); });
+  if(groups.unmatched) keys.push('unmatched');
+  $('emailPageSub').textContent=handled?`${list.length} handled (latest 150)`:`${emailNew.length} new · ${new Set(emailNew.filter(e=>e.item_id).map(e=>e.item_id)).size} items`;
+  $('emailEmpty').classList.toggle('hidden',keys.length>0);
+  if(handled){ list.sort((a,b)=>b.received_at.localeCompare(a.received_at)); }
+  wrap.innerHTML=keys.map(k=>emailGroupHTML(k,groups[k].slice().sort((a,b)=>a.received_at.localeCompare(b.received_at)),{handled})).join('');
+}
+
+// One card per item (or the unmatched bucket). opts.inTab = rendered inside the item modal.
+function emailGroupHTML(key,emails,opts={}){
+  const unmatched=key==='unmatched';
+  const item=unmatched?null:data.find(i=>i.id===key);
+  const gid=(opts.inTab?'t-':'p-')+key;
+  const newOnes=emails.filter(e=>e.status==='new');
+  const selected=newOnes.filter(e=>_emSel[e.id]!==false);
+  const canAct=!VIEW_ONLY && newOnes.length>0;
+  const sugN=unmatched?0:newOnes.filter(emailHasSugg).length;
+  const sumBtn='btn btn-ghost btn-sm', sumLbl='Copilot';
+  const accAll=(canAct&&sugN)?`<button class="btn btn-sm" onclick="emailAcceptAll('${key}')" title="Adds one timeline entry per email, dated when each email arrived">✓ Accept ${sugN>1?`all ${sugN}`:'suggestion'}</button>`:'';
+  let head='';
+  if(!opts.inTab){
+    const title=unmatched?'Unmatched emails':(item?esc(item.name):'Item not found');
+    const sub=unmatched
+      ?`<span>No tracker ref code found — assign them to an item or dismiss</span>`
+      :`${item?.refCode?`<span class="em-ref">${esc(item.refCode)}</span>`:''}<span>${esc(item?.supplier||'')}</span>${item?stageBadge(item.stage):''}<span>${emails.length} email${emails.length>1?'s':''}</span>`;
+    head=`<div class="em-ghead">
+      <div style="flex:1;min-width:0"><div class="em-gtitle">${unmatched?'❔ ':''}${title}</div><div class="em-gsub">${sub}</div></div>
+      ${accAll}
+      ${canAct&&!unmatched?`<button class="${sumBtn}" onclick="emailSummarise('${gid}','${key}')" title="Copies a ready-made prompt + the selected emails, then opens Copilot">${sumLbl}</button>`:''}
+      ${canAct&&!unmatched?`<button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>`:''}
+      ${canAct?`<button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')" title="Mark the selected emails as not needing a timeline update">Dismiss${selected.length>1?' selected':''}</button>`:''}
+      ${item?`<button class="btn btn-ghost btn-sm" onclick="openDetail('${item.id}','emails')">Open item</button>`:''}
+    </div>`;
+  } else if(canAct){
+    head=`<div class="em-ghead">
+      <div class="em-gsub" style="flex:1">${newOnes.length} new · ${emails.length-newOnes.length} handled</div>
+      ${accAll}
+      <button class="${sumBtn}" onclick="emailSummarise('${gid}','${key}')">${sumLbl}</button>
+      <button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>
+      <button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')">Dismiss${selected.length>1?' selected':''}</button>
+    </div>`;
+  }
+  const rows=emails.map(e=>emailRowHTML(e,{unmatched,canAct:!VIEW_ONLY,inTab:opts.inTab})).join('');
+  const comp=_emComp[gid]?emailComposerHTML(gid,key):'';
+  return `<div class="em-group${unmatched?' unmatched':''}" id="emg-${gid}">${head}${rows}${comp}</div>`;
+}
+
+function emailRowHTML(e,o){
+  const isNew=e.status==='new';
+  const open=_emOpen.has(e.id);
+  const who=e.direction==='out'?`↗ You → ${esc(e.to_emails||'')}`:`↙ ${esc(e.from_name||'')}${e.from_email?` &lt;${esc(e.from_email)}&gt;`:''}`;
+  const status=isNew?'':`<span class="em-status">${e.status==='processed'?'✓ On timeline':'Dismissed'}</span>`;
+  let acts='';
+  if(o.canAct && isNew){
+    if(o.unmatched){
+      const opts=data.filter(i=>!i.archived).sort((a,b)=>a.name.localeCompare(b.name))
+        .map(i=>`<option value="${i.id}">${esc(i.refCode?i.refCode+' — ':'')}${esc(i.name)}</option>`).join('');
+      acts=`<select class="em-assign" onchange="emailAssign('${e.id}',this.value)"><option value="">Assign to item…</option>${opts}</select>
+        <button class="btn btn-ghost btn-xs" onclick="emailSetStatus(['${e.id}'],'dismissed')">Dismiss</button>`;
+    }else{
+      acts=`<button class="btn btn-ghost btn-xs" onclick="emailSummariseOne('${e.id}')" title="Summarise just this email">✨</button>`;
+    }
+  } else if(o.canAct && !isNew){
+    acts=`<button class="btn btn-ghost btn-xs" onclick="emailSetStatus(['${e.id}'],'new')" title="Move back to New">↺</button>`;
+  }
+  const body=open?`<div class="em-body">${_emBodies[e.id]===undefined?'Loading…':esc(_emBodies[e.id]||'(no text — the body may have been archived after 90 days)')}</div>`:'';
+  return `<div class="em-row${isNew?'':' done'}">
+    ${isNew&&o.canAct&&!o.unmatched?`<input type="checkbox" ${_emSel[e.id]!==false?'checked':''} onchange="_emSel['${e.id}']=this.checked;emailRerender()" title="Include in summary / timeline update">`:'<span style="width:13px"></span>'}
+    <div class="em-main" onclick="emailToggle('${e.id}')">
+      <div class="em-line1"><span class="em-subj">${e.has_attachments?'📎 ':''}${esc(e.subject||'(no subject)')}</span>${status}<span class="em-when" title="${esc(new Date(e.received_at).toLocaleString())}">${emailWhen(e.received_at)}</span></div>
+      <div class="em-from">${who}${e.match_method==='thread'?' · matched by thread':''}${o.unmatched&&e.ref_code?` · code ${esc(e.ref_code)} not on any item`:''}</div>
+      ${open?'':`<div class="em-prev">${esc(e.preview||'')}</div>`}
+      ${body}
+      ${isNew&&!o.unmatched?emailSuggLine(e,o.canAct):''}
+    </div>
+    <div class="em-acts">${acts}</div>
+  </div>`;
+}
+
+function emailComposerHTML(gid,key){
+  const c=_emComp[gid];
+  return `<div class="em-comp">
+    <textarea id="emc-${gid}" placeholder="Paste Copilot's summary here, or type the update…" oninput="_emComp['${gid}'].text=this.value">${esc(c.text||'')}</textarea>
+    <div class="em-crow">
+      <input type="date" id="emd-${gid}" value="${c.date||todayISO()}" onchange="_emComp['${gid}'].date=this.value">
+      <button class="btn btn-sm" onclick="emailSaveTimeline('${gid}','${key}')">Save to timeline</button>
+      <button class="btn btn-ghost btn-sm" onclick="delete _emComp['${gid}'];emailRerender()">Cancel</button>
+      ${c.copied?`<span class="em-hint">📋 Prompt copied — <a href="${COPILOT_URL}" target="_blank" rel="noopener" style="color:var(--accent2)">open Copilot</a>, press Ctrl+V then Enter, and paste the reply above.</span>`:''}
+      <span class="em-hint" style="margin-left:auto">Saves as a ✉️ timeline entry and marks ${emailSelectedIds(key).length} email(s) as done</span>
+    </div>
+  </div>`;
+}
+
+function emailRerender(){
+  // keep any half-typed composer text
+  document.querySelectorAll('.em-comp textarea').forEach(t=>{ const g=t.id.slice(4); if(_emComp[g]) _emComp[g].text=t.value; });
+  if(currentPage==='emails') renderEmailsPage();
+  if(currentItemId && currentTab==='emails' && !$('detailOverlay').classList.contains('hidden')){
+    const it=data.find(i=>i.id===currentItemId); if(it) renderEmailsTab(it,true);
+  }
+}
+
+function emailSelectedIds(key){
+  const pool=emailNew.filter(e=>(e.item_id||'unmatched')===key);
+  return pool.filter(e=>_emSel[e.id]!==false).map(e=>e.id);
+}
+
+async function emailFetchBodies(ids){
+  const need=ids.filter(id=>_emBodies[id]===undefined);
+  if(need.length){
+    const rows=await SB.get(`email_updates?select=id,body&id=in.(${need.join(',')})`);
+    (rows||[]).forEach(r=>{ _emBodies[r.id]=r.body||''; });
+  }
+}
+
+async function emailToggle(id){
+  if(_emOpen.has(id)){ _emOpen.delete(id); emailRerender(); return; }
+  _emOpen.add(id); emailRerender();
+  try{ await emailFetchBodies([id]); }catch(e){ _emBodies[id]='Could not load: '+e.message; }
+  emailRerender();
+}
+
+function emailOpenComposer(gid,key,extra){
+  if(!emailSelectedIds(key).length){ toast('Tick at least one email first','error'); return; }
+  _emComp[gid]=Object.assign({text:'',date:todayISO()},_emComp[gid]||{},extra||{});
+  emailRerender();
+  setTimeout(()=>$('emc-'+gid)?.focus(),0);
+}
+
+function emailPrompt(item,emails){
+  const head=`Summarise these supplier emails about ${item?.refCode||''} (${item?.name||'item'}${item?.supplier?`, supplier ${item.supplier}`:''}) into ONE short update for our buying tracker timeline.
+Rules: max 2 sentences; start with the supplier name; include any prices, MOQs, quantities, dates, tracking numbers, and anything we need to action. Reply with the update text only — no preamble, no bullet points.`;
+  const blocks=emails.map((e,i)=>`=== EMAIL ${i+1} — ${new Date(e.received_at).toLocaleString('en-GB')} — ${e.direction==='out'?'Sent by us':`From: ${e.from_name||''} <${e.from_email||''}>`} — Subject: ${e.subject||''} ===
+${(_emBodies[e.id]||e.preview||'').trim()}`);
+  return head+'\n\n'+blocks.join('\n\n');
+}
+
+async function emailCopyAndOpen(text){
+  let copied=false;
+  try{ await navigator.clipboard.writeText(text); copied=true; }
+  catch(e){
+    // fallback for browsers that block async clipboard
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try{ copied=document.execCommand('copy'); }catch(_){} ta.remove();
+  }
+  if(!copied){ toast('Could not copy to clipboard','error'); return false; }
+  const w=window.open(COPILOT_URL,'_blank','noopener');
+  toast(w===null?'Prompt copied — use the "open Copilot" link':'Prompt copied — paste it into Copilot with Ctrl+V');
+  return true;
+}
+
+async function emailSummarise(gid,key){
+  const ids=emailSelectedIds(key);
+  if(!ids.length){ toast('Tick at least one email first','error'); return; }
+  const item=data.find(i=>i.id===key);
+  const emails=emailNew.filter(e=>ids.includes(e.id)).sort((a,b)=>a.received_at.localeCompare(b.received_at));
+  try{ await emailFetchBodies(ids); }catch(e){ toast('Could not load email text: '+e.message,'error'); return; }
+  const ok=await emailCopyAndOpen(emailPrompt(item,emails));
+  emailOpenComposer(gid,key,{copied:ok});
+}
+
+async function emailSummariseOne(id){
+  const e=emailNew.find(x=>x.id===id); if(!e) return;
+  const key=e.item_id||'unmatched';
+  // select only this email in its group
+  emailNew.filter(x=>(x.item_id||'unmatched')===key).forEach(x=>{ _emSel[x.id]=x.id===id; });
+  const gid=(currentPage==='emails'&&$('detailOverlay').classList.contains('hidden')?'p-':'t-')+key;
+  await emailSummarise(gid,key);
+}
+
+async function emailSaveTimeline(gid,key){
+  const item=data.find(i=>i.id===key); if(!item){ toast('Item not found','error'); return; }
+  const raw=($('emc-'+gid)?.value||'').trim();
+  if(!raw){ toast('Paste or type the update first','error'); return; }
+  const ids=emailSelectedIds(key);
+  if(!ids.length){ toast('Tick at least one email first','error'); return; }
+  const date=$('emd-'+gid)?.value||todayISO();
+  const sid=_emComp[gid]?.suggestionId||null;
+  if(await emailCommitTimeline(item,raw,date,ids,sid)) delete _emComp[gid];
+  await loadEmails();
+}
+
+// Shared: write a ✉️ timeline entry, mark the emails done, and close the suggestion if there was one
+async function emailCommitTimeline(item,text,date,ids,suggestionId){
+  const note=text.startsWith('✉️')?text:'✉️ '+text;
+  const s=getStoredSession(); const by=s?.user?.email||'';
+  const id=newId(), now=new Date().toISOString();
+  try{
+    const res=await SB.post('timeline_entries',{id,item_id:item.id,date,note,created_by:by});
+    if(!res||(Array.isArray(res)&&!res.length)){ toast('Entry blocked by database','error'); return false; }
+    item.timeline=item.timeline||[];
+    item.timeline.push({id,date,note,createdBy:by,createdAt:now});
+    await SB.patch(`items?id=eq.${item.id}`,{updated_at:now});
+    if(ids.length) await SB.patch(`email_updates?id=in.(${ids.join(',')})&status=eq.new`,{status:'processed',processed_at:now,processed_by:by,timeline_entry_id:id});
+    if(suggestionId) await SB.patch(`email_suggestions?id=eq.${suggestionId}`,{status:'accepted',decided_at:now,decided_by:by,timeline_entry_id:id});
+    toast(`Added to ${item.refCode||item.name} timeline`);
+    render(); if(currentItemId===item.id) refreshDetailHeader();
+    return true;
+  }catch(e){ toast('Failed to save: '+e.message,'error'); return false; }
+}
+
+const emailHasSugg=e=>e.status==='new'&&!!e.suggested_summary&&!e.suggestion_dismissed;
+const _emEditing=new Set();
+const emailLocalDate=iso=>{ const d=new Date(iso); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+function emailSuggLine(e,canAct){
+  if(_emEditing.has(e.id)) return `<div class="em-sline" onclick="event.stopPropagation()">✨ <input class="em-sedit" id="ems-${e.id}" value="${esc(e.suggested_summary||'')}" placeholder="Short update for the timeline…" onkeydown="if(event.key==='Enter')emailAcceptOne('${e.id}',this.value);if(event.key==='Escape'){_emEditing.delete('${e.id}');emailRerender()}">
+    <button class="btn btn-xs" onclick="emailAcceptOne('${e.id}',$('ems-${e.id}').value)">Save</button>
+    <button class="btn btn-ghost btn-xs" onclick="_emEditing.delete('${e.id}');emailRerender()">Cancel</button></div>`;
+  if(!emailHasSugg(e)){
+    if(e.suggestion_dismissed||!canAct) return '';
+    return `<div class="em-sline muted" onclick="event.stopPropagation()">✨ <span class="em-hint">Suggestion on the next hourly run</span> <button class="btn btn-ghost btn-xs" onclick="emailEditOne('${e.id}')" title="Write the timeline line yourself">✎ Write</button></div>`;
+  }
+  return `<div class="em-sline" onclick="event.stopPropagation()">✨ <span class="em-stxt">${esc(e.suggested_summary)}</span>${canAct?`
+    <button class="btn btn-xs" onclick="emailAcceptOne('${e.id}')" title="Add to timeline, dated ${fmtShort(emailLocalDate(e.received_at))}">✓</button>
+    <button class="btn btn-ghost btn-xs" onclick="emailEditOne('${e.id}')" title="Edit before adding">✎</button>
+    <button class="btn btn-ghost btn-xs" onclick="emailDismissOne('${e.id}')" title="Don't add this one to the timeline">✕</button>`:''}</div>`;
+}
+function emailEditOne(id){
+  const e=emailNew.find(x=>x.id===id); if(!e) return;
+  _emEditing.add(id); emailRerender();
+  setTimeout(()=>{ const t=$('ems-'+id); if(t){ t.focus(); t.setSelectionRange(t.value.length,t.value.length); } },0);
+}
+// One timeline entry per email, each dated the day that email arrived
+async function emailCommitEach(item,list){
+  const s=getStoredSession(); const by=s?.user?.email||''; let done=0;
+  try{
+    for(const {e,text} of list){
+      const note='✉️ '+text.replace(/^✉️\s*/,'');
+      const id=newId(), date=emailLocalDate(e.received_at), now=new Date().toISOString();
+      const res=await SB.post('timeline_entries',{id,item_id:item.id,date,note,created_by:by});
+      if(!res||(Array.isArray(res)&&!res.length)){ toast('Entry blocked by database','error'); break; }
+      item.timeline=item.timeline||[]; item.timeline.push({id,date,note,createdBy:by,createdAt:now});
+      await SB.patch(`email_updates?id=eq.${e.id}&status=eq.new`,{status:'processed',processed_at:now,processed_by:by,timeline_entry_id:id,suggested_summary:text});
+      done++;
+    }
+    if(done){ await SB.patch(`items?id=eq.${item.id}`,{updated_at:new Date().toISOString()});
+      toast(`Added ${done} update${done>1?'s':''} to ${item.refCode||item.name}`); render(); if(currentItemId===item.id) refreshDetailHeader(); }
+  }catch(err){ toast('Failed to save: '+err.message,'error'); }
+  return done;
+}
+async function emailAcceptOne(id,text){
+  const e=emailNew.find(x=>x.id===id); if(!e) return;
+  const t=(text!==undefined?text:e.suggested_summary||'').trim();
+  if(!t){ toast('Type a short update first','error'); return; }
+  const item=data.find(i=>i.id===e.item_id); if(!item){ toast('Item not found','error'); return; }
+  _emEditing.delete(id);
+  await emailCommitEach(item,[{e,text:t}]);
+  await loadEmails();
+}
+async function emailAcceptAll(key){
+  const item=data.find(i=>i.id===key); if(!item) return;
+  const list=emailNew.filter(e=>e.item_id===key&&emailHasSugg(e)&&_emSel[e.id]!==false)
+    .sort((a,b)=>a.received_at.localeCompare(b.received_at)).map(e=>({e,text:e.suggested_summary}));
+  if(!list.length){ toast('No ticked emails have a suggestion yet','error'); return; }
+  await emailCommitEach(item,list);
+  await loadEmails();
+}
+async function emailDismissOne(id){
+  try{ await SB.patch(`email_updates?id=eq.${id}`,{suggestion_dismissed:true}); await loadEmails(); }
+  catch(e){ toast('Failed: '+e.message,'error'); }
+}
+
+// Item modal tab: every email for this item (new + handled), newest thread activity last
+async function renderEmailsTab(item,fromCache){
+  const body=$('detailBody'); const footer=$('detailFooter');
+  if(footer) footer.innerHTML='';
+  if(!fromCache || !_emItemCache[item.id]){
+    body.innerHTML='<div class="em-hint" style="padding:16px 0">Loading emails…</div>';
+    try{
+      _emItemCache[item.id]=await SB.get(`email_updates?select=${EMAIL_LIST_COLS}&item_id=eq.${item.id}&order=received_at.asc&limit=200`)||[];
+    }catch(e){ body.innerHTML=`<div style="padding:20px;color:var(--red);font-size:.875rem">⚠ Could not load emails: ${esc(e.message)}</div>`; return; }
+    if(currentItemId!==item.id||currentTab!=='emails') return;
+  }
+  const list=_emItemCache[item.id];
+  list.forEach(e=>{ if(e.status==='new'&&_emSel[e.id]===undefined) _emSel[e.id]=true; });
+  if(!list.length){
+    body.innerHTML=`<div style="color:var(--text3);font-size:.875rem;padding:12px 0;line-height:1.6">No emails yet.<br>Any email whose subject includes <span class="em-ref">${esc(item.refCode||'the ref code')}</span> will show up here automatically.</div>`;
+    return;
+  }
+  // keep emailNew rows in sync with the cache (selection state uses emailNew)
+  body.innerHTML=emailGroupHTML(item.id,list,{inTab:true});
+}
+
 let VIEW_ONLY=false;
 async function bootApp(){
   // Sales reps have their own page; this tracker is buyers-only (enforced by RLS too)
@@ -7276,6 +7546,7 @@ async function bootApp(){
   loadAirmail();
   Promise.all([loadTodo(), loadReports()]).then(()=>updateNotifBadge());
   loadRequests();
+  loadEmails();
   startAutoRefresh();
 }
 
