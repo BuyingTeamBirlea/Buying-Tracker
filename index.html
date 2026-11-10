@@ -7137,7 +7137,6 @@ function startBCBackgroundSync(){
 // builds a short preview and links it to the item. Lists only ever load previews (egress);
 // full bodies are fetched on demand when you expand or summarise.
 // ═══════════════════════════════════════
-const COPILOT_URL='https://m365.cloud.microsoft/chat';
 const EMAIL_LIST_COLS='id,item_id,ref_code,status,direction,subject,from_name,from_email,to_emails,received_at,preview,conversation_id,has_attachments,match_method,processed_at,processed_by,suggested_summary,suggestion_dismissed';
 let emailNew=[], emailHandled=null, _emailAvailable=true, _lastKnownEmailTs=null, _emailTick=0, _emailKnownIds=null;
 let _emailView='new', emailSugg=[];
@@ -7261,7 +7260,6 @@ function emailGroupHTML(key,emails,opts={}){
   const selected=newOnes.filter(e=>_emSel[e.id]!==false);
   const canAct=!VIEW_ONLY && newOnes.length>0;
   const sugN=unmatched?0:newOnes.filter(emailHasSugg).length;
-  const sumBtn='btn btn-ghost btn-sm', sumLbl='Copilot';
   const accAll=(canAct&&sugN)?`<button class="btn btn-sm" onclick="emailAcceptAll('${key}')" title="Adds one timeline entry per email, dated when each email arrived">✓ Accept ${sugN>1?`all ${sugN}`:'suggestion'}</button>`:'';
   let head='';
   if(!opts.inTab){
@@ -7272,7 +7270,6 @@ function emailGroupHTML(key,emails,opts={}){
     head=`<div class="em-ghead">
       <div style="flex:1;min-width:0"><div class="em-gtitle">${unmatched?'❔ ':''}${title}</div><div class="em-gsub">${sub}</div></div>
       ${accAll}
-      ${canAct&&!unmatched?`<button class="${sumBtn}" onclick="emailSummarise('${gid}','${key}')" title="Copies a ready-made prompt + the selected emails, then opens Copilot">${sumLbl}</button>`:''}
       ${canAct&&!unmatched?`<button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>`:''}
       ${canAct?`<button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')" title="Mark the selected emails as not needing a timeline update">Dismiss${selected.length>1?' selected':''}</button>`:''}
       ${item?`<button class="btn btn-ghost btn-sm" onclick="openDetail('${item.id}','emails')">Open item</button>`:''}
@@ -7281,7 +7278,6 @@ function emailGroupHTML(key,emails,opts={}){
     head=`<div class="em-ghead">
       <div class="em-gsub" style="flex:1">${newOnes.length} new · ${emails.length-newOnes.length} handled</div>
       ${accAll}
-      <button class="${sumBtn}" onclick="emailSummarise('${gid}','${key}')">${sumLbl}</button>
       <button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>
       <button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')">Dismiss${selected.length>1?' selected':''}</button>
     </div>`;
@@ -7304,7 +7300,7 @@ function emailRowHTML(e,o){
       acts=`<select class="em-assign" onchange="emailAssign('${e.id}',this.value)"><option value="">Assign to item…</option>${opts}</select>
         <button class="btn btn-ghost btn-xs" onclick="emailSetStatus(['${e.id}'],'dismissed')">Dismiss</button>`;
     }else{
-      acts=`<button class="btn btn-ghost btn-xs" onclick="emailSummariseOne('${e.id}')" title="Summarise just this email">✨</button>`;
+      acts=`<button class="btn btn-ghost btn-xs" onclick="emailDismissOne('${e.id}')" title="Dismiss — already on the timeline or not needed">✕ Dismiss</button>`;
     }
   } else if(o.canAct && !isNew){
     acts=`<button class="btn btn-ghost btn-xs" onclick="emailSetStatus(['${e.id}'],'new')" title="Move back to New">↺</button>`;
@@ -7326,12 +7322,11 @@ function emailRowHTML(e,o){
 function emailComposerHTML(gid,key){
   const c=_emComp[gid];
   return `<div class="em-comp">
-    <textarea id="emc-${gid}" placeholder="Paste Copilot's summary here, or type the update…" oninput="_emComp['${gid}'].text=this.value">${esc(c.text||'')}</textarea>
+    <textarea id="emc-${gid}" placeholder="Type the timeline update…" oninput="_emComp['${gid}'].text=this.value">${esc(c.text||'')}</textarea>
     <div class="em-crow">
       <input type="date" id="emd-${gid}" value="${c.date||todayISO()}" onchange="_emComp['${gid}'].date=this.value">
       <button class="btn btn-sm" onclick="emailSaveTimeline('${gid}','${key}')">Save to timeline</button>
       <button class="btn btn-ghost btn-sm" onclick="delete _emComp['${gid}'];emailRerender()">Cancel</button>
-      ${c.copied?`<span class="em-hint">📋 Prompt copied — <a href="${COPILOT_URL}" target="_blank" rel="noopener" style="color:var(--accent2)">open Copilot</a>, press Ctrl+V then Enter, and paste the reply above.</span>`:''}
       <span class="em-hint" style="margin-left:auto">Saves as a ✉️ timeline entry and marks ${emailSelectedIds(key).length} email(s) as done</span>
     </div>
   </div>`;
@@ -7371,47 +7366,6 @@ function emailOpenComposer(gid,key,extra){
   _emComp[gid]=Object.assign({text:'',date:todayISO()},_emComp[gid]||{},extra||{});
   emailRerender();
   setTimeout(()=>$('emc-'+gid)?.focus(),0);
-}
-
-function emailPrompt(item,emails){
-  const head=`Summarise these supplier emails about ${item?.refCode||''} (${item?.name||'item'}${item?.supplier?`, supplier ${item.supplier}`:''}) into ONE short update for our buying tracker timeline.
-Rules: max 2 sentences; start with the supplier name; include any prices, MOQs, quantities, dates, tracking numbers, and anything we need to action. Reply with the update text only — no preamble, no bullet points.`;
-  const blocks=emails.map((e,i)=>`=== EMAIL ${i+1} — ${new Date(e.received_at).toLocaleString('en-GB')} — ${e.direction==='out'?'Sent by us':`From: ${e.from_name||''} <${e.from_email||''}>`} — Subject: ${e.subject||''} ===
-${(_emBodies[e.id]||e.preview||'').trim()}`);
-  return head+'\n\n'+blocks.join('\n\n');
-}
-
-async function emailCopyAndOpen(text){
-  let copied=false;
-  try{ await navigator.clipboard.writeText(text); copied=true; }
-  catch(e){
-    // fallback for browsers that block async clipboard
-    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select(); try{ copied=document.execCommand('copy'); }catch(_){} ta.remove();
-  }
-  if(!copied){ toast('Could not copy to clipboard','error'); return false; }
-  const w=window.open(COPILOT_URL,'_blank','noopener');
-  toast(w===null?'Prompt copied — use the "open Copilot" link':'Prompt copied — paste it into Copilot with Ctrl+V');
-  return true;
-}
-
-async function emailSummarise(gid,key){
-  const ids=emailSelectedIds(key);
-  if(!ids.length){ toast('Tick at least one email first','error'); return; }
-  const item=data.find(i=>i.id===key);
-  const emails=emailNew.filter(e=>ids.includes(e.id)).sort((a,b)=>a.received_at.localeCompare(b.received_at));
-  try{ await emailFetchBodies(ids); }catch(e){ toast('Could not load email text: '+e.message,'error'); return; }
-  const ok=await emailCopyAndOpen(emailPrompt(item,emails));
-  emailOpenComposer(gid,key,{copied:ok});
-}
-
-async function emailSummariseOne(id){
-  const e=emailNew.find(x=>x.id===id); if(!e) return;
-  const key=e.item_id||'unmatched';
-  // select only this email in its group
-  emailNew.filter(x=>(x.item_id||'unmatched')===key).forEach(x=>{ _emSel[x.id]=x.id===id; });
-  const gid=(currentPage==='emails'&&$('detailOverlay').classList.contains('hidden')?'p-':'t-')+key;
-  await emailSummarise(gid,key);
 }
 
 async function emailSaveTimeline(gid,key){
@@ -7459,7 +7413,7 @@ function emailSuggLine(e,canAct){
   return `<div class="em-sline" onclick="event.stopPropagation()">✨ <span class="em-stxt">${esc(e.suggested_summary)}</span>${canAct?`
     <button class="btn btn-xs" onclick="emailAcceptOne('${e.id}')" title="Add to timeline, dated ${fmtShort(emailLocalDate(e.received_at))}">✓</button>
     <button class="btn btn-ghost btn-xs" onclick="emailEditOne('${e.id}')" title="Edit before adding">✎</button>
-    <button class="btn btn-ghost btn-xs" onclick="emailDismissOne('${e.id}')" title="Don't add this one to the timeline">✕</button>`:''}</div>`;
+    `:''}</div>`;
 }
 function emailEditOne(id){
   const e=emailNew.find(x=>x.id===id); if(!e) return;
@@ -7501,9 +7455,14 @@ async function emailAcceptAll(key){
   await emailCommitEach(item,list);
   await loadEmails();
 }
+// Dismiss = already handled (e.g. updated manually during the day): leaves New, nothing added to the timeline
 async function emailDismissOne(id){
-  try{ await SB.patch(`email_updates?id=eq.${id}`,{suggestion_dismissed:true}); await loadEmails(); }
-  catch(e){ toast('Failed: '+e.message,'error'); }
+  const s=getStoredSession();
+  try{
+    await SB.patch(`email_updates?id=eq.${id}`,{status:'dismissed',suggestion_dismissed:true,processed_at:new Date().toISOString(),processed_by:s?.user?.email||''});
+    _emEditing.delete(id);
+    toast('Dismissed — nothing added to the timeline'); await loadEmails();
+  }catch(e){ toast('Failed: '+e.message,'error'); }
 }
 
 // Item modal tab: every email for this item (new + handled), newest thread activity last
