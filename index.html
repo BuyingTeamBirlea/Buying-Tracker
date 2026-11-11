@@ -7266,20 +7266,18 @@ function emailGroupHTML(key,emails,opts={}){
     const title=unmatched?'Unmatched emails':(item?esc(item.name):'Item not found');
     const sub=unmatched
       ?`<span>No tracker ref code found — assign them to an item or dismiss</span>`
-      :`${item?.refCode?`<span class="em-ref">${esc(item.refCode)}</span>`:''}<span>${esc(item?.supplier||'')}</span>${item?stageBadge(item.stage):''}<span>${emails.length} email${emails.length>1?'s':''}</span>`;
+      :`${item?.refCode?`<span class="em-ref" style="cursor:pointer;user-select:all" title="Click to copy reference code" onclick="copyRefCode('${esc(item.refCode)}')">${esc(item.refCode)}</span>`:''}<span>${esc(item?.supplier||'')}</span>${item?stageBadge(item.stage):''}<span>${emails.length} email${emails.length>1?'s':''}</span>`;
     head=`<div class="em-ghead">
       <div style="flex:1;min-width:0"><div class="em-gtitle">${unmatched?'❔ ':''}${title}</div><div class="em-gsub">${sub}</div></div>
       ${accAll}
-      ${canAct&&!unmatched?`<button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>`:''}
-      ${canAct?`<button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')" title="Mark the selected emails as not needing a timeline update">Dismiss${selected.length>1?' selected':''}</button>`:''}
-      ${item?`<button class="btn btn-ghost btn-sm" onclick="openDetail('${item.id}','emails')">Open item</button>`:''}
+      ${canAct&&unmatched?`<button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')" title="Dismiss all unmatched emails">Dismiss all</button>`:''}
+      ${item?`<button class="btn btn-ghost btn-sm" onclick="openDetail('${item.id}','timeline')" title="Open the item card on its timeline">Timeline</button>`:''}
     </div>`;
   } else if(canAct){
     head=`<div class="em-ghead">
       <div class="em-gsub" style="flex:1">${newOnes.length} new · ${emails.length-newOnes.length} handled</div>
       ${accAll}
-      <button class="btn btn-ghost btn-sm" onclick="emailOpenComposer('${gid}','${key}')">＋ Add to timeline</button>
-      <button class="btn btn-ghost btn-sm" onclick="emailSetStatus(emailSelectedIds('${key}'),'dismissed')">Dismiss${selected.length>1?' selected':''}</button>
+      <button class="btn btn-ghost btn-sm" onclick="switchTab('timeline')">Timeline</button>
     </div>`;
   }
   const rows=emails.map(e=>emailRowHTML(e,{unmatched,canAct:!VIEW_ONLY,inTab:opts.inTab})).join('');
