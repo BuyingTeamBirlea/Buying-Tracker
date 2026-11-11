@@ -7327,7 +7327,7 @@ function emailComposerHTML(gid,key){
       <input type="date" id="emd-${gid}" value="${c.date||todayISO()}" onchange="_emComp['${gid}'].date=this.value">
       <button class="btn btn-sm" onclick="emailSaveTimeline('${gid}','${key}')">Save to timeline</button>
       <button class="btn btn-ghost btn-sm" onclick="delete _emComp['${gid}'];emailRerender()">Cancel</button>
-      <span class="em-hint" style="margin-left:auto">Saves as a ✉️ timeline entry and marks ${emailSelectedIds(key).length} email(s) as done</span>
+      <span class="em-hint" style="margin-left:auto">Saves as a timeline entry and marks ${emailSelectedIds(key).length} email(s) as done</span>
     </div>
   </div>`;
 }
@@ -7382,7 +7382,7 @@ async function emailSaveTimeline(gid,key){
 
 // Shared: write a ✉️ timeline entry, mark the emails done, and close the suggestion if there was one
 async function emailCommitTimeline(item,text,date,ids,suggestionId){
-  const note=text.startsWith('✉️')?text:'✉️ '+text;
+  const note=text.replace(/^\s*✉️?\s*/,'');
   const s=getStoredSession(); const by=s?.user?.email||'';
   const id=newId(), now=new Date().toISOString();
   try{
@@ -7425,7 +7425,7 @@ async function emailCommitEach(item,list){
   const s=getStoredSession(); const by=s?.user?.email||''; let done=0;
   try{
     for(const {e,text} of list){
-      const note='✉️ '+text.replace(/^✉️\s*/,'');
+      const note=text.replace(/^\s*✉️?\s*/,'');
       const id=newId(), date=emailLocalDate(e.received_at), now=new Date().toISOString();
       const res=await SB.post('timeline_entries',{id,item_id:item.id,date,note,created_by:by});
       if(!res||(Array.isArray(res)&&!res.length)){ toast('Entry blocked by database','error'); break; }
