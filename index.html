@@ -619,7 +619,7 @@ body.light-mode .cp-event{color:#475569}
 .req-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(79,110,247,.1);border:1px solid rgba(79,110,247,.4);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:.88rem}
 .req-banner.urgent{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.45)}
 .req-banner b{font-weight:600}
-.em-chip{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:100px;background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.4);color:var(--accent2);cursor:pointer;vertical-align:1px}
+.td-name span.em-chip,.em-chip{display:inline-block;width:auto;margin:3px 0 0;font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:100px;background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.4);color:var(--accent2);cursor:pointer;vertical-align:1px}
 .em-chip:hover{background:var(--accent);color:#fff}
 .em-group{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .em-group.unmatched{border-style:dashed}
@@ -650,9 +650,10 @@ body.light-mode .cp-event{color:#475569}
 .em-sugg-lbl{font-size:.76rem;font-weight:600;color:var(--accent2);margin-bottom:4px}
 .em-sugg-txt{font-size:.9rem;color:var(--text);line-height:1.5;white-space:pre-wrap}
 .em-sugg .em-crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.em-sline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;padding:5px 8px;background:rgba(79,110,247,.08);border:1px solid rgba(79,110,247,.25);border-radius:var(--radius-sm);font-size:.84rem;cursor:default}
+.em-sline{display:inline-flex;max-width:100%;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;padding:5px 8px;background:rgba(79,110,247,.08);border:1px solid rgba(79,110,247,.25);border-radius:var(--radius-sm);font-size:.84rem;cursor:default}
 .em-sline.muted{background:none;border-style:dashed}
-.em-stxt{color:var(--text);flex:1;min-width:0}
+.em-stxt{color:var(--text);flex:0 1 auto;min-width:0}
+.em-sline.editing{display:flex}
 .em-sedit{flex:1;min-width:200px;background:var(--bg4);border:1px solid var(--accent);color:var(--text);border-radius:4px;padding:4px 8px;font-family:inherit;font-size:.84rem;outline:none}
 .em-assign{background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:3px 6px;font-family:inherit;font-size:.78rem;max-width:260px}
 .rq-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:.74rem;font-weight:500;white-space:nowrap}
@@ -7401,7 +7402,7 @@ const emailHasSugg=e=>e.status==='new'&&!!e.suggested_summary&&!e.suggestion_dis
 const _emEditing=new Set();
 const emailLocalDate=iso=>{ const d=new Date(iso); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function emailSuggLine(e,canAct){
-  if(_emEditing.has(e.id)) return `<div class="em-sline" onclick="event.stopPropagation()">✨ <input class="em-sedit" id="ems-${e.id}" value="${esc(e.suggested_summary||'')}" placeholder="Short update for the timeline…" onkeydown="if(event.key==='Enter')emailAcceptOne('${e.id}',this.value);if(event.key==='Escape'){_emEditing.delete('${e.id}');emailRerender()}">
+  if(_emEditing.has(e.id)) return `<div class="em-sline editing" onclick="event.stopPropagation()">✨ <input class="em-sedit" id="ems-${e.id}" value="${esc(e.suggested_summary||'')}" placeholder="Short update for the timeline…" onkeydown="if(event.key==='Enter')emailAcceptOne('${e.id}',this.value);if(event.key==='Escape'){_emEditing.delete('${e.id}');emailRerender()}">
     <button class="btn btn-xs" onclick="emailAcceptOne('${e.id}',$('ems-${e.id}').value)">Save</button>
     <button class="btn btn-ghost btn-xs" onclick="_emEditing.delete('${e.id}');emailRerender()">Cancel</button></div>`;
   if(!emailHasSugg(e)){
